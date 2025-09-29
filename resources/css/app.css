@@ -1,11 +1,100 @@
-@import 'tailwindcss';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
+/* Fixed header styles */
+.fixed-header {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 1000 !important;
+  height: 4rem !important; /* 64px explicit height */
+  background-color: white !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1) !important;
+}
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+/* Content spacing for fixed header */
+.content-with-fixed-header {
+  margin-top: 4rem !important; /* 64px header height - use margin instead of padding */
+}
+
+/* Content spacing for sidebar on large screens */
+@media (min-width: 1024px) {
+  .content-with-sidebar {
+    margin-left: 16rem !important; /* 256px sidebar width */
+  }
+}
+
+/* Mobile sidebar overlay z-index */
+.z-45 {
+  z-index: 900 !important;
+}
+
+/* Sidebar positioning */
+.fixed-sidebar {
+  position: fixed !important;
+  top: 4rem !important; /* Below header - 64px header height */
+  left: 0 !important;
+  width: 16rem !important; /* 256px explicit width */
+  height: calc(100vh - 4rem) !important; /* Full height minus header */
+  z-index: 800 !important; /* Lower than header z-index but higher than content */
+  background-color: white !important;
+  border-right: 1px solid #e5e7eb !important;
+  overflow-y: auto !important;
+}
+
+/* Global menu container - ensure no scrolling interference */
+.global-menu-container {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 1001 !important;
+  pointer-events: none !important; /* Allow clicking through container */
+}
+
+.global-menu-container > * {
+  pointer-events: auto !important; /* Re-enable pointer events for child elements */
+}
+
+/* Prevent body scroll interference with fixed elements */
+html, body {
+  scroll-behavior: smooth !important;
+  height: 100% !important;
+  overflow-x: hidden !important;
+}
+
+/* Ensure the main application container doesn't interfere with fixed positioning */
+#app {
+  position: relative !important;
+  min-height: 100vh !important;
+}
+
+/* Ensure fixed elements stay fixed during scroll */
+.fixed-header,
+.fixed-sidebar {
+  transform: translateZ(0) !important; /* Force hardware acceleration */
+  will-change: transform !important; /* Optimize for animations */
+}
+
+/* Override any Tailwind classes that might interfere with fixed positioning */
+.fixed-header {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+}
+
+.fixed-sidebar {
+  position: fixed !important;
+  top: 4rem !important;
+  left: 0 !important;
+}
+
+/* Ensure smooth scrolling for content area only */
+.content-with-fixed-header {
+  overflow-x: hidden !important;
+  position: relative !important;
 }

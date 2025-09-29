@@ -1,0 +1,360 @@
+{
+	"info": {
+		"_postman_id": "health-management-system",
+		"name": "健康管理システム API Collection",
+		"description": "Laravel 12ベースの健康管理システムAPIテスト用コレクション",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "noauth"
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000/api",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "ヘルスチェック",
+			"item": [
+				{
+					"name": "システム稼働確認",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "学生管理API",
+			"item": [
+				{
+					"name": "学生一覧取得",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/students",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"students"
+							]
+						}
+					}
+				},
+				{
+					"name": "学生詳細取得",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/students/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"students",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "学生新規登録",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"student_number\": \"2025001\",\n    \"name\": \"山田太郎\",\n    \"name_kana\": \"やまだたろう\",\n    \"grade\": 3,\n    \"school_class_id\": 1,\n    \"gender\": \"男\",\n    \"birthday\": \"2010-04-15\",\n    \"emergency_contact\": \"03-1234-5678\",\n    \"medical_info\": \"アレルギー: 特になし\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/students",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"students"
+							]
+						}
+					}
+				},
+				{
+					"name": "検索候補取得",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/students/search/suggestions?query=山田&limit=5",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"students",
+								"search",
+								"suggestions"
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "山田"
+								},
+								{
+									"key": "limit",
+									"value": "5"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "高度な検索",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/students/search/advanced?grade=3&gender=男",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"students",
+								"search",
+								"advanced"
+							],
+							"query": [
+								{
+									"key": "grade",
+									"value": "3"
+								},
+								{
+									"key": "gender",
+									"value": "男"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "クラス管理API",
+			"item": [
+				{
+					"name": "クラス一覧取得",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/classes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"classes"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "健康記録API",
+			"item": [
+				{
+					"name": "健康記録一覧取得",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/health-records",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"health-records"
+							]
+						}
+					}
+				},
+				{
+					"name": "健康記録新規作成",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"student_id\": 1,\n    \"record_date\": \"2025-09-17\",\n    \"height\": 150.5,\n    \"weight\": 45.2,\n    \"notes\": \"健康状態良好\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/v1/health-records",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"health-records"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "統計データAPI",
+			"item": [
+				{
+					"name": "システム統計取得",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/statistics/system",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"statistics",
+								"system"
+							]
+						}
+					}
+				},
+				{
+					"name": "学年別統計取得",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/statistics/grade?grade=3",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"statistics",
+								"grade"
+							],
+							"query": [
+								{
+									"key": "grade",
+									"value": "3"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "健康記録統計取得",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/v1/statistics/health?start_date=2025-01-01&end_date=2025-12-31",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"v1",
+								"statistics",
+								"health"
+							],
+							"query": [
+								{
+									"key": "start_date",
+									"value": "2025-01-01"
+								},
+								{
+									"key": "end_date",
+									"value": "2025-12-31"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "デバッグAPI（開発環境のみ）",
+			"item": [
+				{
+					"name": "データベース接続確認",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/debug/database",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"debug",
+								"database"
+							]
+						}
+					}
+				},
+				{
+					"name": "ルート一覧表示",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/debug/routes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"debug",
+								"routes"
+							]
+						}
+					}
+				}
+			]
+		}
+	]
+}
