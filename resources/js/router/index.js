@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import { useMainStore } from '@/stores/main.js';
 import AppLayout from '@/components/layouts/AppLayout.vue';
 
 // Import view components (will be created later)
@@ -343,22 +342,8 @@ const router = createRouter({
 
 // Navigation guards
 router.beforeEach(async (to, from, next) => {
-  const mainStore = useMainStore();
-  
-  // Check if route requires authentication
-  if (to.matched.some(record => record.meta.requiresAuth)) {
-    // Check if user is authenticated
-    if (!mainStore.currentUser) {
-      try {
-        await mainStore.fetchCurrentUser();
-      } catch (error) {
-        // Redirect to login or show error
-        console.error('Authentication check failed:', error);
-        // For now, continue without authentication
-        // In production, redirect to login page
-      }
-    }
-  }
+  // For now, just handle page titles and continue navigation
+  // Authentication will be handled at the component level
   
   // Set page title
   if (to.meta.title) {

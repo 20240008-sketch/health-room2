@@ -43,6 +43,36 @@ export const useStatisticsStore = defineStore('statistics', () => {
     return systemStats.value?.health_records?.by_month || [];
   });
 
+  const bmiDistribution = computed(() => {
+    if (!healthStats.value?.bmi_distribution) {
+      return {
+        underweight: 0,
+        normal: 0,
+        overweight: 0,
+        obese: 0
+      };
+    }
+    return healthStats.value.bmi_distribution;
+  });
+
+  const dashboardStats = computed(() => {
+    if (!systemStats.value) {
+      return {
+        totalStudents: 0,
+        totalClasses: 0,
+        totalHealthRecords: 0,
+        recentHealthRecords: 0
+      };
+    }
+    
+    return {
+      totalStudents: systemStats.value.students?.total || 0,
+      totalClasses: systemStats.value.classes?.total || 0,
+      totalHealthRecords: systemStats.value.health_records?.total || 0,
+      recentHealthRecords: systemStats.value.health_records?.recent || 0
+    };
+  });
+
   // Actions
   const fetchSystemStats = async () => {
     loading.value = true;
@@ -158,6 +188,26 @@ export const useStatisticsStore = defineStore('statistics', () => {
     } catch (error) {
       console.error('ダッシュボード統計取得エラー:', error);
       notificationStore.showError('ダッシュボード統計の取得に失敗しました');
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const fetchBmiDistribution = async () => {
+    loading.value = true;
+    try {
+      const response = await axios.get('/v1/statistics/health', {
+        params: {
+          start_date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] // 30日前
+        }
+      });
+      
+      if (response.data.success) {
+        healthStats.value = response.data.data;
+      }
+    } catch (error) {
+      console.error('BMI分布取得エラー:', error);
+      notificationStore.showError('BMI分布の取得に失敗しました');
     } finally {
       loading.value = false;
     }
@@ -290,6 +340,8 @@ export const useStatisticsStore = defineStore('statistics', () => {
     studentsByGrade,
     classesByGrade,
     healthRecordsTrend,
+    bmiDistribution,
+    dashboardStats,
     needsUpdate,
     
     // Actions
@@ -299,6 +351,7 @@ export const useStatisticsStore = defineStore('statistics', () => {
     fetchHealthStats,
     fetchAllStats,
     fetchDashboardStats,
+    fetchBmiDistribution,
     formatChartData,
     exportStatsToCSV,
     clearCache

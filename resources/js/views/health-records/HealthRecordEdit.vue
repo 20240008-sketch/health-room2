@@ -814,7 +814,7 @@ export default {
       try {
         isLoading.value = true;
         
-        const healthRecord = await healthRecordStore.getHealthRecord(recordId.value);
+        const healthRecord = await healthRecordStore.fetchHealthRecord(recordId.value);
         if (!healthRecord) {
           record.value = null;
           return;

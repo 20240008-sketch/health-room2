@@ -56,14 +56,13 @@
                 label="クラス"
               >
                 <option value="">すべてのクラス</option>
-                <option value="特進">特進</option>
-                <option value="進学">進学</option>
-                <option value="調理">調理</option>
-                <option value="福祉">福祉</option>
-                <option value="情会">情会</option>
-                <option value="総合１">総合１</option>
-                <option value="総合２">総合２</option>
-                <option value="総合３">総合３</option>
+                <option 
+                  v-for="classItem in classes" 
+                  :key="classItem.class_id"
+                  :value="classItem.class_id"
+                >
+                  {{ classItem.class_name }}
+                </option>
               </BaseSelect>
             </div>
 
@@ -86,8 +85,8 @@
                 v-model="sortBy"
                 label="並び順"
               >
-                <option value="name">名前順</option>
                 <option value="student_number">学生番号順</option>
+                <option value="name">名前順</option>
                 <option value="created_at">登録日順</option>
               </BaseSelect>
             </div>
@@ -170,8 +169,8 @@
             <!-- Class & Grade Column -->
             <template #cell(class_grade)="{ item }">
               <div class="text-sm text-gray-600">
-                <div>{{ item.class_id || '未設定' }}</div>
-                <div class="text-xs text-gray-500">{{ item.grade_id || '?' }}年生</div>
+                <div>{{ getClassName(item.class_id) || '未設定' }}</div>
+                <div class="text-xs text-gray-500">{{ getClassGrade(item.class_id) || '?' }}年生</div>
               </div>
             </template>
             
@@ -438,7 +437,7 @@ export default {
     const searchQuery = ref('');
     const selectedClass = ref('');
     const selectedGrade = ref('');
-    const sortBy = ref('name');
+    const sortBy = ref('student_number');
     const selectedStudents = ref([]);
     const showImportModal = ref(false);
     const selectedFile = ref(null);
@@ -514,17 +513,13 @@ export default {
     };
     
     const getClassName = (classId) => {
-      const classNames = {
-        'tokushin': '特進',
-        'shingaku': '進学',
-        'chori': '調理',
-        'fukushi': '福祉',
-        'jokai': '情会',
-        'sogo1': '総合１',
-        'sogo2': '総合２',
-        'sogo3': '総合３'
-      };
-      return classNames[classId] || '';
+      const classItem = classes.value.find(c => c.class_id === classId);
+      return classItem ? classItem.class_name : '';
+    };
+    
+    const getClassGrade = (classId) => {
+      const classItem = classes.value.find(c => c.class_id === classId);
+      return classItem ? classItem.grade : null;
     };
     
     const handleSearch = async () => {
@@ -547,7 +542,7 @@ export default {
       searchQuery.value = '';
       selectedClass.value = '';
       selectedGrade.value = '';
-      sortBy.value = 'name';
+      sortBy.value = 'student_number';
       await handleSearch();
     };
     
@@ -709,6 +704,7 @@ export default {
       // Methods
       formatDate,
       getClassName,
+      getClassGrade,
       handleSearch,
       handleReset,
       handleSort,

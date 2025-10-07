@@ -27,12 +27,12 @@ class StatisticsController extends Controller
             $stats = [
                 'students' => [
                     'total' => Student::count(),
-                    'active' => Student::count(), // 実際のアクティブ学生判定ロジックを追加
-                    'by_grade' => Student::selectRaw('grade, COUNT(*) as count')
-                        ->groupBy('grade')
-                        ->orderBy('grade')
+                    'active' => Student::where('status', 'active')->count(),
+                    'by_gender' => Student::selectRaw('gender, COUNT(*) as count')
+                        ->groupBy('gender')
+                        ->orderBy('gender')
                         ->get()
-                        ->mapWithKeys(fn($item) => [$item->grade => $item->count])
+                        ->mapWithKeys(fn($item) => [$item->gender => $item->count])
                         ->toArray(),
                 ],
                 'classes' => [
@@ -46,14 +46,14 @@ class StatisticsController extends Controller
                 ],
                 'health_records' => [
                     'total' => HealthRecord::count(),
-                    'recent' => HealthRecord::where('record_date', '>=', now()->subDays(30))->count(),
-                    'by_month' => HealthRecord::selectRaw('YEAR(record_date) as year, MONTH(record_date) as month, COUNT(*) as count')
-                        ->groupByRaw('YEAR(record_date), MONTH(record_date)')
+                    'recent' => HealthRecord::where('created_at', '>=', now()->subDays(30))->count(),
+                    'by_month' => HealthRecord::selectRaw('strftime("%Y", created_at) as year, strftime("%m", created_at) as month, COUNT(*) as count')
+                        ->groupByRaw('strftime("%Y", created_at), strftime("%m", created_at)')
                         ->orderByRaw('year DESC, month DESC')
                         ->limit(12)
                         ->get()
                         ->map(fn($item) => [
-                            'period' => "{$item->year}-" . str_pad($item->month, 2, '0', STR_PAD_LEFT),
+                            'period' => "{$item->year}-{$item->month}",
                             'count' => $item->count
                         ])
                         ->toArray(),
@@ -93,8 +93,8 @@ class StatisticsController extends Controller
             $stats = [
                 'grade' => $grade,
                 'students' => [
-                    'total' => Student::where('grade', $grade)->count(),
-                    'gender_distribution' => Student::where('grade', $grade)
+                    'total' => Student::where('grade_id', $grade)->count(),
+                    'gender_distribution' => Student::where('grade_id', $grade)
                         ->selectRaw('gender, COUNT(*) as count')
                         ->groupBy('gender')
                         ->get()
@@ -106,18 +106,18 @@ class StatisticsController extends Controller
                     ->get()
                     ->map(fn($class) => [
                         'id' => $class->id,
-                        'name' => $class->name,
+                        'name' => $class->class_name,
                         'student_count' => $class->students_count,
-                        'teacher_name' => $class->teacher_name,
+                        'teacher_name' => $class->teacher_name ?? 'N/A',
                     ])
                     ->toArray(),
                 'health_records' => [
                     'total' => HealthRecord::whereHas('student', function($query) use ($grade) {
-                        $query->where('grade', $grade);
+                        $query->where('grade_id', $grade);
                     })->count(),
                     'recent' => HealthRecord::whereHas('student', function($query) use ($grade) {
-                        $query->where('grade', $grade);
-                    })->where('record_date', '>=', now()->subDays(30))->count(),
+                        $query->where('grade_id', $grade);
+                    })->where('created_at', '>=', now()->subDays(30))->count(),
                 ],
             ];
 
@@ -197,11 +197,11 @@ class StatisticsController extends Controller
             $query = HealthRecord::query();
             
             if ($startDate) {
-                $query->where('record_date', '>=', $startDate);
+                $query->where('created_at', '>=', $startDate);
             }
             
             if ($endDate) {
-                $query->where('record_date', '<=', $endDate);
+                $query->where('created_at', '<=', $endDate);
             }
 
             $stats = [
@@ -213,22 +213,22 @@ class StatisticsController extends Controller
                 ],
                 'trends' => [
                     'height_by_grade' => HealthRecord::join('students', 'health_records.student_id', '=', 'students.id')
-                        ->selectRaw('students.grade, AVG(health_records.height) as avg_height')
-                        ->when($startDate, fn($q) => $q->where('health_records.record_date', '>=', $startDate))
-                        ->when($endDate, fn($q) => $q->where('health_records.record_date', '<=', $endDate))
-                        ->groupBy('students.grade')
-                        ->orderBy('students.grade')
+                        ->selectRaw('students.grade_id, AVG(health_records.height) as avg_height')
+                        ->when($startDate, fn($q) => $q->where('health_records.created_at', '>=', $startDate))
+                        ->when($endDate, fn($q) => $q->where('health_records.created_at', '<=', $endDate))
+                        ->groupBy('students.grade_id')
+                        ->orderBy('students.grade_id')
                         ->get()
-                        ->mapWithKeys(fn($item) => [$item->grade => round($item->avg_height, 2)])
+                        ->mapWithKeys(fn($item) => [$item->grade_id => round($item->avg_height, 2)])
                         ->toArray(),
                     'weight_by_grade' => HealthRecord::join('students', 'health_records.student_id', '=', 'students.id')
-                        ->selectRaw('students.grade, AVG(health_records.weight) as avg_weight')
-                        ->when($startDate, fn($q) => $q->where('health_records.record_date', '>=', $startDate))
-                        ->when($endDate, fn($q) => $q->where('health_records.record_date', '<=', $endDate))
-                        ->groupBy('students.grade')
-                        ->orderBy('students.grade')
+                        ->selectRaw('students.grade_id, AVG(health_records.weight) as avg_weight')
+                        ->when($startDate, fn($q) => $q->where('health_records.created_at', '>=', $startDate))
+                        ->when($endDate, fn($q) => $q->where('health_records.created_at', '<=', $endDate))
+                        ->groupBy('students.grade_id')
+                        ->orderBy('students.grade_id')
                         ->get()
-                        ->mapWithKeys(fn($item) => [$item->grade => round($item->avg_weight, 2)])
+                        ->mapWithKeys(fn($item) => [$item->grade_id => round($item->avg_weight, 2)])
                         ->toArray(),
                 ],
             ];

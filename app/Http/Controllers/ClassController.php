@@ -6,6 +6,7 @@ use App\Models\SchoolClass;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
 
 class ClassController extends Controller
 {
@@ -15,26 +16,40 @@ class ClassController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
-            $query = SchoolClass::withCount('students');
+            // Use raw SQL to get accurate student counts
+            $query = SchoolClass::selectRaw('
+                school_classes.*, 
+                COALESCE(student_counts.students_count, 0) as students_count
+            ')
+            ->leftJoin(DB::raw('(
+                SELECT class_id, COUNT(*) as students_count 
+                FROM students 
+                GROUP BY class_id
+            ) as student_counts'), 'school_classes.class_id', '=', 'student_counts.class_id');
 
             // 年度フィルタ
             if ($request->has('year') && !empty($request->year)) {
-                $query->where('year', $request->year);
+                $query->where('school_classes.year', $request->year);
             }
 
             // 学年フィルタ
             if ($request->has('grade') && !empty($request->grade)) {
-                $query->where('grade', $request->grade);
+                $query->where('school_classes.grade', $request->grade);
             }
 
             // ソート
             $sortBy = $request->get('sort_by', 'grade');
             $sortOrder = $request->get('sort_order', 'asc');
-            $query->orderBy($sortBy, $sortOrder);
+            
+            if ($sortBy === 'students_count') {
+                $query->orderBy('students_count', $sortOrder);
+            } else {
+                $query->orderBy("school_classes.{$sortBy}", $sortOrder);
+            }
             
             // 組でのサブソート
             if ($sortBy !== 'kumi') {
-                $query->orderBy('kumi', 'asc');
+                $query->orderBy('school_classes.kumi', 'asc');
             }
 
             $classes = $query->get();

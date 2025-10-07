@@ -55,7 +55,7 @@
 <script>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { useMainStore } from '@/stores/main.js';
+import { useAuthStore } from '@/stores/auth.js';
 import { useNotificationStore } from '@/stores/notification.js';
 import AppHeader from './AppHeader.vue';
 import AppSidebar from './AppSidebar.vue';
@@ -88,15 +88,15 @@ export default {
   
   setup(props) {
     const route = useRoute();
-    const mainStore = useMainStore();
+    const authStore = useAuthStore();
     const notificationStore = useNotificationStore();
     
     // State
     const sidebarOpen = ref(false);
     
     // Computed properties
-    const currentUser = computed(() => mainStore.currentUser);
-    const isLoading = computed(() => mainStore.isLoading);
+    const currentUser = computed(() => authStore.user);
+    const isLoading = computed(() => authStore.isLoading);
     const currentRoute = computed(() => route.name);
     
     // Navigation items
@@ -224,18 +224,10 @@ export default {
     // Methods
     const handleLogout = async () => {
       try {
-        await mainStore.logout();
-        notificationStore.addNotification({
-          type: 'success',
-          title: 'ログアウト完了',
-          message: 'ログアウトしました'
-        });
+        await authStore.logout();
+        notificationStore.showSuccess('ログアウトしました');
       } catch (error) {
-        notificationStore.addNotification({
-          type: 'danger',
-          title: 'ログアウトエラー',
-          message: 'ログアウトに失敗しました'
-        });
+        notificationStore.showError('ログアウトに失敗しました');
       }
     };
     
@@ -243,7 +235,11 @@ export default {
     onMounted(async () => {
       // Initialize app data
       if (!currentUser.value) {
-        await mainStore.fetchCurrentUser();
+        try {
+          await authStore.fetchCurrentUser();
+        } catch (error) {
+          console.error('Failed to fetch current user:', error);
+        }
       }
     });
     

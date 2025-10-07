@@ -8,6 +8,7 @@ export const useHealthRecordStore = defineStore('healthRecord', () => {
   
   // State
   const healthRecords = ref([]);
+  const recentRecords = ref([]);
   const currentRecord = ref(null);
   const loading = ref(false);
   const filters = ref({
@@ -146,6 +147,29 @@ export const useHealthRecordStore = defineStore('healthRecord', () => {
       }
     } catch (error) {
       handleApiError(error, '健康記録詳細の取得に失敗しました');
+      throw error;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const fetchRecentRecords = async (limit = 10) => {
+    loading.value = true;
+    try {
+      const response = await axios.get('/v1/health-records', {
+        params: {
+          per_page: limit,
+          sort: 'created_at',
+          order: 'desc'
+        }
+      });
+      
+      if (response.data.success) {
+        recentRecords.value = response.data.data;
+        return response.data.data;
+      }
+    } catch (error) {
+      handleApiError(error, '最近の健康記録の取得に失敗しました');
       throw error;
     } finally {
       loading.value = false;
@@ -414,6 +438,7 @@ export const useHealthRecordStore = defineStore('healthRecord', () => {
   return {
     // State
     healthRecords,
+    recentRecords,
     currentRecord,
     loading,
     filters,
@@ -427,6 +452,7 @@ export const useHealthRecordStore = defineStore('healthRecord', () => {
     // Actions
     fetchHealthRecords,
     fetchHealthRecord,
+    fetchRecentRecords,
     createHealthRecord,
     updateHealthRecord,
     deleteHealthRecord,

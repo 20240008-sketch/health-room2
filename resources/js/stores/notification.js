@@ -50,6 +50,11 @@ export const useNotificationStore = defineStore('notification', () => {
     showNotification('warning', message, duration);
   };
 
+  // Alias for addNotification
+  const addNotification = (type, message, duration = 5000) => {
+    showNotification(type, message, duration);
+  };
+
   return {
     notification,
     showNotification,
@@ -57,6 +62,7 @@ export const useNotificationStore = defineStore('notification', () => {
     showSuccess,
     showError,
     showInfo,
-    showWarning
+    showWarning,
+    addNotification
   };
 });

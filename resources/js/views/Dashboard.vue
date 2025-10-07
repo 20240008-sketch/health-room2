@@ -334,7 +334,7 @@
 
 <script>
 import { ref, computed, onMounted } from 'vue';
-import { useMainStore } from '@/stores/main.js';
+import { useAuthStore } from '@/stores/auth.js';
 import { useStudentStore } from '@/stores/student.js';
 import { useClassStore } from '@/stores/class.js';
 import { useHealthRecordStore } from '@/stores/healthRecord.js';
@@ -412,7 +412,7 @@ export default {
   },
   
   setup() {
-    const mainStore = useMainStore();
+    const authStore = useAuthStore();
     const studentStore = useStudentStore();
     const classStore = useClassStore();
     const healthRecordStore = useHealthRecordStore();
@@ -469,7 +469,13 @@ export default {
     };
     
     const formatDateTime = (dateString) => {
+      if (!dateString) return '未記録';
+      
       const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return '無効な日付';
+      }
+      
       return new Intl.DateTimeFormat('ja-JP', {
         month: 'short',
         day: 'numeric',
@@ -500,17 +506,9 @@ export default {
           statisticsStore.fetchBmiDistribution()
         ]);
         
-        notificationStore.addNotification({
-          type: 'success',
-          title: 'データ更新完了',
-          message: 'ダッシュボードのデータを更新しました'
-        });
+        notificationStore.showSuccess('ダッシュボードのデータを更新しました');
       } catch (error) {
-        notificationStore.addNotification({
-          type: 'danger',
-          title: 'データ更新エラー',
-          message: 'データの更新に失敗しました'
-        });
+        notificationStore.showError('データの更新に失敗しました');
       } finally {
         isRefreshing.value = false;
       }
@@ -518,6 +516,16 @@ export default {
     
     // Lifecycle
     onMounted(async () => {
+      try {
+        // Initialize auth if needed
+        if (!authStore.isAuthenticated) {
+          await authStore.fetchCurrentUser();
+        }
+      } catch (error) {
+        console.error('Auth initialization failed:', error);
+        // Continue anyway for demo purposes
+      }
+      
       await refreshData();
     });
     
