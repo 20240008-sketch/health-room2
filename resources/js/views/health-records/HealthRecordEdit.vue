@@ -777,11 +777,9 @@ export default {
       
       try {
         const updateData = {
-          measured_date: form.measured_date,
-          academic_year: parseInt(form.academic_year),
+          year: parseInt(form.academic_year),
           height: parseFloat(form.height),
           weight: parseFloat(form.weight),
-          bmi: parseFloat(calculatedBMI.value),
           notes: form.notes || null,
           edit_reason: form.edit_reason
         };

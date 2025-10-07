@@ -262,11 +262,13 @@ export const useHealthRecordStore = defineStore('healthRecord', () => {
   // 新機能: 特定学生の健康記録を全て取得
   const getHealthRecordsByStudent = async (studentId) => {
     try {
-      const response = await axios.get(`/v1/students/${studentId}/health-records`);
+      const response = await axios.get('/v1/health-records', {
+        params: { student_id: studentId }
+      });
       
       if (response.data.success) {
-        const records = response.data.data;
-        return records.map(enrichRecordWithBMI).sort((a, b) => new Date(b.measured_date) - new Date(a.measured_date));
+        const records = response.data.data || [];
+        return records.sort((a, b) => new Date(b.measured_date || b.record_date) - new Date(a.measured_date || a.record_date));
       }
       return [];
     } catch (error) {

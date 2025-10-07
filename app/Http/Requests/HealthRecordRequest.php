@@ -33,6 +33,16 @@ class HealthRecordRequest extends FormRequest
                 'min:2020',
                 'max:' . ($currentYear + 1),
             ],
+            'academic_year' => [
+                'sometimes',
+                'integer',
+                'min:2020',
+                'max:' . ($currentYear + 1),
+            ],
+            'measured_date' => [
+                'sometimes',
+                'date',
+            ],
             'height' => [
                 'nullable',
                 'numeric',
@@ -46,6 +56,49 @@ class HealthRecordRequest extends FormRequest
                 'min:0',
                 'max:200',
                 'regex:/^\d+(\.\d{1,2})?$/', // 小数点以下2桁まで
+            ],
+            'bmi' => [
+                'sometimes',
+                'nullable',
+                'numeric',
+                'min:0',
+                'max:100',
+            ],
+            'notes' => [
+                'sometimes',
+                'nullable',
+                'string',
+                'max:1000',
+            ],
+            'edit_reason' => [
+                'sometimes',
+                'nullable',
+                'string',
+                'max:500',
+            ],
+            'vision_left' => [
+                'sometimes',
+                'nullable',
+                'numeric',
+                'min:0',
+                'max:2',
+            ],
+            'vision_right' => [
+                'sometimes',
+                'nullable',
+                'numeric',
+                'min:0',
+                'max:2',
+            ],
+            'hearing_left' => [
+                'sometimes',
+                'nullable',
+                'boolean',
+            ],
+            'hearing_right' => [
+                'sometimes',
+                'nullable',
+                'boolean',
             ],
         ];
 
