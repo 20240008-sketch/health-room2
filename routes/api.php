@@ -52,6 +52,8 @@ Route::group(['prefix' => 'v1'], function () {
     Route::apiResource('classes', ClassController::class);
     
     // 健康記録関連の追加エンドポイント（先に定義する必要がある）
+    Route::get('health-records/export-pdf', [HealthRecordController::class, 'exportPdf'])
+        ->name('health-records.export-pdf');
     Route::post('health-records/bulk', [HealthRecordController::class, 'bulkStore'])
         ->name('health-records.bulk-store');
     Route::get('health-records/peer-comparison', [HealthRecordController::class, 'peerComparison'])

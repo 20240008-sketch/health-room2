@@ -260,7 +260,14 @@ class StatisticsController extends Controller
                     COUNT(*) as count,
                     AVG(health_records.height) as avg_height,
                     AVG(health_records.weight) as avg_weight,
-                    AVG(health_records.weight / (health_records.height/100 * health_records.height/100)) as avg_bmi
+                    AVG(health_records.weight / (health_records.height/100 * health_records.height/100)) as avg_bmi,
+                    AVG(CASE 
+                        WHEN health_records.vision_left IS NOT NULL AND health_records.vision_right IS NOT NULL 
+                        THEN (health_records.vision_left + health_records.vision_right) / 2
+                        WHEN health_records.vision_left_corrected IS NOT NULL AND health_records.vision_right_corrected IS NOT NULL
+                        THEN (health_records.vision_left_corrected + health_records.vision_right_corrected) / 2
+                        ELSE NULL
+                    END) as avg_vision
                 ')
                 ->where('health_records.year', now()->year)
                 ->whereNotNull('students.grade_id')
@@ -270,10 +277,11 @@ class StatisticsController extends Controller
                 ->map(function($item) {
                     return [
                         'grade' => $item->grade_id,
-                        'count' => $item->count,
+                        'student_count' => $item->count,
                         'avg_height' => $item->avg_height ? round($item->avg_height, 1) : null,
                         'avg_weight' => $item->avg_weight ? round($item->avg_weight, 1) : null,
                         'avg_bmi' => $item->avg_bmi ? round($item->avg_bmi, 1) : null,
+                        'avg_vision' => $item->avg_vision ? round($item->avg_vision, 1) : null,
                     ];
                 });
 
@@ -301,16 +309,23 @@ class StatisticsController extends Controller
             $classAverages = HealthRecord::join('students', 'health_records.student_id', '=', 'students.id')
                 ->join('school_classes', 'students.class_id', '=', 'school_classes.class_id')
                 ->selectRaw('
-                    school_classes.id as class_id,
+                    school_classes.class_id,
                     school_classes.grade,
                     school_classes.class_name,
                     COUNT(*) as count,
                     AVG(health_records.height) as avg_height,
                     AVG(health_records.weight) as avg_weight,
-                    AVG(health_records.weight / (health_records.height/100 * health_records.height/100)) as avg_bmi
+                    AVG(health_records.weight / (health_records.height/100 * health_records.height/100)) as avg_bmi,
+                    AVG(CASE 
+                        WHEN health_records.vision_left IS NOT NULL AND health_records.vision_right IS NOT NULL 
+                        THEN (health_records.vision_left + health_records.vision_right) / 2
+                        WHEN health_records.vision_left_corrected IS NOT NULL AND health_records.vision_right_corrected IS NOT NULL
+                        THEN (health_records.vision_left_corrected + health_records.vision_right_corrected) / 2
+                        ELSE NULL
+                    END) as avg_vision
                 ')
                 ->where('health_records.year', now()->year)
-                ->groupBy('school_classes.id', 'school_classes.grade', 'school_classes.class_name')
+                ->groupBy('school_classes.class_id', 'school_classes.grade', 'school_classes.class_name')
                 ->orderBy('school_classes.grade')
                 ->orderBy('school_classes.class_name')
                 ->get()
@@ -319,10 +334,11 @@ class StatisticsController extends Controller
                         'class_id' => $item->class_id,
                         'grade' => $item->grade,
                         'class_name' => $item->class_name,
-                        'count' => $item->count,
+                        'student_count' => $item->count,
                         'avg_height' => $item->avg_height ? round($item->avg_height, 1) : null,
                         'avg_weight' => $item->avg_weight ? round($item->avg_weight, 1) : null,
                         'avg_bmi' => $item->avg_bmi ? round($item->avg_bmi, 1) : null,
+                        'avg_vision' => $item->avg_vision ? round($item->avg_vision, 1) : null,
                     ];
                 });
 

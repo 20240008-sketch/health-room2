@@ -8,6 +8,7 @@ use App\Http\Requests\HealthRecordRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use TCPDF;
 
 class HealthRecordController extends Controller
 {
@@ -572,6 +573,209 @@ class HealthRecordController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => '統計データの取得に失敗しました',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Export health records to PDF
+     */
+    public function exportPdf(Request $request)
+    {
+        try {
+            // Get filtered records
+            $query = HealthRecord::with(['student.schoolClass']);
+
+            // Apply filters (same as index method)
+            if ($request->has('academic_year') && !empty($request->academic_year)) {
+                $query->where('year', $request->academic_year);
+            }
+
+            if ($request->has('grade') && !empty($request->grade)) {
+                $query->whereHas('student', function ($q) use ($request) {
+                    $q->where('grade_id', $request->grade);
+                });
+            }
+
+            if ($request->has('class_id') && !empty($request->class_id)) {
+                $query->whereHas('student', function ($q) use ($request) {
+                    $q->where('class_id', $request->class_id);
+                });
+            }
+
+            if ($request->has('search') && !empty($request->search)) {
+                $query->whereHas('student', function ($q) use ($request) {
+                    $q->where('name', 'like', '%' . $request->search . '%')
+                      ->orWhere('student_number', 'like', '%' . $request->search . '%');
+                });
+            }
+
+            // Date filters
+            if ($request->has('year') && !empty($request->year)) {
+                $query->whereYear('created_at', $request->year);
+            }
+            if ($request->has('month') && !empty($request->month)) {
+                $query->whereMonth('created_at', $request->month);
+            }
+            if ($request->has('day') && !empty($request->day)) {
+                $query->whereDay('created_at', $request->day);
+            }
+
+            $records = $query->orderBy('created_at', 'desc')->get();
+
+            // 視力をABCDグレードに変換するヘルパー関数
+            $getVisionGrade = function($vision) {
+                if (!$vision) return '-';
+                $v = floatval($vision);
+                if ($v >= 1.0) return 'A';
+                if ($v >= 0.7) return 'B';
+                if ($v >= 0.3) return 'C';
+                return 'D';
+            };
+
+            // PDFを生成
+            $pdf = new TCPDF('L', 'mm', 'A4', true, 'UTF-8', false); // 横向き
+            
+            // PDFの基本設定
+            $pdf->SetCreator('Health Room System');
+            $pdf->SetAuthor('School');
+            $pdf->SetTitle('健康記録一覧');
+            $pdf->SetSubject('健康記録一覧');
+            
+            // ヘッダー・フッターを削除
+            $pdf->setPrintHeader(false);
+            $pdf->setPrintFooter(false);
+            
+            // マージン設定
+            $pdf->SetMargins(10, 10, 10);
+            $pdf->SetAutoPageBreak(true, 10);
+            
+            // フォント設定（日本語対応）
+            $pdf->SetFont('kozminproregular', '', 9);
+            
+            // ページ追加
+            $pdf->AddPage();
+            
+            // タイトル
+            $pdf->SetFont('kozminproregular', 'B', 14);
+            $pdf->Cell(0, 8, '健康記録一覧', 0, 1, 'C');
+            $pdf->Ln(3);
+            
+            // 出力日時
+            $pdf->SetFont('kozminproregular', '', 8);
+            $pdf->Cell(0, 5, '出力日時: ' . date('Y年m月d日 H:i'), 0, 1, 'R');
+            $pdf->Ln(2);
+            
+            // フィルター情報
+            if ($request->has('academic_year') || $request->has('class_id')) {
+                $pdf->SetFont('kozminproregular', '', 8);
+                $filterText = '絞り込み: ';
+                $filters = [];
+                if ($request->has('academic_year')) $filters[] = $request->academic_year . '年度';
+                if ($request->has('class_id')) $filters[] = 'クラス指定あり';
+                $pdf->Cell(0, 5, $filterText . implode(', ', $filters), 0, 1, 'L');
+                $pdf->Ln(2);
+            }
+            
+            // テーブルヘッダー
+            $pdf->SetFont('kozminproregular', 'B', 8);
+            $pdf->SetFillColor(230, 230, 230);
+            $pdf->Cell(20, 7, '測定日', 1, 0, 'C', true);
+            $pdf->Cell(35, 7, 'クラス', 1, 0, 'C', true);
+            $pdf->Cell(25, 7, '出席番号', 1, 0, 'C', true);
+            $pdf->Cell(40, 7, '氏名', 1, 0, 'C', true);
+            $pdf->Cell(20, 7, '身長(cm)', 1, 0, 'C', true);
+            $pdf->Cell(20, 7, '体重(kg)', 1, 0, 'C', true);
+            $pdf->Cell(30, 7, '視力(左/右)', 1, 0, 'C', true);
+            $pdf->Cell(15, 7, 'BMI', 1, 0, 'C', true);
+            $pdf->Cell(70, 7, '備考', 1, 1, 'C', true);
+            
+            // テーブルデータ
+            $pdf->SetFont('kozminproregular', '', 7);
+            foreach ($records as $record) {
+                // ページの残りスペースをチェック
+                if ($pdf->GetY() > 180) {
+                    $pdf->AddPage();
+                    // ヘッダーを再表示
+                    $pdf->SetFont('kozminproregular', 'B', 8);
+                    $pdf->SetFillColor(230, 230, 230);
+                    $pdf->Cell(20, 7, '測定日', 1, 0, 'C', true);
+                    $pdf->Cell(35, 7, 'クラス', 1, 0, 'C', true);
+                    $pdf->Cell(25, 7, '出席番号', 1, 0, 'C', true);
+                    $pdf->Cell(40, 7, '氏名', 1, 0, 'C', true);
+                    $pdf->Cell(20, 7, '身長(cm)', 1, 0, 'C', true);
+                    $pdf->Cell(20, 7, '体重(kg)', 1, 0, 'C', true);
+                    $pdf->Cell(30, 7, '視力(左/右)', 1, 0, 'C', true);
+                    $pdf->Cell(15, 7, 'BMI', 1, 0, 'C', true);
+                    $pdf->Cell(70, 7, '備考', 1, 1, 'C', true);
+                    $pdf->SetFont('kozminproregular', '', 7);
+                }
+                
+                $measuredDate = $record->created_at ? $record->created_at->format('Y/m/d') : '-';
+                $className = $record->student->schoolClass->class_name ?? '-';
+                $studentNumber = $record->student->student_number ?? '-';
+                $studentName = $record->student->name ?? '-';
+                $height = $record->height ?? '-';
+                $weight = $record->weight ?? '-';
+                
+                // 視力（裸眼または矯正）をABCDグレードで表示
+                $visionLeft = '-';
+                if ($record->vision_left) {
+                    $visionLeft = $getVisionGrade($record->vision_left);
+                } elseif ($record->vision_left_corrected) {
+                    $visionLeft = '矯' . $getVisionGrade($record->vision_left_corrected);
+                }
+                
+                $visionRight = '-';
+                if ($record->vision_right) {
+                    $visionRight = $getVisionGrade($record->vision_right);
+                } elseif ($record->vision_right_corrected) {
+                    $visionRight = '矯' . $getVisionGrade($record->vision_right_corrected);
+                }
+                
+                $vision = $visionLeft . '/' . $visionRight;
+                
+                $bmi = $record->bmi ?? '-';
+                $notes = $record->notes ? mb_substr($record->notes, 0, 30) : '';
+                
+                $pdf->Cell(20, 6, $measuredDate, 1, 0, 'C');
+                $pdf->Cell(35, 6, $className, 1, 0, 'L');
+                $pdf->Cell(25, 6, $studentNumber, 1, 0, 'C');
+                $pdf->Cell(40, 6, $studentName, 1, 0, 'L');
+                $pdf->Cell(20, 6, $height, 1, 0, 'C');
+                $pdf->Cell(20, 6, $weight, 1, 0, 'C');
+                $pdf->Cell(30, 6, $vision, 1, 0, 'C');
+                $pdf->Cell(15, 6, $bmi, 1, 0, 'C');
+                $pdf->Cell(70, 6, $notes, 1, 1, 'L');
+            }
+            
+            // 統計情報
+            $pdf->Ln(5);
+            $pdf->SetFont('kozminproregular', 'B', 9);
+            $pdf->Cell(0, 6, '統計情報', 0, 1, 'L');
+            $pdf->SetFont('kozminproregular', '', 8);
+            $pdf->Cell(0, 5, '総記録数: ' . $records->count() . '件', 0, 1, 'L');
+            
+            if ($records->count() > 0) {
+                $avgHeight = round($records->avg('height'), 1);
+                $avgWeight = round($records->avg('weight'), 1);
+                $avgBmi = round($records->avg('bmi'), 1);
+                
+                $pdf->Cell(0, 5, '平均身長: ' . $avgHeight . 'cm  平均体重: ' . $avgWeight . 'kg  平均BMI: ' . $avgBmi, 0, 1, 'L');
+            }
+            
+            // PDFを出力
+            $fileName = '健康記録一覧_' . date('Ymd') . '.pdf';
+            
+            return response($pdf->Output($fileName, 'S'))
+                ->header('Content-Type', 'application/pdf')
+                ->header('Content-Disposition', 'attachment; filename="' . $fileName . '"');
+                
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'PDF生成に失敗しました',
                 'error' => $e->getMessage()
             ], 500);
         }

@@ -336,12 +336,87 @@
             </template>
 
             <div class="space-y-6">
+              <!-- Filters and Display Options -->
+              <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <h3 class="text-sm font-semibold text-gray-700 mb-3">フィルターと表示設定</h3>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  <!-- Grade Filter -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">学年</label>
+                    <select
+                      v-model="statisticsFilters.grade"
+                      @change="applyStatisticsFilters"
+                      class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                    >
+                      <option value="">すべての学年</option>
+                      <option value="1">1年生</option>
+                      <option value="2">2年生</option>
+                      <option value="3">3年生</option>
+                    </select>
+                  </div>
+
+                  <!-- Class Filter -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">クラス</label>
+                    <select
+                      v-model="statisticsFilters.class_id"
+                      @change="applyStatisticsFilters"
+                      :disabled="!statisticsFilters.grade"
+                      class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    >
+                      <option value="">すべてのクラス</option>
+                      <option
+                        v-for="schoolClass in filteredClassesForStats"
+                        :key="schoolClass.class_id"
+                        :value="schoolClass.class_id"
+                      >
+                        {{ schoolClass.class_name }}
+                      </option>
+                    </select>
+                    <p v-if="!statisticsFilters.grade" class="mt-1 text-xs text-gray-500">
+                      ※ 学年を選択してください
+                    </p>
+                  </div>
+
+                  <!-- Display Items -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">表示項目</label>
+                    <div class="flex flex-wrap gap-3">
+                      <label class="inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          v-model="displayItems.height"
+                          class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
+                        />
+                        <span class="ml-2 text-sm text-gray-700">身長</span>
+                      </label>
+                      <label class="inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          v-model="displayItems.weight"
+                          class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
+                        />
+                        <span class="ml-2 text-sm text-gray-700">体重</span>
+                      </label>
+                      <label class="inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          v-model="displayItems.vision"
+                          class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
+                        />
+                        <span class="ml-2 text-sm text-gray-700">視力</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <!-- Grade Averages -->
-              <div>
+              <div v-if="!statisticsFilters.class_id">
                 <h3 class="text-sm font-medium text-gray-900 mb-3">学年平均</h3>
                 <div class="space-y-3">
                   <div
-                    v-for="gradeAvg in gradeAverages"
+                    v-for="gradeAvg in filteredGradeAverages"
                     :key="gradeAvg.grade"
                     class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                   >
@@ -354,15 +429,19 @@
                       </span>
                     </div>
                     <div class="flex items-center space-x-4 text-sm">
-                      <div class="text-center">
+                      <div v-if="displayItems.height" class="text-center">
                         <div class="text-gray-500">身長</div>
                         <div class="font-medium">{{ gradeAvg.avg_height }}cm</div>
                       </div>
-                      <div class="text-center">
+                      <div v-if="displayItems.weight" class="text-center">
                         <div class="text-gray-500">体重</div>
                         <div class="font-medium">{{ gradeAvg.avg_weight }}kg</div>
                       </div>
-                      <div class="text-center">
+                      <div v-if="displayItems.vision" class="text-center">
+                        <div class="text-gray-500">視力</div>
+                        <div class="font-medium">{{ gradeAvg.avg_vision || '-' }}</div>
+                      </div>
+                      <div v-if="!displayItems.height && !displayItems.weight && !displayItems.vision" class="text-center">
                         <div class="text-gray-500">BMI</div>
                         <div class="font-medium">{{ gradeAvg.avg_bmi }}</div>
                       </div>
@@ -373,10 +452,12 @@
 
               <!-- Class Averages -->
               <div>
-                <h3 class="text-sm font-medium text-gray-900 mb-3">クラス平均</h3>
+                <h3 class="text-sm font-medium text-gray-900 mb-3">
+                  {{ statisticsFilters.class_id ? '選択クラスの統計' : 'クラス平均' }}
+                </h3>
                 <div class="space-y-2 max-h-64 overflow-y-auto">
                   <div
-                    v-for="classAvg in classAverages"
+                    v-for="classAvg in filteredClassAverages"
                     :key="classAvg.class_id"
                     class="flex items-center justify-between p-2 hover:bg-gray-50 rounded"
                   >
@@ -389,15 +470,19 @@
                       </span>
                     </div>
                     <div class="flex items-center space-x-3 text-xs">
-                      <div class="text-center">
+                      <div v-if="displayItems.height" class="text-center">
                         <div class="text-gray-500">身長</div>
                         <div class="font-medium">{{ classAvg.avg_height }}cm</div>
                       </div>
-                      <div class="text-center">
+                      <div v-if="displayItems.weight" class="text-center">
                         <div class="text-gray-500">体重</div>
                         <div class="font-medium">{{ classAvg.avg_weight }}kg</div>
                       </div>
-                      <div class="text-center">
+                      <div v-if="displayItems.vision" class="text-center">
+                        <div class="text-gray-500">視力</div>
+                        <div class="font-medium">{{ classAvg.avg_vision || '-' }}</div>
+                      </div>
+                      <div v-if="!displayItems.height && !displayItems.weight && !displayItems.vision" class="text-center">
                         <div class="text-gray-500">BMI</div>
                         <div class="font-medium">{{ classAvg.avg_bmi }}</div>
                       </div>
@@ -504,6 +589,19 @@ export default {
     const isRefreshing = ref(false);
     const currentDate = ref(new Date());
     
+    // Statistics filters
+    const statisticsFilters = ref({
+      grade: '',
+      class_id: ''
+    });
+    
+    // Display items
+    const displayItems = ref({
+      height: true,
+      weight: true,
+      vision: false
+    });
+    
     // Computed
     const statistics = computed(() => ({
       totalStudents: statisticsStore.totalStudents,
@@ -514,6 +612,40 @@ export default {
     const recentHealthRecords = computed(() => healthRecordStore.recentRecords);
     const gradeAverages = computed(() => statisticsStore.gradeAverages);
     const classAverages = computed(() => statisticsStore.classAverages);
+    
+    // Classes from class store
+    const classes = computed(() => classStore.classes);
+    
+    // Filtered classes based on grade filter
+    const filteredClassesForStats = computed(() => {
+      if (!statisticsFilters.value.grade) return classes.value;
+      return classes.value.filter(c => c.grade.toString() === statisticsFilters.value.grade);
+    });
+    
+    // Filtered grade averages
+    const filteredGradeAverages = computed(() => {
+      if (!statisticsFilters.value.grade) return gradeAverages.value;
+      return gradeAverages.value.filter(g => g.grade.toString() === statisticsFilters.value.grade);
+    });
+    
+    // Filtered class averages
+    const filteredClassAverages = computed(() => {
+      let result = classAverages.value;
+      
+      if (statisticsFilters.value.grade) {
+        result = result.filter(c => {
+          const classData = classes.value.find(cls => cls.class_id === c.class_id);
+          return classData && classData.grade.toString() === statisticsFilters.value.grade;
+        });
+      }
+      
+      if (statisticsFilters.value.class_id) {
+        result = result.filter(c => c.class_id === statisticsFilters.value.class_id);
+      }
+      
+      return result;
+    });
+    
     const bmiDistribution = computed(() => {
       const dist = statisticsStore.bmiDistribution;
       const total = dist.underweight + dist.normal + dist.overweight + dist.obese;
@@ -584,6 +716,16 @@ export default {
       }
     };
     
+    const applyStatisticsFilters = () => {
+      // Reset class filter when grade changes
+      if (!statisticsFilters.value.grade) {
+        statisticsFilters.value.class_id = '';
+      }
+      
+      // Fetch filtered statistics if needed
+      // For now, we use client-side filtering
+    };
+    
     const refreshData = async () => {
       isRefreshing.value = true;
       
@@ -593,7 +735,8 @@ export default {
           healthRecordStore.fetchRecentRecords(),
           statisticsStore.fetchBmiDistribution(),
           statisticsStore.fetchGradeAverages(),
-          statisticsStore.fetchClassAverages()
+          statisticsStore.fetchClassAverages(),
+          classStore.fetchClasses()
         ]);
         
         notificationStore.showSuccess('ダッシュボードのデータを更新しました');
@@ -627,10 +770,17 @@ export default {
       gradeAverages,
       classAverages,
       bmiDistribution,
+      statisticsFilters,
+      displayItems,
+      classes,
+      filteredClassesForStats,
+      filteredGradeAverages,
+      filteredClassAverages,
       formatDate,
       formatDateTime,
       getBmiStatus,
-      refreshData
+      refreshData,
+      applyStatisticsFilters
     };
   }
 };

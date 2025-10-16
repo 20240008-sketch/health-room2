@@ -21,6 +21,13 @@
         <div class="mt-4 flex space-x-3 md:mt-0 md:ml-4">
           <BaseButton
             variant="secondary"
+            @click="exportToPDF"
+          >
+            <DocumentArrowDownIcon class="h-4 w-4 mr-2" />
+            PDF出力
+          </BaseButton>
+          <BaseButton
+            variant="secondary"
             @click="exportHealthRecords"
           >
             <DocumentArrowDownIcon class="h-4 w-4 mr-2" />
@@ -43,7 +50,7 @@
         <h3 class="text-sm font-medium text-gray-900">検索・フィルタ</h3>
       </div>
       <div class="p-4">
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <!-- Search -->
           <div class="sm:col-span-2">
             <div class="flex">
@@ -87,21 +94,6 @@
             </BaseInput>
           </div>
 
-          <!-- Grade Filter -->
-          <div>
-            <BaseInput
-              type="select"
-              v-model="filters.grade"
-              placeholder="学年を選択"
-              @change="applyFilters"
-            >
-              <option value="">すべての学年</option>
-              <option value="1">1年</option>
-              <option value="2">2年</option>
-              <option value="3">3年</option>
-            </BaseInput>
-          </div>
-
           <!-- Class Filter -->
           <div>
             <BaseInput
@@ -109,15 +101,14 @@
               v-model="filters.class_id"
               placeholder="クラスを選択"
               @change="applyFilters"
-              :disabled="!filters.grade"
             >
               <option value="">すべてのクラス</option>
               <option
-                v-for="schoolClass in filteredClasses"
+                v-for="schoolClass in allClasses"
                 :key="schoolClass.id"
-                :value="schoolClass.id"
+                :value="schoolClass.class_id"
               >
-                {{ schoolClass.name }}
+                {{ schoolClass.class_name }}
               </option>
             </BaseInput>
           </div>
@@ -183,6 +174,45 @@
                 </option>
               </BaseInput>
             </div>
+          </div>
+        </div>
+
+        <!-- Display Items Selection -->
+        <div class="mt-4 pt-4 border-t border-gray-200">
+          <h4 class="text-sm font-medium text-gray-700 mb-3">表示項目</h4>
+          <div class="flex flex-wrap gap-4">
+            <label class="inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="displayColumns.height"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
+              />
+              <span class="ml-2 text-sm text-gray-700">身長</span>
+            </label>
+            <label class="inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="displayColumns.weight"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
+              />
+              <span class="ml-2 text-sm text-gray-700">体重</span>
+            </label>
+            <label class="inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="displayColumns.vision"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
+              />
+              <span class="ml-2 text-sm text-gray-700">視力</span>
+            </label>
+            <label class="inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="displayColumns.bmi"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
+              />
+              <span class="ml-2 text-sm text-gray-700">BMI</span>
+            </label>
           </div>
         </div>
       </div>
@@ -395,21 +425,7 @@
 
           <template #cell(vision)="{ item }">
             <div class="text-sm text-gray-900">
-              <!-- 裸眼視力がある場合 -->
-              <div v-if="item.vision_left || item.vision_right">
-                <div>{{ item.vision_left || '-' }} / {{ item.vision_right || '-' }}</div>
-                <div v-if="item.vision_left_corrected || item.vision_right_corrected" class="text-xs text-gray-500 mt-1">
-                  <span class="text-gray-400">矯正:</span> {{ item.vision_left_corrected || '-' }} / {{ item.vision_right_corrected || '-' }}
-                </div>
-              </div>
-              <!-- 矯正視力のみの場合 -->
-              <div v-else-if="item.vision_left_corrected || item.vision_right_corrected">
-                <div class="text-xs text-gray-500">
-                  <span class="text-gray-400">矯正:</span> {{ item.vision_left_corrected || '-' }} / {{ item.vision_right_corrected || '-' }}
-                </div>
-              </div>
-              <!-- 視力データなし -->
-              <span v-else class="text-gray-400">-</span>
+              {{ formatVision(item) }}
             </div>
           </template>
 
@@ -475,50 +491,31 @@
                   {{ record.student?.class_id }} | {{ record.student?.grade_id }}年
                 </p>
               </div>
-              <BaseBadge :variant="getBMIVariant(record.bmi)">
+              <BaseBadge v-if="displayColumns.bmi" :variant="getBMIVariant(record.bmi)">
                 BMI {{ record.bmi }}
               </BaseBadge>
             </div>
 
             <!-- Measurements -->
             <div class="grid grid-cols-2 gap-4 mb-4">
-              <div class="text-center">
+              <div v-if="displayColumns.height" class="text-center">
                 <div class="text-2xl font-bold text-gray-900">
                   {{ record.height || '-' }}
                 </div>
                 <div class="text-sm text-gray-500">身長 (cm)</div>
               </div>
-              <div class="text-center">
+              <div v-if="displayColumns.weight" class="text-center">
                 <div class="text-2xl font-bold text-gray-900">
                   {{ record.weight || '-' }}
                 </div>
                 <div class="text-sm text-gray-500">体重 (kg)</div>
               </div>
-              <!-- 視力（左） - 裸眼視力がある場合 -->
-              <div class="text-center" v-if="record.vision_left || record.vision_left_corrected">
+              <!-- 視力 -->
+              <div v-if="displayColumns.vision" class="text-center">
                 <div class="text-lg font-bold text-gray-900">
-                  <span v-if="record.vision_left">{{ record.vision_left }}</span>
-                  <span v-else class="text-xs text-gray-500">
-                    <span class="text-gray-400">矯正:</span> {{ record.vision_left_corrected }}
-                  </span>
+                  {{ formatVision(record) }}
                 </div>
-                <div class="text-sm text-gray-500">視力（左）</div>
-                <div v-if="record.vision_left && record.vision_left_corrected" class="text-xs text-gray-500 mt-1">
-                  <span class="text-gray-400">矯正:</span> {{ record.vision_left_corrected }}
-                </div>
-              </div>
-              <!-- 視力（右） - 裸眼視力がある場合 -->
-              <div class="text-center" v-if="record.vision_right || record.vision_right_corrected">
-                <div class="text-lg font-bold text-gray-900">
-                  <span v-if="record.vision_right">{{ record.vision_right }}</span>
-                  <span v-else class="text-xs text-gray-500">
-                    <span class="text-gray-400">矯正:</span> {{ record.vision_right_corrected }}
-                  </span>
-                </div>
-                <div class="text-sm text-gray-500">視力（右）</div>
-                <div v-if="record.vision_right && record.vision_right_corrected" class="text-xs text-gray-500 mt-1">
-                  <span class="text-gray-400">矯正:</span> {{ record.vision_right_corrected }}
-                </div>
+                <div class="text-sm text-gray-500">視力（左/右）</div>
               </div>
             </div>
 
@@ -723,11 +720,18 @@ export default {
     
     const filters = reactive({
       academic_year: '',
-      grade: '',
       class_id: '',
       year: '',
       month: '',
       day: ''
+    });
+    
+    // Display columns control
+    const displayColumns = reactive({
+      height: true,
+      weight: true,
+      vision: true,
+      bmi: true
     });
     
     // Computed
@@ -760,9 +764,8 @@ export default {
       return Array.from({ length: maxDays }, (_, i) => i + 1);
     });
     
-    const filteredClasses = computed(() => {
-      if (!filters.grade) return classes.value;
-      return classes.value.filter(c => c.grade.toString() === filters.grade);
+    const allClasses = computed(() => {
+      return classes.value;
     });
     
     const filteredHealthRecords = computed(() => {
@@ -780,13 +783,6 @@ export default {
       // Academic year filter
       if (filters.academic_year) {
         result = result.filter(record => record.academic_year.toString() === filters.academic_year);
-      }
-      
-      // Grade filter
-      if (filters.grade) {
-        result = result.filter(record => 
-          record.student?.school_class?.grade?.toString() === filters.grade
-        );
       }
       
       // Class filter
@@ -875,23 +871,39 @@ export default {
     const hasActiveFilters = computed(() => {
       return searchQuery.value || 
              filters.academic_year || 
-             filters.grade || 
              filters.class_id ||
              filters.year ||
              filters.month ||
              filters.day;
     });
     
-    const tableColumns = [
-      { key: 'student_name', title: '学生名・出席番号', label: '学生名・出席番号', sortable: true, width: '180px' },
-      { key: 'class_grade', title: 'クラス・学年', label: 'クラス・学年', width: '120px' },
-      { key: 'measured_date', title: '測定日', label: '測定日', sortable: true, width: '100px' },
-      { key: 'height', title: '身長(cm)', label: '身長(cm)', sortable: true, width: '80px' },
-      { key: 'weight', title: '体重(kg)', label: '体重(kg)', sortable: true, width: '80px' },
-      { key: 'vision', title: '視力(左/右)', label: '視力(左/右)', width: '100px' },
-      { key: 'bmi', title: 'BMI', label: 'BMI', sortable: true, width: '80' },
-      { key: 'actions', title: '操作', label: '操作', width: '120px' }
-    ];
+    const tableColumns = computed(() => {
+      const baseColumns = [
+        { key: 'student_name', title: '学生名・出席番号', label: '学生名・出席番号', sortable: true, width: '180px' },
+        { key: 'class_grade', title: 'クラス・学年', label: 'クラス・学年', width: '120px' },
+        { key: 'measured_date', title: '測定日', label: '測定日', sortable: true, width: '100px' }
+      ];
+      
+      const dataColumns = [];
+      if (displayColumns.height) {
+        dataColumns.push({ key: 'height', title: '身長(cm)', label: '身長(cm)', sortable: true, width: '80px' });
+      }
+      if (displayColumns.weight) {
+        dataColumns.push({ key: 'weight', title: '体重(kg)', label: '体重(kg)', sortable: true, width: '80px' });
+      }
+      if (displayColumns.vision) {
+        dataColumns.push({ key: 'vision', title: '視力(左/右)', label: '視力(左/右)', width: '100px' });
+      }
+      if (displayColumns.bmi) {
+        dataColumns.push({ key: 'bmi', title: 'BMI', label: 'BMI', sortable: true, width: '80px' });
+      }
+      
+      return [
+        ...baseColumns,
+        ...dataColumns,
+        { key: 'actions', title: '操作', label: '操作', width: '120px' }
+      ];
+    });
     
     // Methods
     const handleSearch = () => {
@@ -899,6 +911,13 @@ export default {
     };
     
     const applyFilters = () => {
+      console.log('Applying filters:', {
+        class_id: filters.class_id,
+        academic_year: filters.academic_year
+      });
+      console.log('Available classes:', classes.value.length);
+      console.log('Total health records:', healthRecords.value.length);
+      console.log('Filtered health records:', filteredHealthRecords.value.length);
       currentPage.value = 1;
     };
     
@@ -909,7 +928,6 @@ export default {
     const resetFilters = () => {
       searchQuery.value = '';
       filters.academic_year = '';
-      filters.grade = '';
       filters.class_id = '';
       filters.year = '';
       filters.month = '';
@@ -950,6 +968,94 @@ export default {
       if (bmi < 25) return 'text-green-600';
       if (bmi < 30) return 'text-yellow-600';
       return 'text-red-600';
+    };
+    
+    const getVisionGrade = (vision) => {
+      if (!vision) return '-';
+      const v = parseFloat(vision);
+      if (v >= 1.0) return 'A';
+      if (v >= 0.7) return 'B';
+      if (v >= 0.3) return 'C';
+      return 'D';
+    };
+    
+    const formatVision = (record) => {
+      if (!record) return '-/-';
+      
+      // 左目
+      let leftVision = '-';
+      let leftIsCorrected = false;
+      if (record.vision_left) {
+        leftVision = getVisionGrade(record.vision_left);
+      } else if (record.vision_left_corrected) {
+        leftVision = getVisionGrade(record.vision_left_corrected);
+        leftIsCorrected = true;
+      }
+      
+      // 右目
+      let rightVision = '-';
+      let rightIsCorrected = false;
+      if (record.vision_right) {
+        rightVision = getVisionGrade(record.vision_right);
+      } else if (record.vision_right_corrected) {
+        rightVision = getVisionGrade(record.vision_right_corrected);
+        rightIsCorrected = true;
+      }
+      
+      // 矯正視力の場合は「矯」を付ける
+      if (leftIsCorrected) leftVision = '矯' + leftVision;
+      if (rightIsCorrected) rightVision = '矯' + rightVision;
+      
+      return leftVision + '/' + rightVision;
+    };
+    
+    const exportToPDF = async () => {
+      try {
+        notificationStore.addNotification({
+          type: 'info',
+          title: 'PDF出力中',
+          message: '健康記録のPDFを生成しています...'
+        });
+
+        // Build query parameters based on current filters
+        const params = new URLSearchParams();
+        if (filters.academic_year) params.append('academic_year', filters.academic_year);
+        if (filters.class_id) params.append('class_id', filters.class_id);
+        if (filters.year) params.append('year', filters.year);
+        if (filters.month) params.append('month', filters.month);
+        if (filters.day) params.append('day', filters.day);
+        if (searchQuery.value) params.append('search', searchQuery.value);
+
+        const response = await fetch(`/api/v1/health-records/export-pdf?${params.toString()}`, {
+          method: 'GET',
+        });
+
+        if (!response.ok) {
+          throw new Error('PDF生成に失敗しました');
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `健康記録一覧_${new Date().toISOString().split('T')[0]}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        notificationStore.addNotification({
+          type: 'success',
+          title: 'PDF出力完了',
+          message: '健康記録のPDFをダウンロードしました'
+        });
+      } catch (error) {
+        notificationStore.addNotification({
+          type: 'danger',
+          title: 'PDF出力エラー',
+          message: error.message || 'PDFの生成に失敗しました'
+        });
+      }
     };
     
     const exportHealthRecords = () => {
@@ -1019,6 +1125,7 @@ export default {
       currentPage,
       itemsPerPage,
       filters,
+      displayColumns,
       filteredHealthRecords,
       paginatedRecords,
       stats,
@@ -1027,7 +1134,7 @@ export default {
       availableAcademicYears,
       availableYears,
       availableDays,
-      filteredClasses,
+      allClasses,
       handleSearch,
       applyFilters,
       applySorting,
@@ -1036,6 +1143,9 @@ export default {
       getBMICategory,
       getBMIVariant,
       getBMIColor,
+      getVisionGrade,
+      formatVision,
+      exportToPDF,
       exportHealthRecords
     };
   }

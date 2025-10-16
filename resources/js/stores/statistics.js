@@ -97,7 +97,8 @@ export const useStatisticsStore = defineStore('statistics', () => {
           ...grade,
           avg_height: grade.avg_height ? parseFloat(grade.avg_height).toFixed(1) : '---',
           avg_weight: grade.avg_weight ? parseFloat(grade.avg_weight).toFixed(1) : '---',
-          avg_bmi: grade.avg_bmi ? parseFloat(grade.avg_bmi).toFixed(1) : '---'
+          avg_bmi: grade.avg_bmi ? parseFloat(grade.avg_bmi).toFixed(1) : '---',
+          avg_vision: grade.avg_vision ? parseFloat(grade.avg_vision).toFixed(1) : null
         }));
       }
     } catch (error) {
@@ -115,7 +116,8 @@ export const useStatisticsStore = defineStore('statistics', () => {
           ...cls,
           avg_height: cls.avg_height ? parseFloat(cls.avg_height).toFixed(1) : '---',
           avg_weight: cls.avg_weight ? parseFloat(cls.avg_weight).toFixed(1) : '---',
-          avg_bmi: cls.avg_bmi ? parseFloat(cls.avg_bmi).toFixed(1) : '---'
+          avg_bmi: cls.avg_bmi ? parseFloat(cls.avg_bmi).toFixed(1) : '---',
+          avg_vision: cls.avg_vision ? parseFloat(cls.avg_vision).toFixed(1) : null
         }));
       }
     } catch (error) {
