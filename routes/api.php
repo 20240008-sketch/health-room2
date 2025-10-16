@@ -47,6 +47,8 @@ Route::group(['prefix' => 'v1'], function () {
     Route::apiResource('students', StudentController::class);
     
     // クラス管理API
+    Route::get('classes/export-pdf', [ClassController::class, 'exportPdf'])
+        ->name('classes.export-pdf');
     Route::apiResource('classes', ClassController::class);
     
     // 健康記録関連の追加エンドポイント（先に定義する必要がある）

@@ -18,7 +18,14 @@
             学校のクラス情報を管理します
           </p>
         </div>
-        <div class="mt-4 flex md:mt-0 md:ml-4">
+        <div class="mt-4 flex space-x-3 md:mt-0 md:ml-4">
+          <BaseButton
+            variant="secondary"
+            @click="exportToPDF"
+          >
+            <DocumentArrowDownIcon class="h-4 w-4 mr-2" />
+            PDF出力
+          </BaseButton>
           <BaseButton
             variant="primary"
             @click="$router.push('/classes/create')"
@@ -396,6 +403,14 @@ const PlusIcon = {
   `
 };
 
+const DocumentArrowDownIcon = {
+  template: `
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+    </svg>
+  `
+};
+
 const MagnifyingGlassIcon = {
   template: `
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -570,6 +585,46 @@ export default {
       filters.academic_year = '';
       sortBy.value = 'name';
     };
+
+    const exportToPDF = async () => {
+      try {
+        notificationStore.addNotification({
+          type: 'info',
+          title: 'PDF出力中',
+          message: 'クラスリストのPDFを生成しています...'
+        });
+
+        const response = await fetch('/api/v1/classes/export-pdf', {
+          method: 'GET',
+        });
+
+        if (!response.ok) {
+          throw new Error('PDF生成に失敗しました');
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `クラス一覧_${new Date().toISOString().split('T')[0]}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        notificationStore.addNotification({
+          type: 'success',
+          title: 'PDF出力完了',
+          message: 'クラスリストのPDFをダウンロードしました'
+        });
+      } catch (error) {
+        notificationStore.addNotification({
+          type: 'danger',
+          title: 'PDF出力エラー',
+          message: error.message || 'PDFの生成に失敗しました'
+        });
+      }
+    };
     
     // Lifecycle
     onMounted(async () => {
@@ -600,7 +655,8 @@ export default {
       handleSearch,
       applyFilters,
       applySorting,
-      resetFilters
+      resetFilters,
+      exportToPDF
     };
   }
 };
