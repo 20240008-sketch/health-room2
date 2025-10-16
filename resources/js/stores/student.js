@@ -181,6 +181,42 @@ export const useStudentStore = defineStore('student', () => {
     }
   };
 
+  const fetchAllStudents = async () => {
+    loading.value = true;
+    try {
+      console.log('Fetching all students...'); // Debug log
+      const response = await axios.get('/v1/students', { 
+        params: { per_page: 1000 } // 大きな値で全件取得
+      });
+      
+      console.log('All students API Response:', response.data); // Debug log
+      
+      if (response.data.success) {
+        // レスポンスデータの構造に応じて適切に処理
+        if (response.data.data.data) {
+          // ページネーション付きレスポンス
+          students.value = response.data.data.data;
+          pagination.value = {
+            current_page: response.data.data.current_page,
+            per_page: response.data.data.per_page,
+            total: response.data.data.total,
+            last_page: response.data.data.last_page
+          };
+        } else {
+          // 単純な配列レスポンス
+          students.value = response.data.data;
+        }
+        console.log('All students loaded:', students.value.length); // Debug log
+      }
+    } catch (error) {
+      console.error('全生徒取得エラー:', error);
+      console.error('Error response:', error.response?.data);
+      notificationStore.showError('全生徒の取得に失敗しました');
+    } finally {
+      loading.value = false;
+    }
+  };
+
   const searchSuggestions = async (query, limit = 10) => {
     try {
       const response = await axios.get('/v1/students/search/suggestions', {
@@ -242,6 +278,7 @@ export const useStudentStore = defineStore('student', () => {
     
     // Actions
     fetchStudents,
+    fetchAllStudents,
     fetchStudent,
     createStudent,
     updateStudent,

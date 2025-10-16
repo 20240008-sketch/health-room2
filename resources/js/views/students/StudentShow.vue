@@ -127,7 +127,7 @@
               <div v-if="latestHealthRecord">
                 <dt class="text-sm font-medium text-gray-500">最新記録日</dt>
                 <dd class="mt-1 text-sm text-gray-900">
-                  {{ formatDate(latestHealthRecord.recorded_date) }}
+                  {{ formatDate(latestHealthRecord.measured_date) }}
                 </dd>
               </div>
 
@@ -445,10 +445,10 @@ export default {
     
     // State
     const isLoading = ref(true);
+    const healthRecords = ref([]);
     
     // Computed
     const student = computed(() => studentStore.currentStudent);
-    const healthRecords = computed(() => healthRecordStore.studentHealthRecords);
     const latestHealthRecord = computed(() => {
       return healthRecords.value[0] || null;
     });
@@ -462,7 +462,7 @@ export default {
     // Health record table columns
     const healthRecordColumns = [
       {
-        key: 'recorded_date',
+        key: 'measured_date',
         label: '記録日',
         width: '100px'
       },
@@ -607,11 +607,17 @@ export default {
       const studentId = route.params.id;
       
       try {
-        await Promise.all([
+        // 学生情報と健康記録を並行取得
+        const [studentData, healthRecordsData] = await Promise.all([
           studentStore.fetchStudent(studentId),
-          healthRecordStore.fetchStudentHealthRecords(studentId, { limit: 10 })
+          healthRecordStore.getHealthRecordsByStudent(studentId)
         ]);
+        
+        // 健康記録をstateに設定
+        healthRecords.value = healthRecordsData || [];
+        
       } catch (error) {
+        console.error('データ取得エラー:', error);
         notificationStore.addNotification({
           type: 'danger',
           title: 'データ取得エラー',

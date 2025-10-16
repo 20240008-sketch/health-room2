@@ -56,13 +56,19 @@ export const useClassStore = defineStore('class', () => {
   const fetchClasses = async () => {
     loading.value = true;
     try {
+      console.log('Fetching classes...');
       const response = await axios.get('/v1/classes');
+      
+      console.log('Classes response:', response.data);
       
       if (response.data.success) {
         classes.value = response.data.data;
+        console.log('Classes loaded:', classes.value.length);
+        console.log('First class:', classes.value[0]);
       }
     } catch (error) {
       console.error('クラス一覧取得エラー:', error);
+      console.error('Error response:', error.response?.data);
       notificationStore.showError('クラス一覧の取得に失敗しました');
     } finally {
       loading.value = false;
@@ -72,14 +78,20 @@ export const useClassStore = defineStore('class', () => {
   const fetchClass = async (id) => {
     loading.value = true;
     try {
+      console.log('Fetching class with id:', id);
       const response = await axios.get(`/v1/classes/${id}`);
+      
+      console.log('Class response:', response.data);
       
       if (response.data.success) {
         currentClass.value = response.data.data;
+        console.log('Class loaded:', currentClass.value);
+        console.log('Students in class:', currentClass.value.students?.length || 0);
         return response.data.data;
       }
     } catch (error) {
       console.error('クラス詳細取得エラー:', error);
+      console.error('Error response:', error.response?.data);
       notificationStore.showError('クラス詳細の取得に失敗しました');
       throw error;
     } finally {

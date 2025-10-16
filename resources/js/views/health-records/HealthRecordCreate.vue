@@ -99,7 +99,7 @@
                         <div>
                           <div class="font-medium text-gray-900">{{ student.name }}</div>
                           <div class="text-sm text-gray-500">
-                            {{ student.student_number }} | {{ student.school_class?.name }}
+                            {{ student.student_number }}番 | {{ getClassGrade(student) }}年{{ getClassName(student) }}
                           </div>
                         </div>
                         <div class="text-sm text-gray-400">
@@ -127,7 +127,7 @@
                       <div class="ml-4 flex-1">
                         <h3 class="text-lg font-medium text-gray-900">{{ selectedStudent.name }}</h3>
                         <p class="text-sm text-gray-500">
-                          {{ selectedStudent.student_number }} | {{ selectedStudent.school_class?.name }}
+                          {{ selectedStudent.student_number }}番 | {{ getClassGrade(selectedStudent) }}年{{ getClassName(selectedStudent) }}
                         </p>
                         <div v-if="selectedStudent.latest_health_record" class="mt-1 text-sm text-gray-600">
                           前回測定: {{ formatDate(selectedStudent.latest_health_record.measured_date) }} 
@@ -195,17 +195,15 @@
                     v-model="bulkFilters.class_id"
                     label="クラス"
                     @change="updateBulkSelection"
-                    :disabled="!bulkFilters.grade"
                   >
                     <option value="">すべてのクラス</option>
-                    <option value="特進">特進</option>
-                    <option value="進学">進学</option>
-                    <option value="調理">調理</option>
-                    <option value="福祉">福祉</option>
-                    <option value="情会">情会</option>
-                    <option value="総合１">総合１</option>
-                    <option value="総合２">総合２</option>
-                    <option value="総合３">総合３</option>
+                    <option 
+                      v-for="schoolClass in filteredClasses" 
+                      :key="schoolClass.class_id" 
+                      :value="schoolClass.class_id"
+                    >
+                      {{ schoolClass.class_name }}
+                    </option>
                   </BaseInput>
                 </div>
 
@@ -241,7 +239,7 @@
                         <div class="ml-3 flex-1">
                           <div class="font-medium text-gray-900">{{ student.name }}</div>
                           <div class="text-sm text-gray-500">
-                            {{ student.student_number }} | {{ student.school_class?.name }}
+                            {{ student.student_number }}番 | {{ getClassGrade(student) }}年{{ getClassName(student) }}
                           </div>
                         </div>
                         <div class="text-sm text-gray-400">
@@ -305,6 +303,7 @@
                   <!-- Height -->
                   <div>
                     <BaseInput
+                      ref="heightInput"
                       type="number"
                       step="0.1"
                       v-model="form.height"
@@ -313,12 +312,14 @@
                       placeholder="150.5"
                       :error="errors.height"
                       @input="calculateBMI"
+                      @keydown.enter.prevent="focusNextField('heightInput')"
                     />
                   </div>
 
                   <!-- Weight -->
                   <div>
                     <BaseInput
+                      ref="weightInput"
                       type="number"
                       step="0.1"
                       v-model="form.weight"
@@ -327,6 +328,7 @@
                       placeholder="45.5"
                       :error="errors.weight"
                       @input="calculateBMI"
+                      @keydown.enter.prevent="focusNextField('weightInput')"
                     />
                   </div>
                 </div>
@@ -373,24 +375,90 @@
 
               <!-- Bulk Measurement -->
               <div v-else class="space-y-4">
-                <div class="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+                <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
                   <div class="flex">
-                    <ExclamationTriangleIcon class="h-5 w-5 text-yellow-600 mr-2" />
-                    <div class="text-sm text-yellow-800">
+                    <InformationCircleIcon class="h-5 w-5 text-blue-600 mr-2" />
+                    <div class="text-sm text-blue-800">
                       <p class="font-medium">一括測定モード</p>
-                      <p>各学生の身長・体重は個別に入力する必要があります。測定後に「詳細入力」ボタンから入力してください。</p>
+                      <p>選択された{{ selectedStudents.length }}名の学生に対して測定データを入力できます。</p>
                     </div>
                   </div>
                 </div>
                 
-                <p class="text-sm text-gray-600">
-                  選択された{{ selectedStudents.length }}名の学生に対して基本記録を作成し、後から個別に測定値を入力できます。
-                </p>
+                <!-- Individual measurement inputs for each selected student -->
+                <div class="space-y-4">
+                  <div
+                    v-for="student in selectedStudents"
+                    :key="student.id"
+                    class="bg-white border border-gray-200 rounded-lg p-4"
+                  >
+                    <div class="flex items-center justify-between mb-4">
+                      <div class="flex items-center">
+                        <span class="font-medium text-gray-900">{{ student.name }}</span>
+                        <BaseBadge variant="info" class="ml-2">
+                          {{ student.school_class?.name || `${student.grade}年${student.class_number}組` }}
+                        </BaseBadge>
+                        <span class="ml-2 text-sm text-gray-500">
+                          出席番号: {{ student.student_number }}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <!-- Height -->
+                      <div>
+                        <BaseInput
+                          :ref="el => setBulkInputRef(el, student.id, 'height')"
+                          type="number"
+                          step="0.1"
+                          v-model="bulkMeasurements[student.id].height"
+                          label="身長 (cm)"
+                          placeholder="150.5"
+                          @input="calculateBulkBMI(student.id)"
+                          @keydown.enter.prevent="focusBulkNextField(student.id, 'height')"
+                        />
+                      </div>
+
+                      <!-- Weight -->
+                      <div>
+                        <BaseInput
+                          :ref="el => setBulkInputRef(el, student.id, 'weight')"
+                          type="number"
+                          step="0.1"
+                          v-model="bulkMeasurements[student.id].weight"
+                          label="体重 (kg)"
+                          placeholder="45.5"
+                          @input="calculateBulkBMI(student.id)"
+                          @keydown.enter.prevent="focusBulkNextField(student.id, 'weight')"
+                        />
+                      </div>
+                    </div>
+                    
+                    <!-- BMI Display for this student -->
+                    <div v-if="bulkMeasurements[student.id].height && bulkMeasurements[student.id].weight" class="mt-3 bg-gray-50 rounded-lg p-3">
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <span class="text-sm font-medium text-gray-700">BMI: </span>
+                          <span class="text-xl font-bold" :class="getBMIColor(bulkMeasurements[student.id].bmi)">
+                            {{ bulkMeasurements[student.id].bmi }}
+                          </span>
+                          <BaseBadge :variant="getBMIVariant(bulkMeasurements[student.id].bmi)" class="ml-2">
+                            {{ getBMICategory(bulkMeasurements[student.id].bmi) }}
+                          </BaseBadge>
+                        </div>
+                        <div v-if="student.latest_health_record" class="text-sm text-gray-500">
+                          前回BMI: {{ student.latest_health_record.bmi }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <!-- Notes -->
               <div>
                 <BaseInput
+                  ref="notesInput"
                   type="textarea"
                   v-model="form.notes"
                   label="備考"
@@ -684,6 +752,15 @@ export default {
       class_id: ''
     });
     
+    // Bulk measurements storage - stores measurements for each student
+    const bulkMeasurements = reactive({});
+    
+    // Refs for input fields
+    const heightInput = ref(null);
+    const weightInput = ref(null);
+    const notesInput = ref(null);
+    const bulkInputRefs = reactive({});
+    
     // Errors
     const errors = ref({});
     
@@ -698,22 +775,43 @@ export default {
     });
     
     const filteredClasses = computed(() => {
-      if (!bulkFilters.grade) return classes.value;
-      return classes.value.filter(c => c.grade.toString() === bulkFilters.grade);
+      const currentYear = new Date().getFullYear();
+      let result = classes.value.filter(c => c.year === currentYear);
+      
+      if (bulkFilters.grade) {
+        result = result.filter(c => c.grade.toString() === bulkFilters.grade);
+      }
+      
+      return result.sort((a, b) => {
+        // First sort by grade, then by class_name
+        if (a.grade !== b.grade) {
+          return a.grade - b.grade;
+        }
+        return a.class_name.localeCompare(b.class_name, 'ja');
+      });
     });
     
     const bulkStudents = computed(() => {
       let result = [...students.value];
       
       if (bulkFilters.grade) {
-        result = result.filter(s => s.school_class?.grade?.toString() === bulkFilters.grade);
+        result = result.filter(s => {
+          // Use the grade from school_classes via class_id
+          const studentClass = classes.value.find(c => c.class_id === s.class_id);
+          return studentClass && studentClass.grade.toString() === bulkFilters.grade;
+        });
       }
       
       if (bulkFilters.class_id) {
-        result = result.filter(s => s.school_class?.name === bulkFilters.class_id);
+        result = result.filter(s => s.class_id === bulkFilters.class_id);
       }
       
-      return result.sort((a, b) => a.name.localeCompare(b.name, 'ja'));
+      // Sort by student_number (ascending)
+      return result.sort((a, b) => {
+        const aNum = parseInt(a.student_number) || 0;
+        const bNum = parseInt(b.student_number) || 0;
+        return aNum - bNum;
+      });
     });
     
     const selectedStudents = computed(() => {
@@ -773,7 +871,9 @@ export default {
       searchResults.value = students.value
         .filter(student => 
           student.name.toLowerCase().includes(query) ||
-          student.student_number.toLowerCase().includes(query)
+          student.name_kana.toLowerCase().includes(query) ||
+          String(student.student_number).includes(query) ||
+          (student.student_id && student.student_id.toLowerCase().includes(query))
         )
         .slice(0, 10);
     };
@@ -799,6 +899,52 @@ export default {
         selectedStudentIds.value = [];
       } else {
         selectedStudentIds.value = bulkStudents.value.map(s => s.id);
+        // Initialize bulk measurements for all selected students
+        initializeBulkMeasurements();
+      }
+    };
+    
+    const toggleStudentSelection = (studentId) => {
+      const index = selectedStudentIds.value.indexOf(studentId);
+      if (index > -1) {
+        selectedStudentIds.value.splice(index, 1);
+        // Remove from bulk measurements
+        delete bulkMeasurements[studentId];
+      } else {
+        selectedStudentIds.value.push(studentId);
+        // Initialize measurement for this student
+        initializeBulkMeasurement(studentId);
+      }
+    };
+    
+    const initializeBulkMeasurements = () => {
+      selectedStudentIds.value.forEach(id => {
+        initializeBulkMeasurement(id);
+      });
+    };
+    
+    const initializeBulkMeasurement = (studentId) => {
+      if (!bulkMeasurements[studentId]) {
+        bulkMeasurements[studentId] = {
+          height: '',
+          weight: '',
+          bmi: null
+        };
+      }
+    };
+    
+    const calculateBulkBMI = (studentId) => {
+      const measurement = bulkMeasurements[studentId];
+      if (!measurement) return;
+      
+      const height = parseFloat(measurement.height);
+      const weight = parseFloat(measurement.weight);
+      
+      if (height && weight) {
+        const heightInMeters = height / 100;
+        measurement.bmi = (weight / (heightInMeters * heightInMeters)).toFixed(1);
+      } else {
+        measurement.bmi = null;
       }
     };
     
@@ -828,6 +974,65 @@ export default {
         month: 'numeric',
         day: 'numeric'
       });
+    };
+    
+    const getClassName = (student) => {
+      if (!student.class_id) return '未設定';
+      const schoolClass = classes.value.find(c => c.class_id === student.class_id);
+      return schoolClass ? schoolClass.class_name : '未設定';
+    };
+    
+    const getClassGrade = (student) => {
+      if (!student.class_id) return '?';
+      const schoolClass = classes.value.find(c => c.class_id === student.class_id);
+      return schoolClass ? schoolClass.grade : '?';
+    };
+    
+    // Focus management for individual mode
+    const focusNextField = (currentField) => {
+      if (currentField === 'heightInput' && weightInput.value) {
+        // Height -> Weight
+        weightInput.value.$el.querySelector('input').focus();
+      } else if (currentField === 'weightInput' && notesInput.value) {
+        // Weight -> Notes
+        notesInput.value.$el.querySelector('textarea').focus();
+      }
+    };
+    
+    // Bulk input refs management
+    const setBulkInputRef = (el, studentId, fieldType) => {
+      if (el) {
+        if (!bulkInputRefs[studentId]) {
+          bulkInputRefs[studentId] = {};
+        }
+        bulkInputRefs[studentId][fieldType] = el;
+      }
+    };
+    
+    // Focus management for bulk mode
+    const focusBulkNextField = (currentStudentId, currentField) => {
+      const studentIds = selectedStudentIds.value;
+      const currentIndex = studentIds.indexOf(currentStudentId);
+      
+      if (currentField === 'height') {
+        // Height -> Weight (same student)
+        const weightRef = bulkInputRefs[currentStudentId]?.weight;
+        if (weightRef) {
+          weightRef.$el.querySelector('input').focus();
+        }
+      } else if (currentField === 'weight') {
+        // Weight -> next student's Height, or Notes if last student
+        if (currentIndex < studentIds.length - 1) {
+          const nextStudentId = studentIds[currentIndex + 1];
+          const nextHeightRef = bulkInputRefs[nextStudentId]?.height;
+          if (nextHeightRef) {
+            nextHeightRef.$el.querySelector('input').focus();
+          }
+        } else if (notesInput.value) {
+          // Last student's weight -> Notes
+          notesInput.value.$el.querySelector('textarea').focus();
+        }
+      }
     };
     
     const getBMICategory = (bmi) => {
@@ -874,15 +1079,11 @@ export default {
           return false;
         }
         
-        if (!form.height) {
-          errors.value.height = '身長は必須です';
-        } else if (parseFloat(form.height) < 50 || parseFloat(form.height) > 250) {
-          errors.value.height = '身長は50-250cmの範囲で入力してください';
+        if (form.height && (parseFloat(form.height) < 50 || parseFloat(form.height) > 300)) {
+          errors.value.height = '身長は50-300cmの範囲で入力してください';
         }
         
-        if (!form.weight) {
-          errors.value.weight = '体重は必須です';
-        } else if (parseFloat(form.weight) < 10 || parseFloat(form.weight) > 200) {
+        if (form.weight && (parseFloat(form.weight) < 10 || parseFloat(form.weight) > 200)) {
           errors.value.weight = '体重は10-200kgの範囲で入力してください';
         }
       } else {
@@ -931,11 +1132,9 @@ export default {
           // Individual record creation
           const recordData = {
             student_id: selectedStudent.value.id,
-            measured_date: form.measured_date,
-            academic_year: parseInt(form.academic_year),
-            height: parseFloat(form.height),
-            weight: parseFloat(form.weight),
-            bmi: parseFloat(calculatedBMI.value),
+            year: parseInt(form.academic_year), // academic_year → year
+            height: form.height ? parseFloat(form.height) : null,
+            weight: form.weight ? parseFloat(form.weight) : null,
             notes: form.notes || null
           };
           
@@ -949,23 +1148,24 @@ export default {
           
           router.push(`/health-records/${newRecord.id}`);
         } else {
-          // Bulk record creation
-          const recordsData = selectedStudentIds.value.map(studentId => ({
-            student_id: studentId,
-            measured_date: form.measured_date,
-            academic_year: parseInt(form.academic_year),
-            height: null, // To be filled later
-            weight: null, // To be filled later
-            bmi: null, // To be calculated later
-            notes: form.notes || null
-          }));
+          // Bulk record creation with measurements
+          const recordsData = selectedStudentIds.value.map(studentId => {
+            const measurement = bulkMeasurements[studentId] || {};
+            return {
+              student_id: studentId,
+              year: parseInt(form.academic_year), // academic_year → year
+              height: measurement.height ? parseFloat(measurement.height) : null,
+              weight: measurement.weight ? parseFloat(measurement.weight) : null,
+              notes: form.notes || null
+            };
+          });
           
-          await healthRecordStore.createBulkHealthRecords(recordsData);
+          const result = await healthRecordStore.createBulkHealthRecords(recordsData);
           
           notificationStore.addNotification({
             type: 'success',
-            title: '一括記録作成完了',
-            message: `${selectedStudentIds.value.length}名の健康記録を作成しました`
+            title: '一括記録処理完了',
+            message: `${selectedStudentIds.value.length}名の健康記録を処理しました`
           });
           
           router.push('/health-records');
@@ -991,11 +1191,32 @@ export default {
       updateBulkSelection();
     });
     
+    // Watch selectedStudentIds to initialize/cleanup bulk measurements
+    watch(selectedStudentIds, (newIds, oldIds) => {
+      if (selectionMethod.value === 'bulk') {
+        // Initialize measurements for newly added students
+        newIds.forEach(id => {
+          if (!bulkMeasurements[id]) {
+            initializeBulkMeasurement(id);
+          }
+        });
+        
+        // Clean up measurements for removed students
+        if (oldIds) {
+          oldIds.forEach(id => {
+            if (!newIds.includes(id) && bulkMeasurements[id]) {
+              delete bulkMeasurements[id];
+            }
+          });
+        }
+      }
+    });
+    
     // Lifecycle
     onMounted(async () => {
       try {
         await Promise.all([
-          studentStore.fetchStudents(),
+          studentStore.fetchAllStudents(), // 全件取得
           classStore.fetchClasses(),
           healthRecordStore.fetchHealthRecords()
         ]);
@@ -1035,6 +1256,7 @@ export default {
       searchResults,
       form,
       bulkFilters,
+      bulkMeasurements,
       errors,
       academicYearOptions,
       filteredClasses,
@@ -1046,17 +1268,29 @@ export default {
       heightGrowth,
       weightGrowth,
       recentRecords,
+      heightInput,
+      weightInput,
+      notesInput,
       searchStudents,
       selectStudent,
       clearSelectedStudent,
       updateBulkSelection,
       toggleAllStudents,
+      toggleStudentSelection,
+      initializeBulkMeasurements,
+      initializeBulkMeasurement,
+      calculateBulkBMI,
       calculateBMI,
       calculateAge,
       formatDate,
+      focusNextField,
+      setBulkInputRef,
+      focusBulkNextField,
       getBMICategory,
       getBMIVariant,
       getBMIColor,
+      getClassName,
+      getClassGrade,
       resetForm,
       handleSubmit
     };

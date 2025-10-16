@@ -17,7 +17,7 @@ class HealthRecordController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
-            $query = HealthRecord::with(['student']);
+            $query = HealthRecord::with(['student.schoolClass']);
 
             // 生徒IDフィルタ
             if ($request->has('student_id') && !empty($request->student_id)) {
@@ -29,37 +29,47 @@ class HealthRecordController extends Controller
                 $query->where('year', $request->year);
             }
 
+            // 学年フィルタ
+            if ($request->has('grade') && !empty($request->grade)) {
+                $query->whereHas('student', function ($q) use ($request) {
+                    $q->where('grade_id', $request->grade);
+                });
+            }
+
+            // クラスフィルタ
+            if ($request->has('class_id') && !empty($request->class_id)) {
+                $query->whereHas('student', function ($q) use ($request) {
+                    $q->where('class_id', $request->class_id);
+                });
+            }
+
             // ソート
-            $sortBy = $request->get('sort_by', 'measured_date');
+            $sortBy = $request->get('sort_by', 'created_at');
             $sortOrder = $request->get('sort_order', 'desc');
+            
+            // measured_date は created_at にマッピング
+            if ($sortBy === 'measured_date') {
+                $sortBy = 'created_at';
+            }
+            
             $query->orderBy($sortBy, $sortOrder);
 
-            // ページネーション
-            $perPage = $request->get('per_page', 15);
-            $healthRecords = $query->paginate($perPage);
-
-            // シンプルなレスポンスに変換
-            $simplifiedData = $healthRecords->getCollection()->map(function ($record) {
-                return [
-                    'id' => $record->id,
-                    'student' => [
-                        'name' => $record->student->name ?? '不明',
-                        'student_number' => $record->student->student_number ?? '未設定',
-                        'class_id' => $record->student->class_id ?? '未設定',
-                        'grade_id' => $record->student->grade_id ?? '?',
-                    ],
-                    'measured_date' => $record->measured_date,
-                    'height' => $record->height,
-                    'weight' => $record->weight,
-                    'bmi' => $record->bmi ? round($record->bmi, 1) : null,
-                    'created_at' => $record->created_at->format('Y-m-d'),
-                ];
-            });
+            // ページネーションまたは全件取得
+            $perPage = $request->get('per_page', 1000);
+            
+            if ($perPage > 500) {
+                // 大量データの場合は全件取得
+                $healthRecords = $query->get();
+                $data = $healthRecords;
+            } else {
+                $healthRecords = $query->paginate($perPage);
+                $data = $healthRecords->items();
+            }
 
             return response()->json([
                 'success' => true,
-                'data' => $simplifiedData,
-                'pagination' => [
+                'data' => $data,
+                'pagination' => $perPage > 500 ? null : [
                     'current_page' => $healthRecords->currentPage(),
                     'last_page' => $healthRecords->lastPage(),
                     'per_page' => $healthRecords->perPage(),
@@ -326,12 +336,29 @@ class HealthRecordController extends Controller
             $createdRecords = [];
             foreach ($request->records as $recordData) {
                 // BMIを自動計算
-                if ($recordData['height'] && $recordData['weight']) {
+                if (isset($recordData['height']) && isset($recordData['weight']) && 
+                    $recordData['height'] && $recordData['weight']) {
                     $heightInM = $recordData['height'] / 100;
                     $recordData['bmi'] = round($recordData['weight'] / ($heightInM * $heightInM), 1);
                 }
 
-                $record = HealthRecord::create($recordData);
+                // 既存のレコードをチェック（student_id と year の組み合わせでユニーク）
+                $existingRecord = HealthRecord::where('student_id', $recordData['student_id'])
+                                             ->where('year', $recordData['year'])
+                                             ->first();
+
+                if ($existingRecord) {
+                    // 既存レコードを更新（空でないフィールドのみ）
+                    $updateData = array_filter($recordData, function($value) {
+                        return $value !== null && $value !== '';
+                    });
+                    $existingRecord->update($updateData);
+                    $record = $existingRecord;
+                } else {
+                    // 新しいレコードを作成
+                    $record = HealthRecord::create($recordData);
+                }
+                
                 $record->load(['student.schoolClass']);
                 $createdRecords[] = $record;
             }
@@ -339,7 +366,7 @@ class HealthRecordController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => $createdRecords,
-                'message' => count($createdRecords) . '件の健康記録を一括登録しました'
+                'message' => count($createdRecords) . '件の健康記録を一括処理しました'
             ], 201);
 
         } catch (\Illuminate\Validation\ValidationException $e) {

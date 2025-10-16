@@ -31,7 +31,7 @@
             </div>
             <div class="mt-2 flex items-center text-sm text-gray-500">
               <UsersIcon class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
-              {{ schoolClass?.students_count || 0 }}名の学生
+              {{ studentsCount }}名の学生
             </div>
             <div class="mt-2 flex items-center text-sm text-gray-500">
               <BaseBadge :variant="schoolClass?.is_active ? 'success' : 'secondary'">
@@ -102,18 +102,18 @@
                 <dt class="text-sm font-medium text-gray-500">現在の学生数</dt>
                 <dd class="mt-1 flex items-center">
                   <span class="text-2xl font-bold text-blue-600">
-                    {{ schoolClass.students_count || 0 }}
+                    {{ studentsCount }}
                   </span>
                   <span class="ml-1 text-sm text-gray-500">名</span>
                   <div v-if="schoolClass.capacity" class="ml-3">
                     <div class="w-32 bg-gray-200 rounded-full h-2">
                       <div
                         class="bg-blue-600 h-2 rounded-full"
-                        :style="{ width: `${Math.min(100, (schoolClass.students_count / schoolClass.capacity) * 100)}%` }"
+                        :style="{ width: `${Math.min(100, (studentsCount / schoolClass.capacity) * 100)}%` }"
                       ></div>
                     </div>
                     <p class="mt-1 text-xs text-gray-500">
-                      {{ Math.round((schoolClass.students_count / schoolClass.capacity) * 100) }}% 充足率
+                      {{ Math.round((studentsCount / schoolClass.capacity) * 100) }}% 充足率
                     </p>
                   </div>
                 </dd>
@@ -571,7 +571,11 @@ export default {
     
     // Computed
     const schoolClass = computed(() => classStore.currentClass);
-    const students = computed(() => studentStore.students);
+    const students = computed(() => {
+      // クラス詳細に含まれる学生リストを使用
+      return schoolClass.value?.students || [];
+    });
+    const studentsCount = computed(() => students.value.length);
     const recentActivities = computed(() => [
       // Placeholder for recent activities - would come from API
     ]);
@@ -721,11 +725,10 @@ export default {
       const classId = route.params.id;
       
       try {
-        await Promise.all([
-          classStore.fetchClass(classId),
-          studentStore.fetchStudents({ class_id: classId })
-        ]);
+        // クラス詳細を取得（students リレーション含む）
+        await classStore.fetchClass(classId);
       } catch (error) {
+        console.error('クラス情報取得エラー:', error);
         notificationStore.addNotification({
           type: 'danger',
           title: 'データ取得エラー',
@@ -743,6 +746,7 @@ export default {
       statusFilter,
       schoolClass,
       students,
+      studentsCount,
       filteredStudents,
       classStats,
       recentActivities,

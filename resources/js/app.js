@@ -11,7 +11,7 @@ import App from "./App.vue";
 import router from "./router/index.js";
 
 // Axios configuration
-axios.defaults.baseURL = "http://localhost:8000/api";
+axios.defaults.baseURL = "http://localhost:8003/api";
 axios.defaults.headers.common["Accept"] = "application/json";
 axios.defaults.headers.common["Content-Type"] = "application/json";
 axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";

@@ -68,8 +68,12 @@ Route::group(['prefix' => 'v1'], function () {
             ->name('grade');
         Route::get('class/{classId}', [StatisticsController::class, 'classStats'])
             ->name('class');
-        Route::get('health', [StatisticsController::class, 'healthStats'])
+        Route::get('health-records', [StatisticsController::class, 'healthStats'])
             ->name('health');
+        Route::get('grade-averages', [StatisticsController::class, 'gradeAverages'])
+            ->name('grade-averages');
+        Route::get('class-averages', [StatisticsController::class, 'classAverages'])
+            ->name('class-averages');
     });
     
 });

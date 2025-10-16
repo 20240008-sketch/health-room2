@@ -326,6 +326,87 @@
               </div>
             </div>
           </BaseCard>
+
+          <!-- Class and Grade Averages -->
+          <BaseCard>
+            <template #header>
+              <h2 class="text-lg font-medium text-gray-900">
+                統計分析
+              </h2>
+            </template>
+
+            <div class="space-y-6">
+              <!-- Grade Averages -->
+              <div>
+                <h3 class="text-sm font-medium text-gray-900 mb-3">学年平均</h3>
+                <div class="space-y-3">
+                  <div
+                    v-for="gradeAvg in gradeAverages"
+                    :key="gradeAvg.grade"
+                    class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  >
+                    <div class="flex items-center space-x-3">
+                      <span class="text-sm font-medium text-gray-900">
+                        {{ gradeAvg.grade }}年生
+                      </span>
+                      <span class="text-xs text-gray-500">
+                        ({{ gradeAvg.student_count }}名)
+                      </span>
+                    </div>
+                    <div class="flex items-center space-x-4 text-sm">
+                      <div class="text-center">
+                        <div class="text-gray-500">身長</div>
+                        <div class="font-medium">{{ gradeAvg.avg_height }}cm</div>
+                      </div>
+                      <div class="text-center">
+                        <div class="text-gray-500">体重</div>
+                        <div class="font-medium">{{ gradeAvg.avg_weight }}kg</div>
+                      </div>
+                      <div class="text-center">
+                        <div class="text-gray-500">BMI</div>
+                        <div class="font-medium">{{ gradeAvg.avg_bmi }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Class Averages -->
+              <div>
+                <h3 class="text-sm font-medium text-gray-900 mb-3">クラス平均</h3>
+                <div class="space-y-2 max-h-64 overflow-y-auto">
+                  <div
+                    v-for="classAvg in classAverages"
+                    :key="classAvg.class_id"
+                    class="flex items-center justify-between p-2 hover:bg-gray-50 rounded"
+                  >
+                    <div class="flex items-center space-x-2">
+                      <span class="text-sm font-medium text-gray-900">
+                        {{ classAvg.class_name }}
+                      </span>
+                      <span class="text-xs text-gray-500">
+                        ({{ classAvg.student_count }}名)
+                      </span>
+                    </div>
+                    <div class="flex items-center space-x-3 text-xs">
+                      <div class="text-center">
+                        <div class="text-gray-500">身長</div>
+                        <div class="font-medium">{{ classAvg.avg_height }}cm</div>
+                      </div>
+                      <div class="text-center">
+                        <div class="text-gray-500">体重</div>
+                        <div class="font-medium">{{ classAvg.avg_weight }}kg</div>
+                      </div>
+                      <div class="text-center">
+                        <div class="text-gray-500">BMI</div>
+                        <div class="font-medium">{{ classAvg.avg_bmi }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </BaseCard>
         </div>
       </div>
     </div>
@@ -424,8 +505,15 @@ export default {
     const currentDate = ref(new Date());
     
     // Computed
-    const statistics = computed(() => statisticsStore.dashboardStats);
+    const statistics = computed(() => ({
+      totalStudents: statisticsStore.totalStudents,
+      totalClasses: statisticsStore.totalClasses,
+      totalHealthRecords: statisticsStore.totalHealthRecords,
+      recentHealthRecords: statisticsStore.recentHealthRecords
+    }));
     const recentHealthRecords = computed(() => healthRecordStore.recentRecords);
+    const gradeAverages = computed(() => statisticsStore.gradeAverages);
+    const classAverages = computed(() => statisticsStore.classAverages);
     const bmiDistribution = computed(() => {
       const dist = statisticsStore.bmiDistribution;
       const total = dist.underweight + dist.normal + dist.overweight + dist.obese;
@@ -501,9 +589,11 @@ export default {
       
       try {
         await Promise.all([
-          statisticsStore.fetchDashboardStats(),
+          statisticsStore.fetchSystemStats(),
           healthRecordStore.fetchRecentRecords(),
-          statisticsStore.fetchBmiDistribution()
+          statisticsStore.fetchBmiDistribution(),
+          statisticsStore.fetchGradeAverages(),
+          statisticsStore.fetchClassAverages()
         ]);
         
         notificationStore.showSuccess('ダッシュボードのデータを更新しました');
@@ -534,6 +624,8 @@ export default {
       currentDate,
       statistics,
       recentHealthRecords,
+      gradeAverages,
+      classAverages,
       bmiDistribution,
       formatDate,
       formatDateTime,

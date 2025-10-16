@@ -247,4 +247,97 @@ class StatisticsController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * 学年別平均データを取得
+     */
+    public function gradeAverages(): JsonResponse
+    {
+        try {
+            $gradeAverages = HealthRecord::join('students', 'health_records.student_id', '=', 'students.id')
+                ->selectRaw('
+                    students.grade_id,
+                    COUNT(*) as count,
+                    AVG(health_records.height) as avg_height,
+                    AVG(health_records.weight) as avg_weight,
+                    AVG(health_records.weight / (health_records.height/100 * health_records.height/100)) as avg_bmi
+                ')
+                ->where('health_records.year', now()->year)
+                ->whereNotNull('students.grade_id')
+                ->groupBy('students.grade_id')
+                ->orderBy('students.grade_id')
+                ->get()
+                ->map(function($item) {
+                    return [
+                        'grade' => $item->grade_id,
+                        'count' => $item->count,
+                        'avg_height' => $item->avg_height ? round($item->avg_height, 1) : null,
+                        'avg_weight' => $item->avg_weight ? round($item->avg_weight, 1) : null,
+                        'avg_bmi' => $item->avg_bmi ? round($item->avg_bmi, 1) : null,
+                    ];
+                });
+
+            return response()->json([
+                'success' => true,
+                'data' => $gradeAverages,
+                'message' => '学年別平均データを取得しました'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => '学年別平均データの取得に失敗しました',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * クラス別平均データを取得
+     */
+    public function classAverages(): JsonResponse
+    {
+        try {
+            $classAverages = HealthRecord::join('students', 'health_records.student_id', '=', 'students.id')
+                ->join('school_classes', 'students.class_id', '=', 'school_classes.class_id')
+                ->selectRaw('
+                    school_classes.id as class_id,
+                    school_classes.grade,
+                    school_classes.class_name,
+                    COUNT(*) as count,
+                    AVG(health_records.height) as avg_height,
+                    AVG(health_records.weight) as avg_weight,
+                    AVG(health_records.weight / (health_records.height/100 * health_records.height/100)) as avg_bmi
+                ')
+                ->where('health_records.year', now()->year)
+                ->groupBy('school_classes.id', 'school_classes.grade', 'school_classes.class_name')
+                ->orderBy('school_classes.grade')
+                ->orderBy('school_classes.class_name')
+                ->get()
+                ->map(function($item) {
+                    return [
+                        'class_id' => $item->class_id,
+                        'grade' => $item->grade,
+                        'class_name' => $item->class_name,
+                        'count' => $item->count,
+                        'avg_height' => $item->avg_height ? round($item->avg_height, 1) : null,
+                        'avg_weight' => $item->avg_weight ? round($item->avg_weight, 1) : null,
+                        'avg_bmi' => $item->avg_bmi ? round($item->avg_bmi, 1) : null,
+                    ];
+                });
+
+            return response()->json([
+                'success' => true,
+                'data' => $classAverages,
+                'message' => 'クラス別平均データを取得しました'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'クラス別平均データの取得に失敗しました',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

@@ -9,11 +9,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class HealthRecord extends Model
 {
     use HasFactory;
+    
     protected $fillable = [
         'student_id',
         'year',
         'height',
-        'weight'
+        'weight',
+        'vision_left',
+        'vision_right',
+        'hearing_left',
+        'hearing_right'
     ];
 
     protected $casts = [
@@ -21,7 +26,11 @@ class HealthRecord extends Model
         'year' => 'integer',
         'height' => 'decimal:2',
         'weight' => 'decimal:2',
+        'vision_left' => 'decimal:2',
+        'vision_right' => 'decimal:2',
     ];
+
+    protected $appends = ['bmi', 'academic_year', 'measured_date'];
 
     /**
      * Get the student that owns the health record.
@@ -41,5 +50,21 @@ class HealthRecord extends Model
             return round($this->weight / ($heightM * $heightM), 2);
         }
         return null;
+    }
+
+    /**
+     * Get the academic year (alias for year).
+     */
+    public function getAcademicYearAttribute(): int
+    {
+        return $this->year;
+    }
+
+    /**
+     * Get the measured date (use created_at as fallback).
+     */
+    public function getMeasuredDateAttribute(): string
+    {
+        return $this->created_at ? $this->created_at->format('Y-m-d') : '';
     }
 }

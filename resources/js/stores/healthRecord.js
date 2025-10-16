@@ -103,20 +103,25 @@ export const useHealthRecordStore = defineStore('healthRecord', () => {
   });
 
   // Actions
-  const fetchHealthRecords = async (page = 1) => {
+  const fetchHealthRecords = async (params = {}) => {
     loading.value = true;
     try {
-      const params = {
-        page,
-        per_page: pagination.value.per_page,
-        ...filters.value
+      const requestParams = {
+        per_page: 1000, // すべての健康記録を取得
+        ...params
       };
 
-      const response = await axios.get('/v1/health-records', { params });
+      console.log('Fetching health records with params:', requestParams);
+      const response = await axios.get('/v1/health-records', { params: requestParams });
+      
+      console.log('Health records response:', response.data);
       
       if (response.data.success) {
         // 新しいシンプルなレスポンス形式に対応
         healthRecords.value = response.data.data || [];
+        
+        console.log('Health records loaded:', healthRecords.value.length);
+        console.log('First record:', healthRecords.value[0]);
         
         // ページネーション情報を更新
         if (response.data.pagination) {
@@ -130,6 +135,7 @@ export const useHealthRecordStore = defineStore('healthRecord', () => {
       }
     } catch (error) {
       console.error('健康記録一覧取得エラー:', error);
+      console.error('Error response:', error.response?.data);
       notificationStore.showError('健康記録一覧の取得に失敗しました');
     } finally {
       loading.value = false;
@@ -286,7 +292,7 @@ export const useHealthRecordStore = defineStore('healthRecord', () => {
       });
       
       if (response.data.success) {
-        notificationStore.showSuccess(`${recordsData.length}件の健康記録を一括登録しました`);
+        notificationStore.showSuccess(response.data.message || `${recordsData.length}件の健康記録を一括処理しました`);
         await fetchHealthRecords(); // リストを更新
         return response.data.data;
       }
