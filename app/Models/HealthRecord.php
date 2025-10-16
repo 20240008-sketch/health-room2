@@ -17,6 +17,8 @@ class HealthRecord extends Model
         'weight',
         'vision_left',
         'vision_right',
+        'vision_left_corrected',
+        'vision_right_corrected',
         'hearing_left',
         'hearing_right'
     ];
@@ -28,6 +30,8 @@ class HealthRecord extends Model
         'weight' => 'decimal:2',
         'vision_left' => 'decimal:2',
         'vision_right' => 'decimal:2',
+        'vision_left_corrected' => 'decimal:2',
+        'vision_right_corrected' => 'decimal:2',
     ];
 
     protected $appends = ['bmi', 'academic_year', 'measured_date'];

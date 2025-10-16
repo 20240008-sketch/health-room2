@@ -263,6 +263,37 @@
             </template>
 
             <div class="space-y-6">
+              <!-- Measurement Items Selection -->
+              <div>
+                <label class="text-base font-medium text-gray-900 mb-3 block">測定項目を選択</label>
+                <div class="space-y-3">
+                  <label class="flex items-center p-3 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      v-model="measurementItems.height"
+                      class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <span class="ml-3 text-sm font-medium text-gray-700">身長 (cm)</span>
+                  </label>
+                  <label class="flex items-center p-3 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      v-model="measurementItems.weight"
+                      class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <span class="ml-3 text-sm font-medium text-gray-700">体重 (kg)</span>
+                  </label>
+                  <label class="flex items-center p-3 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      v-model="measurementItems.vision"
+                      class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <span class="ml-3 text-sm font-medium text-gray-700">視力</span>
+                  </label>
+                </div>
+              </div>
+
               <!-- Common Fields -->
               <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <!-- Measured Date -->
@@ -301,14 +332,14 @@
               <div v-if="selectionMethod === 'individual'" class="space-y-6">
                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                   <!-- Height -->
-                  <div>
+                  <div v-if="measurementItems.height">
                     <BaseInput
                       ref="heightInput"
                       type="number"
                       step="0.1"
                       v-model="form.height"
                       label="身長 (cm)"
-                      required
+                      :required="measurementItems.height"
                       placeholder="150.5"
                       :error="errors.height"
                       @input="calculateBMI"
@@ -317,24 +348,83 @@
                   </div>
 
                   <!-- Weight -->
-                  <div>
+                  <div v-if="measurementItems.weight">
                     <BaseInput
                       ref="weightInput"
                       type="number"
                       step="0.1"
                       v-model="form.weight"
                       label="体重 (kg)"
-                      required
+                      :required="measurementItems.weight"
                       placeholder="45.5"
                       :error="errors.weight"
                       @input="calculateBMI"
                       @keydown.enter.prevent="focusNextField('weightInput')"
                     />
                   </div>
+
+                  <!-- Vision -->
+                  <div v-if="measurementItems.vision" class="sm:col-span-2">
+                    <div class="space-y-4">
+                      <!-- Naked Vision -->
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">裸眼視力（任意）</label>
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                          <BaseInput
+                            ref="visionLeftInput"
+                            type="number"
+                            step="0.1"
+                            v-model="form.vision_left"
+                            label="左"
+                            placeholder="1.0"
+                            :error="errors.vision_left"
+                            @keydown.enter.prevent="focusNextField('visionLeftInput')"
+                          />
+                          <BaseInput
+                            ref="visionRightInput"
+                            type="number"
+                            step="0.1"
+                            v-model="form.vision_right"
+                            label="右"
+                            placeholder="1.0"
+                            :error="errors.vision_right"
+                            @keydown.enter.prevent="focusNextField('visionRightInput')"
+                          />
+                        </div>
+                      </div>
+                      
+                      <!-- Corrected Vision -->
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">矯正視力（任意）</label>
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                          <BaseInput
+                            ref="visionLeftCorrectedInput"
+                            type="number"
+                            step="0.1"
+                            v-model="form.vision_left_corrected"
+                            label="左"
+                            placeholder="1.0"
+                            :error="errors.vision_left_corrected"
+                            @keydown.enter.prevent="focusNextField('visionLeftCorrectedInput')"
+                          />
+                          <BaseInput
+                            ref="visionRightCorrectedInput"
+                            type="number"
+                            step="0.1"
+                            v-model="form.vision_right_corrected"
+                            label="右"
+                            placeholder="1.0"
+                            :error="errors.vision_right_corrected"
+                            @keydown.enter.prevent="focusNextField('visionRightCorrectedInput')"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <!-- BMI Display -->
-                <div v-if="form.height && form.weight" class="bg-gray-50 rounded-lg p-4">
+                <div v-if="measurementItems.height && measurementItems.weight && form.height && form.weight" class="bg-gray-50 rounded-lg p-4">
                   <div class="flex items-center justify-between">
                     <div>
                       <span class="text-sm font-medium text-gray-700">BMI: </span>
@@ -352,17 +442,17 @@
                 </div>
 
                 <!-- Growth Indicators -->
-                <div v-if="selectedStudent?.latest_health_record && form.height && form.weight" class="bg-blue-50 rounded-lg p-4">
+                <div v-if="selectedStudent?.latest_health_record && measurementItems.height && measurementItems.weight && form.height && form.weight" class="bg-blue-50 rounded-lg p-4">
                   <h4 class="text-sm font-medium text-gray-700 mb-2">成長記録</h4>
                   <div class="grid grid-cols-2 gap-4">
-                    <div class="flex items-center">
+                    <div class="flex items-center" v-if="measurementItems.height">
                       <ArrowUpIcon v-if="heightGrowth > 0" class="h-4 w-4 text-green-500 mr-2" />
                       <ArrowDownIcon v-else-if="heightGrowth < 0" class="h-4 w-4 text-red-500 mr-2" />
                       <span class="text-sm">
                         身長: {{ heightGrowth > 0 ? '+' : '' }}{{ heightGrowth }}cm
                       </span>
                     </div>
-                    <div class="flex items-center">
+                    <div class="flex items-center" v-if="measurementItems.weight">
                       <ArrowUpIcon v-if="weightGrowth > 0" class="h-4 w-4 text-green-500 mr-2" />
                       <ArrowDownIcon v-else-if="weightGrowth < 0" class="h-4 w-4 text-red-500 mr-2" />
                       <span class="text-sm">
@@ -406,7 +496,7 @@
                     
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <!-- Height -->
-                      <div>
+                      <div v-if="measurementItems.height">
                         <BaseInput
                           :ref="el => setBulkInputRef(el, student.id, 'height')"
                           type="number"
@@ -420,7 +510,7 @@
                       </div>
 
                       <!-- Weight -->
-                      <div>
+                      <div v-if="measurementItems.weight">
                         <BaseInput
                           :ref="el => setBulkInputRef(el, student.id, 'weight')"
                           type="number"
@@ -432,10 +522,60 @@
                           @keydown.enter.prevent="focusBulkNextField(student.id, 'weight')"
                         />
                       </div>
+
+                      <!-- Vision - Naked -->
+                      <div v-if="measurementItems.vision" class="sm:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">裸眼視力</label>
+                        <div class="grid grid-cols-2 gap-4">
+                          <BaseInput
+                            :ref="el => setBulkInputRef(el, student.id, 'vision_left')"
+                            type="number"
+                            step="0.1"
+                            v-model="bulkMeasurements[student.id].vision_left"
+                            label="左"
+                            placeholder="1.0"
+                            @keydown.enter.prevent="focusBulkNextField(student.id, 'vision_left')"
+                          />
+                          <BaseInput
+                            :ref="el => setBulkInputRef(el, student.id, 'vision_right')"
+                            type="number"
+                            step="0.1"
+                            v-model="bulkMeasurements[student.id].vision_right"
+                            label="右"
+                            placeholder="1.0"
+                            @keydown.enter.prevent="focusBulkNextField(student.id, 'vision_right')"
+                          />
+                        </div>
+                      </div>
+
+                      <!-- Vision - Corrected -->
+                      <div v-if="measurementItems.vision" class="sm:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">矯正視力（必要な場合のみ）</label>
+                        <div class="grid grid-cols-2 gap-4">
+                          <BaseInput
+                            :ref="el => setBulkInputRef(el, student.id, 'vision_left_corrected')"
+                            type="number"
+                            step="0.1"
+                            v-model="bulkMeasurements[student.id].vision_left_corrected"
+                            label="左"
+                            placeholder="1.0"
+                            @keydown.enter.prevent="focusBulkNextField(student.id, 'vision_left_corrected')"
+                          />
+                          <BaseInput
+                            :ref="el => setBulkInputRef(el, student.id, 'vision_right_corrected')"
+                            type="number"
+                            step="0.1"
+                            v-model="bulkMeasurements[student.id].vision_right_corrected"
+                            label="右"
+                            placeholder="1.0"
+                            @keydown.enter.prevent="focusBulkNextField(student.id, 'vision_right_corrected')"
+                          />
+                        </div>
+                      </div>
                     </div>
                     
                     <!-- BMI Display for this student -->
-                    <div v-if="bulkMeasurements[student.id].height && bulkMeasurements[student.id].weight" class="mt-3 bg-gray-50 rounded-lg p-3">
+                    <div v-if="measurementItems.height && measurementItems.weight && bulkMeasurements[student.id].height && bulkMeasurements[student.id].weight" class="mt-3 bg-gray-50 rounded-lg p-3">
                       <div class="flex items-center justify-between">
                         <div>
                           <span class="text-sm font-medium text-gray-700">BMI: </span>
@@ -737,12 +877,23 @@ export default {
     const selectedStudentIds = ref([]);
     const searchResults = ref([]);
     
+    // Measurement items selection
+    const measurementItems = reactive({
+      height: true,
+      weight: true,
+      vision: false
+    });
+    
     // Form data
     const form = reactive({
       measured_date: new Date().toISOString().split('T')[0],
       academic_year: new Date().getFullYear(),
       height: '',
       weight: '',
+      vision_left: '',
+      vision_right: '',
+      vision_left_corrected: '',
+      vision_right_corrected: '',
       notes: ''
     });
     
@@ -758,6 +909,10 @@ export default {
     // Refs for input fields
     const heightInput = ref(null);
     const weightInput = ref(null);
+    const visionLeftInput = ref(null);
+    const visionRightInput = ref(null);
+    const visionLeftCorrectedInput = ref(null);
+    const visionRightCorrectedInput = ref(null);
     const notesInput = ref(null);
     const bulkInputRefs = reactive({});
     
@@ -928,6 +1083,10 @@ export default {
         bulkMeasurements[studentId] = {
           height: '',
           weight: '',
+          vision_left: '',
+          vision_right: '',
+          vision_left_corrected: '',
+          vision_right_corrected: '',
           bmi: null
         };
       }
@@ -990,12 +1149,44 @@ export default {
     
     // Focus management for individual mode
     const focusNextField = (currentField) => {
-      if (currentField === 'heightInput' && weightInput.value) {
-        // Height -> Weight
-        weightInput.value.$el.querySelector('input').focus();
-      } else if (currentField === 'weightInput' && notesInput.value) {
-        // Weight -> Notes
-        notesInput.value.$el.querySelector('textarea').focus();
+      if (currentField === 'heightInput') {
+        // Height -> Weight or Vision Left
+        if (measurementItems.weight && weightInput.value) {
+          weightInput.value.$el.querySelector('input').focus();
+        } else if (measurementItems.vision && visionLeftInput.value) {
+          visionLeftInput.value.$el.querySelector('input').focus();
+        } else if (notesInput.value) {
+          notesInput.value.$el.querySelector('textarea').focus();
+        }
+      } else if (currentField === 'weightInput') {
+        // Weight -> Vision Left or Notes
+        if (measurementItems.vision && visionLeftInput.value) {
+          visionLeftInput.value.$el.querySelector('input').focus();
+        } else if (notesInput.value) {
+          notesInput.value.$el.querySelector('textarea').focus();
+        }
+      } else if (currentField === 'visionLeftInput') {
+        // Vision Left -> Vision Right
+        if (visionRightInput.value) {
+          visionRightInput.value.$el.querySelector('input').focus();
+        }
+      } else if (currentField === 'visionRightInput') {
+        // Vision Right -> Vision Left Corrected
+        if (visionLeftCorrectedInput.value) {
+          visionLeftCorrectedInput.value.$el.querySelector('input').focus();
+        } else if (notesInput.value) {
+          notesInput.value.$el.querySelector('textarea').focus();
+        }
+      } else if (currentField === 'visionLeftCorrectedInput') {
+        // Vision Left Corrected -> Vision Right Corrected
+        if (visionRightCorrectedInput.value) {
+          visionRightCorrectedInput.value.$el.querySelector('input').focus();
+        }
+      } else if (currentField === 'visionRightCorrectedInput') {
+        // Vision Right Corrected -> Notes
+        if (notesInput.value) {
+          notesInput.value.$el.querySelector('textarea').focus();
+        }
       }
     };
     
@@ -1015,23 +1206,93 @@ export default {
       const currentIndex = studentIds.indexOf(currentStudentId);
       
       if (currentField === 'height') {
-        // Height -> Weight (same student)
-        const weightRef = bulkInputRefs[currentStudentId]?.weight;
-        if (weightRef) {
-          weightRef.$el.querySelector('input').focus();
+        // Height -> Weight or Vision Left (same student)
+        if (measurementItems.weight) {
+          const weightRef = bulkInputRefs[currentStudentId]?.weight;
+          if (weightRef) {
+            weightRef.$el.querySelector('input').focus();
+            return;
+          }
         }
+        if (measurementItems.vision) {
+          const visionLeftRef = bulkInputRefs[currentStudentId]?.vision_left;
+          if (visionLeftRef) {
+            visionLeftRef.$el.querySelector('input').focus();
+            return;
+          }
+        }
+        // Move to next student if no other fields for current student
+        moveToNextStudent(currentIndex, studentIds);
       } else if (currentField === 'weight') {
-        // Weight -> next student's Height, or Notes if last student
-        if (currentIndex < studentIds.length - 1) {
-          const nextStudentId = studentIds[currentIndex + 1];
+        // Weight -> Vision Left (same student) or next student
+        if (measurementItems.vision) {
+          const visionLeftRef = bulkInputRefs[currentStudentId]?.vision_left;
+          if (visionLeftRef) {
+            visionLeftRef.$el.querySelector('input').focus();
+            return;
+          }
+        }
+        // Move to next student
+        moveToNextStudent(currentIndex, studentIds);
+      } else if (currentField === 'vision_left') {
+        // Vision Left -> Vision Right (same student)
+        const visionRightRef = bulkInputRefs[currentStudentId]?.vision_right;
+        if (visionRightRef) {
+          visionRightRef.$el.querySelector('input').focus();
+          return;
+        }
+      } else if (currentField === 'vision_right') {
+        // Vision Right -> Vision Left Corrected (same student)
+        const visionLeftCorrectedRef = bulkInputRefs[currentStudentId]?.vision_left_corrected;
+        if (visionLeftCorrectedRef) {
+          visionLeftCorrectedRef.$el.querySelector('input').focus();
+          return;
+        }
+        // Move to next student
+        moveToNextStudent(currentIndex, studentIds);
+      } else if (currentField === 'vision_left_corrected') {
+        // Vision Left Corrected -> Vision Right Corrected (same student)
+        const visionRightCorrectedRef = bulkInputRefs[currentStudentId]?.vision_right_corrected;
+        if (visionRightCorrectedRef) {
+          visionRightCorrectedRef.$el.querySelector('input').focus();
+          return;
+        }
+      } else if (currentField === 'vision_right_corrected') {
+        // Vision Right Corrected -> next student
+        moveToNextStudent(currentIndex, studentIds);
+      }
+    };
+    
+    // Helper function to move to next student's first field
+    const moveToNextStudent = (currentIndex, studentIds) => {
+      if (currentIndex < studentIds.length - 1) {
+        const nextStudentId = studentIds[currentIndex + 1];
+        
+        // Try to focus first available field for next student
+        if (measurementItems.height) {
           const nextHeightRef = bulkInputRefs[nextStudentId]?.height;
           if (nextHeightRef) {
             nextHeightRef.$el.querySelector('input').focus();
+            return;
           }
-        } else if (notesInput.value) {
-          // Last student's weight -> Notes
-          notesInput.value.$el.querySelector('textarea').focus();
         }
+        if (measurementItems.weight) {
+          const nextWeightRef = bulkInputRefs[nextStudentId]?.weight;
+          if (nextWeightRef) {
+            nextWeightRef.$el.querySelector('input').focus();
+            return;
+          }
+        }
+        if (measurementItems.vision) {
+          const nextVisionLeftRef = bulkInputRefs[nextStudentId]?.vision_left;
+          if (nextVisionLeftRef) {
+            nextVisionLeftRef.$el.querySelector('input').focus();
+            return;
+          }
+        }
+      } else if (notesInput.value) {
+        // Last student -> Notes
+        notesInput.value.$el.querySelector('textarea').focus();
       }
     };
     
@@ -1073,18 +1334,44 @@ export default {
         errors.value.academic_year = '年度を選択してください';
       }
       
+      // 少なくとも1つの測定項目が選択されているか確認
+      if (!measurementItems.height && !measurementItems.weight && !measurementItems.vision) {
+        notificationStore.showError('少なくとも1つの測定項目を選択してください');
+        return false;
+      }
+      
       if (selectionMethod.value === 'individual') {
         if (!selectedStudent.value) {
           errors.value.student = '学生を選択してください';
           return false;
         }
         
-        if (form.height && (parseFloat(form.height) < 50 || parseFloat(form.height) > 300)) {
-          errors.value.height = '身長は50-300cmの範囲で入力してください';
+        // 選択された項目のバリデーション
+        if (measurementItems.height && form.height) {
+          if (parseFloat(form.height) < 50 || parseFloat(form.height) > 300) {
+            errors.value.height = '身長は50-300cmの範囲で入力してください';
+          }
         }
         
-        if (form.weight && (parseFloat(form.weight) < 10 || parseFloat(form.weight) > 200)) {
-          errors.value.weight = '体重は10-200kgの範囲で入力してください';
+        if (measurementItems.weight && form.weight) {
+          if (parseFloat(form.weight) < 10 || parseFloat(form.weight) > 200) {
+            errors.value.weight = '体重は10-200kgの範囲で入力してください';
+          }
+        }
+        
+        if (measurementItems.vision) {
+          if (form.vision_left && (parseFloat(form.vision_left) < 0 || parseFloat(form.vision_left) > 3)) {
+            errors.value.vision_left = '視力は0-3.0の範囲で入力してください';
+          }
+          if (form.vision_right && (parseFloat(form.vision_right) < 0 || parseFloat(form.vision_right) > 3)) {
+            errors.value.vision_right = '視力は0-3.0の範囲で入力してください';
+          }
+          if (form.vision_left_corrected && (parseFloat(form.vision_left_corrected) < 0 || parseFloat(form.vision_left_corrected) > 3)) {
+            errors.value.vision_left_corrected = '矯正視力は0-3.0の範囲で入力してください';
+          }
+          if (form.vision_right_corrected && (parseFloat(form.vision_right_corrected) < 0 || parseFloat(form.vision_right_corrected) > 3)) {
+            errors.value.vision_right_corrected = '矯正視力は0-3.0の範囲で入力してください';
+          }
         }
       } else {
         if (selectedStudentIds.value.length === 0) {
@@ -1101,6 +1388,10 @@ export default {
       form.academic_year = new Date().getFullYear();
       form.height = '';
       form.weight = '';
+      form.vision_left = '';
+      form.vision_right = '';
+      form.vision_left_corrected = '';
+      form.vision_right_corrected = '';
       form.notes = '';
       
       selectedStudent.value = null;
@@ -1133,8 +1424,12 @@ export default {
           const recordData = {
             student_id: selectedStudent.value.id,
             year: parseInt(form.academic_year), // academic_year → year
-            height: form.height ? parseFloat(form.height) : null,
-            weight: form.weight ? parseFloat(form.weight) : null,
+            height: measurementItems.height && form.height ? parseFloat(form.height) : null,
+            weight: measurementItems.weight && form.weight ? parseFloat(form.weight) : null,
+            vision_left: measurementItems.vision && form.vision_left ? parseFloat(form.vision_left) : null,
+            vision_right: measurementItems.vision && form.vision_right ? parseFloat(form.vision_right) : null,
+            vision_left_corrected: measurementItems.vision && form.vision_left_corrected ? parseFloat(form.vision_left_corrected) : null,
+            vision_right_corrected: measurementItems.vision && form.vision_right_corrected ? parseFloat(form.vision_right_corrected) : null,
             notes: form.notes || null
           };
           
@@ -1154,8 +1449,12 @@ export default {
             return {
               student_id: studentId,
               year: parseInt(form.academic_year), // academic_year → year
-              height: measurement.height ? parseFloat(measurement.height) : null,
-              weight: measurement.weight ? parseFloat(measurement.weight) : null,
+              height: measurementItems.height && measurement.height ? parseFloat(measurement.height) : null,
+              weight: measurementItems.weight && measurement.weight ? parseFloat(measurement.weight) : null,
+              vision_left: measurementItems.vision && measurement.vision_left ? parseFloat(measurement.vision_left) : null,
+              vision_right: measurementItems.vision && measurement.vision_right ? parseFloat(measurement.vision_right) : null,
+              vision_left_corrected: measurementItems.vision && measurement.vision_left_corrected ? parseFloat(measurement.vision_left_corrected) : null,
+              vision_right_corrected: measurementItems.vision && measurement.vision_right_corrected ? parseFloat(measurement.vision_right_corrected) : null,
               notes: form.notes || null
             };
           });
@@ -1254,6 +1553,7 @@ export default {
       selectedStudent,
       selectedStudentIds,
       searchResults,
+      measurementItems,
       form,
       bulkFilters,
       bulkMeasurements,
@@ -1270,6 +1570,10 @@ export default {
       recentRecords,
       heightInput,
       weightInput,
+      visionLeftInput,
+      visionRightInput,
+      visionLeftCorrectedInput,
+      visionRightCorrectedInput,
       notesInput,
       searchStudents,
       selectStudent,

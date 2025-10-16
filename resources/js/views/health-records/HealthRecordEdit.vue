@@ -187,6 +187,77 @@
                 </div>
               </div>
 
+              <!-- Vision Data -->
+              <div class="space-y-4">
+                <h3 class="text-sm font-medium text-gray-700">視力</h3>
+                
+                <!-- Naked Vision -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">裸眼視力（任意）</label>
+                  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                      <BaseInput
+                        type="number"
+                        step="0.1"
+                        v-model="form.vision_left"
+                        label="左"
+                        placeholder="1.0"
+                        :error="errors.vision_left"
+                      />
+                      <div v-if="form.vision_left != originalRecord.vision_left" class="mt-1 text-sm text-blue-600">
+                        変更前: {{ originalRecord.vision_left || '未入力' }}
+                      </div>
+                    </div>
+                    <div>
+                      <BaseInput
+                        type="number"
+                        step="0.1"
+                        v-model="form.vision_right"
+                        label="右"
+                        placeholder="1.0"
+                        :error="errors.vision_right"
+                      />
+                      <div v-if="form.vision_right != originalRecord.vision_right" class="mt-1 text-sm text-blue-600">
+                        変更前: {{ originalRecord.vision_right || '未入力' }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Corrected Vision -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">矯正視力（任意）</label>
+                  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                      <BaseInput
+                        type="number"
+                        step="0.1"
+                        v-model="form.vision_left_corrected"
+                        label="左"
+                        placeholder="1.0"
+                        :error="errors.vision_left_corrected"
+                      />
+                      <div v-if="form.vision_left_corrected != originalRecord.vision_left_corrected" class="mt-1 text-sm text-blue-600">
+                        変更前: {{ originalRecord.vision_left_corrected || '未入力' }}
+                      </div>
+                    </div>
+                    <div>
+                      <BaseInput
+                        type="number"
+                        step="0.1"
+                        v-model="form.vision_right_corrected"
+                        label="右"
+                        placeholder="1.0"
+                        :error="errors.vision_right_corrected"
+                      />
+                      <div v-if="form.vision_right_corrected != originalRecord.vision_right_corrected" class="mt-1 text-sm text-blue-600">
+                        変更前: {{ originalRecord.vision_right_corrected || '未入力' }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <!-- BMI Display -->
               <div v-if="form.height && form.weight" class="bg-gray-50 rounded-lg p-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -236,14 +307,13 @@
                 <BaseInput
                   type="textarea"
                   v-model="form.edit_reason"
-                  label="修正理由 *"
-                  placeholder="なぜこの記録を修正するのか理由を記入してください"
+                  label="修正理由"
+                  placeholder="必要に応じて修正理由を記入してください（任意）"
                   rows="2"
-                  required
                   :error="errors.edit_reason"
                 />
                 <div class="mt-1 text-xs text-gray-500">
-                  修正理由は履歴として保存され、後から確認できます。
+                  修正理由を入力すると、履歴として保存され、後から確認できます。
                 </div>
               </div>
             </div>
@@ -277,6 +347,18 @@
                     </li>
                     <li v-if="calculatedBMI !== originalRecord.bmi">
                       • BMI: {{ originalRecord.bmi }} → {{ calculatedBMI }}
+                    </li>
+                    <li v-if="form.vision_left != originalRecord.vision_left">
+                      • 視力（左・裸眼）: {{ originalRecord.vision_left || '未入力' }} → {{ form.vision_left || '未入力' }}
+                    </li>
+                    <li v-if="form.vision_right != originalRecord.vision_right">
+                      • 視力（右・裸眼）: {{ originalRecord.vision_right || '未入力' }} → {{ form.vision_right || '未入力' }}
+                    </li>
+                    <li v-if="form.vision_left_corrected != originalRecord.vision_left_corrected">
+                      • 視力（左・矯正）: {{ originalRecord.vision_left_corrected || '未入力' }} → {{ form.vision_left_corrected || '未入力' }}
+                    </li>
+                    <li v-if="form.vision_right_corrected != originalRecord.vision_right_corrected">
+                      • 視力（右・矯正）: {{ originalRecord.vision_right_corrected || '未入力' }} → {{ form.vision_right_corrected || '未入力' }}
                     </li>
                     <li v-if="form.notes !== originalRecord.notes">
                       • 備考: {{ originalRecord.notes ? '修正' : '追加' }}
@@ -353,7 +435,6 @@
               <h4 class="font-medium text-gray-700 mb-2">修正時の注意点</h4>
               <ul class="space-y-1 list-disc list-inside">
                 <li>測定値は正確性を最優先に修正</li>
-                <li>修正理由は必須項目です</li>
                 <li>変更履歴は自動的に保存されます</li>
                 <li>BMIは自動計算されます</li>
               </ul>
@@ -589,6 +670,10 @@ export default {
       academic_year: '',
       height: '',
       weight: '',
+      vision_left: '',
+      vision_right: '',
+      vision_left_corrected: '',
+      vision_right_corrected: '',
       notes: '',
       edit_reason: ''
     });
@@ -631,6 +716,10 @@ export default {
         form.academic_year != originalRecord.value.academic_year ||
         form.height != originalRecord.value.height ||
         form.weight != originalRecord.value.weight ||
+        form.vision_left != originalRecord.value.vision_left ||
+        form.vision_right != originalRecord.value.vision_right ||
+        form.vision_left_corrected != originalRecord.value.vision_left_corrected ||
+        form.vision_right_corrected != originalRecord.value.vision_right_corrected ||
         form.notes !== (originalRecord.value.notes || '')
       );
     });
@@ -707,6 +796,10 @@ export default {
       form.academic_year = record.value.academic_year;
       form.height = record.value.height;
       form.weight = record.value.weight;
+      form.vision_left = record.value.vision_left || '';
+      form.vision_right = record.value.vision_right || '';
+      form.vision_left_corrected = record.value.vision_left_corrected || '';
+      form.vision_right_corrected = record.value.vision_right_corrected || '';
       form.notes = record.value.notes || '';
       form.edit_reason = '';
       
@@ -716,6 +809,10 @@ export default {
         academic_year: record.value.academic_year,
         height: record.value.height,
         weight: record.value.weight,
+        vision_left: record.value.vision_left || '',
+        vision_right: record.value.vision_right || '',
+        vision_left_corrected: record.value.vision_left_corrected || '',
+        vision_right_corrected: record.value.vision_right_corrected || '',
         bmi: record.value.bmi,
         notes: record.value.notes || ''
       };
@@ -751,10 +848,6 @@ export default {
         errors.value.weight = '体重は10-200kgの範囲で入力してください';
       }
       
-      if (!form.edit_reason.trim()) {
-        errors.value.edit_reason = '修正理由は必須です';
-      }
-      
       if (!hasChanges.value) {
         errors.value.general = '変更する項目がありません';
         return false;
@@ -780,8 +873,12 @@ export default {
           year: parseInt(form.academic_year),
           height: parseFloat(form.height),
           weight: parseFloat(form.weight),
+          vision_left: form.vision_left ? parseFloat(form.vision_left) : null,
+          vision_right: form.vision_right ? parseFloat(form.vision_right) : null,
+          vision_left_corrected: form.vision_left_corrected ? parseFloat(form.vision_left_corrected) : null,
+          vision_right_corrected: form.vision_right_corrected ? parseFloat(form.vision_right_corrected) : null,
           notes: form.notes || null,
-          edit_reason: form.edit_reason
+          edit_reason: form.edit_reason || null
         };
         
         await healthRecordStore.updateHealthRecord(recordId.value, updateData);

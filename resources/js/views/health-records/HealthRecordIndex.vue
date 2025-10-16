@@ -393,6 +393,26 @@
             </div>
           </template>
 
+          <template #cell(vision)="{ item }">
+            <div class="text-sm text-gray-900">
+              <!-- 裸眼視力がある場合 -->
+              <div v-if="item.vision_left || item.vision_right">
+                <div>{{ item.vision_left || '-' }} / {{ item.vision_right || '-' }}</div>
+                <div v-if="item.vision_left_corrected || item.vision_right_corrected" class="text-xs text-gray-500 mt-1">
+                  <span class="text-gray-400">矯正:</span> {{ item.vision_left_corrected || '-' }} / {{ item.vision_right_corrected || '-' }}
+                </div>
+              </div>
+              <!-- 矯正視力のみの場合 -->
+              <div v-else-if="item.vision_left_corrected || item.vision_right_corrected">
+                <div class="text-xs text-gray-500">
+                  <span class="text-gray-400">矯正:</span> {{ item.vision_left_corrected || '-' }} / {{ item.vision_right_corrected || '-' }}
+                </div>
+              </div>
+              <!-- 視力データなし -->
+              <span v-else class="text-gray-400">-</span>
+            </div>
+          </template>
+
           <template #cell(bmi)="{ item }">
             <div class="text-sm font-medium" :class="getBMIColor(item.bmi)">
               {{ item.bmi || '-' }}
@@ -464,15 +484,41 @@
             <div class="grid grid-cols-2 gap-4 mb-4">
               <div class="text-center">
                 <div class="text-2xl font-bold text-gray-900">
-                  {{ record.height }}
+                  {{ record.height || '-' }}
                 </div>
                 <div class="text-sm text-gray-500">身長 (cm)</div>
               </div>
               <div class="text-center">
                 <div class="text-2xl font-bold text-gray-900">
-                  {{ record.weight }}
+                  {{ record.weight || '-' }}
                 </div>
                 <div class="text-sm text-gray-500">体重 (kg)</div>
+              </div>
+              <!-- 視力（左） - 裸眼視力がある場合 -->
+              <div class="text-center" v-if="record.vision_left || record.vision_left_corrected">
+                <div class="text-lg font-bold text-gray-900">
+                  <span v-if="record.vision_left">{{ record.vision_left }}</span>
+                  <span v-else class="text-xs text-gray-500">
+                    <span class="text-gray-400">矯正:</span> {{ record.vision_left_corrected }}
+                  </span>
+                </div>
+                <div class="text-sm text-gray-500">視力（左）</div>
+                <div v-if="record.vision_left && record.vision_left_corrected" class="text-xs text-gray-500 mt-1">
+                  <span class="text-gray-400">矯正:</span> {{ record.vision_left_corrected }}
+                </div>
+              </div>
+              <!-- 視力（右） - 裸眼視力がある場合 -->
+              <div class="text-center" v-if="record.vision_right || record.vision_right_corrected">
+                <div class="text-lg font-bold text-gray-900">
+                  <span v-if="record.vision_right">{{ record.vision_right }}</span>
+                  <span v-else class="text-xs text-gray-500">
+                    <span class="text-gray-400">矯正:</span> {{ record.vision_right_corrected }}
+                  </span>
+                </div>
+                <div class="text-sm text-gray-500">視力（右）</div>
+                <div v-if="record.vision_right && record.vision_right_corrected" class="text-xs text-gray-500 mt-1">
+                  <span class="text-gray-400">矯正:</span> {{ record.vision_right_corrected }}
+                </div>
               </div>
             </div>
 
@@ -534,7 +580,7 @@
 </template>
 
 <script>
-import { ref, computed, onMounted, reactive } from 'vue';
+import { ref, computed, onMounted, onActivated, reactive } from 'vue';
 import { useHealthRecordStore } from '@/stores/healthRecord.js';
 import { useClassStore } from '@/stores/class.js';
 import { useNotificationStore } from '@/stores/notification.js';
@@ -842,6 +888,7 @@ export default {
       { key: 'measured_date', title: '測定日', label: '測定日', sortable: true, width: '100px' },
       { key: 'height', title: '身長(cm)', label: '身長(cm)', sortable: true, width: '80px' },
       { key: 'weight', title: '体重(kg)', label: '体重(kg)', sortable: true, width: '80px' },
+      { key: 'vision', title: '視力(左/右)', label: '視力(左/右)', width: '100px' },
       { key: 'bmi', title: 'BMI', label: 'BMI', sortable: true, width: '80' },
       { key: 'actions', title: '操作', label: '操作', width: '120px' }
     ];
@@ -952,6 +999,15 @@ export default {
         });
       } finally {
         isLoading.value = false;
+      }
+    });
+    
+    // ページがアクティブになった時（他のページから戻ってきた時）にデータを再取得
+    onActivated(async () => {
+      try {
+        await healthRecordStore.fetchHealthRecords();
+      } catch (error) {
+        console.error('データ再取得エラー:', error);
       }
     });
     

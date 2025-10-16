@@ -167,6 +167,26 @@
                   </div>
                 </div>
               </div>
+              
+              <div v-if="record.vision_left || record.vision_right" class="bg-gray-50 rounded-lg p-4">
+                <div class="space-y-3">
+                  <div class="text-sm text-gray-500">視力</div>
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <div class="text-xs text-gray-500 mb-1">左</div>
+                      <div class="text-xl font-bold text-gray-900">
+                        {{ record.vision_left || '-' }}
+                      </div>
+                    </div>
+                    <div>
+                      <div class="text-xs text-gray-500 mb-1">右</div>
+                      <div class="text-xl font-bold text-gray-900">
+                        {{ record.vision_right || '-' }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -348,6 +368,9 @@
                 <div class="text-xs text-gray-500 space-y-1">
                   <div>身長: {{ relatedRecord.height }}cm</div>
                   <div>体重: {{ relatedRecord.weight }}kg</div>
+                  <div v-if="relatedRecord.vision_left || relatedRecord.vision_right">
+                    視力: {{ relatedRecord.vision_left || '-' }} / {{ relatedRecord.vision_right || '-' }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -475,7 +498,10 @@
                   {{ formatShortDate(historyRecord.measured_date) }}
                 </div>
                 <div class="text-xs text-gray-500">
-                  {{ historyRecord.height }}cm / {{ historyRecord.weight }}kg
+                  <div>{{ historyRecord.height }}cm / {{ historyRecord.weight }}kg</div>
+                  <div v-if="historyRecord.vision_left || historyRecord.vision_right">
+                    視力: {{ historyRecord.vision_left || '-' }} / {{ historyRecord.vision_right || '-' }}
+                  </div>
                 </div>
               </div>
               <BaseBadge :variant="getBMIVariant(historyRecord.bmi)" size="sm">
