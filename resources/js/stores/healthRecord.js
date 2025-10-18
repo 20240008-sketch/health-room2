@@ -112,7 +112,7 @@ export const useHealthRecordStore = defineStore('healthRecord', () => {
       };
 
       console.log('Fetching health records with params:', requestParams);
-      const response = await axios.get('/v1/health-records', { params: requestParams });
+      const response = await axios.get('/api/v1/health-records', { params: requestParams });
       
       console.log('Health records response:', response.data);
       
@@ -145,7 +145,7 @@ export const useHealthRecordStore = defineStore('healthRecord', () => {
   const fetchHealthRecord = async (id) => {
     loading.value = true;
     try {
-      const response = await axios.get(`/v1/health-records/${id}`);
+      const response = await axios.get(`/api/v1/health-records/${id}`);
       
       if (response.data.success) {
         currentRecord.value = response.data.data;
@@ -162,7 +162,7 @@ export const useHealthRecordStore = defineStore('healthRecord', () => {
   const fetchRecentRecords = async (limit = 10) => {
     loading.value = true;
     try {
-      const response = await axios.get('/v1/health-records', {
+      const response = await axios.get('/api/v1/health-records', {
         params: {
           per_page: limit,
           sort: 'created_at',
@@ -185,7 +185,7 @@ export const useHealthRecordStore = defineStore('healthRecord', () => {
   const createHealthRecord = async (recordData) => {
     loading.value = true;
     try {
-      const response = await axios.post('/v1/health-records', recordData);
+      const response = await axios.post('/api/v1/health-records', recordData);
       
       if (response.data.success) {
         notificationStore.showSuccess('健康記録を登録しました');
@@ -203,7 +203,7 @@ export const useHealthRecordStore = defineStore('healthRecord', () => {
   const updateHealthRecord = async (id, recordData) => {
     loading.value = true;
     try {
-      const response = await axios.put(`/v1/health-records/${id}`, recordData);
+      const response = await axios.put(`/api/v1/health-records/${id}`, recordData);
       
       if (response.data.success) {
         notificationStore.showSuccess('健康記録を更新しました');
@@ -230,7 +230,7 @@ export const useHealthRecordStore = defineStore('healthRecord', () => {
   const deleteHealthRecord = async (id) => {
     loading.value = true;
     try {
-      const response = await axios.delete(`/v1/health-records/${id}`);
+      const response = await axios.delete(`/api/v1/health-records/${id}`);
       
       if (response.data.success) {
         notificationStore.showSuccess('健康記録を削除しました');
@@ -249,7 +249,7 @@ export const useHealthRecordStore = defineStore('healthRecord', () => {
   // 特定の生徒の健康記録履歴を取得
   const fetchStudentHealthHistory = async (studentId) => {
     try {
-      const response = await axios.get('/v1/health-records', {
+      const response = await axios.get('/api/v1/health-records', {
         params: { student_id: studentId }
       });
       
@@ -268,7 +268,7 @@ export const useHealthRecordStore = defineStore('healthRecord', () => {
   // 新機能: 特定学生の健康記録を全て取得
   const getHealthRecordsByStudent = async (studentId) => {
     try {
-      const response = await axios.get('/v1/health-records', {
+      const response = await axios.get('/api/v1/health-records', {
         params: { student_id: studentId }
       });
       
@@ -287,7 +287,7 @@ export const useHealthRecordStore = defineStore('healthRecord', () => {
   const createBulkHealthRecords = async (recordsData) => {
     loading.value = true;
     try {
-      const response = await axios.post('/v1/health-records/bulk', {
+      const response = await axios.post('/api/v1/health-records/bulk', {
         records: recordsData
       });
       
@@ -307,7 +307,7 @@ export const useHealthRecordStore = defineStore('healthRecord', () => {
   // 新機能: 同級生比較データ取得
   const getPeerComparison = async (classId, academicYear) => {
     try {
-      const response = await axios.get(`/v1/health-records/peer-comparison`, {
+      const response = await axios.get(`/api/v1/health-records/peer-comparison`, {
         params: {
           class_id: classId,
           year: academicYear
@@ -327,7 +327,7 @@ export const useHealthRecordStore = defineStore('healthRecord', () => {
   // 新機能: 健康記録統計取得
   const getHealthRecordStatistics = async (filters = {}) => {
     try {
-      const response = await axios.get('/v1/health-records/statistics', {
+      const response = await axios.get('/api/v1/health-records/statistics', {
         params: filters
       });
       

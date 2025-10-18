@@ -59,7 +59,7 @@ export const useStudentStore = defineStore('student', () => {
       };
 
       console.log('Fetching students with params:', requestParams); // Debug log
-      const response = await axios.get('/v1/students', { params: requestParams });
+      const response = await axios.get('/api/v1/students', { params: requestParams });
       
       console.log('API Response:', response.data); // Debug log
       
@@ -94,7 +94,7 @@ export const useStudentStore = defineStore('student', () => {
   const fetchStudent = async (id) => {
     loading.value = true;
     try {
-      const response = await axios.get(`/v1/students/${id}`);
+      const response = await axios.get(`/api/v1/students/${id}`);
       
       if (response.data.success) {
         currentStudent.value = response.data.data;
@@ -112,7 +112,7 @@ export const useStudentStore = defineStore('student', () => {
   const createStudent = async (studentData) => {
     loading.value = true;
     try {
-      const response = await axios.post('/v1/students', studentData);
+      const response = await axios.post('/api/v1/students', studentData);
       
       if (response.data.success) {
         notificationStore.showSuccess('生徒を登録しました');
@@ -138,7 +138,7 @@ export const useStudentStore = defineStore('student', () => {
   const updateStudent = async (id, studentData) => {
     loading.value = true;
     try {
-      const response = await axios.put(`/v1/students/${id}`, studentData);
+      const response = await axios.put(`/api/v1/students/${id}`, studentData);
       
       if (response.data.success) {
         notificationStore.showSuccess('生徒情報を更新しました');
@@ -165,7 +165,7 @@ export const useStudentStore = defineStore('student', () => {
   const deleteStudent = async (id) => {
     loading.value = true;
     try {
-      const response = await axios.delete(`/v1/students/${id}`);
+      const response = await axios.delete(`/api/v1/students/${id}`);
       
       if (response.data.success) {
         notificationStore.showSuccess('生徒を削除しました');
@@ -185,7 +185,7 @@ export const useStudentStore = defineStore('student', () => {
     loading.value = true;
     try {
       console.log('Fetching all students...'); // Debug log
-      const response = await axios.get('/v1/students', { 
+      const response = await axios.get('/api/v1/students', { 
         params: { per_page: 1000 } // 大きな値で全件取得
       });
       
@@ -219,7 +219,7 @@ export const useStudentStore = defineStore('student', () => {
 
   const searchSuggestions = async (query, limit = 10) => {
     try {
-      const response = await axios.get('/v1/students/search/suggestions', {
+      const response = await axios.get('/api/v1/students/search/suggestions', {
         params: { query, limit }
       });
       
@@ -235,7 +235,7 @@ export const useStudentStore = defineStore('student', () => {
 
   const exportData = async (searchParams = {}) => {
     try {
-      const response = await axios.get('/v1/students/export/data', {
+      const response = await axios.get('/api/v1/students/export/data', {
         params: { ...filters.value, search: searchQuery.value, ...searchParams }
       });
       

@@ -1155,16 +1155,14 @@ export default {
           weightInput.value.$el.querySelector('input').focus();
         } else if (measurementItems.vision && visionLeftInput.value) {
           visionLeftInput.value.$el.querySelector('input').focus();
-        } else if (notesInput.value) {
-          notesInput.value.$el.querySelector('textarea').focus();
         }
+        // Don't jump to notes - user can tab there manually if needed
       } else if (currentField === 'weightInput') {
-        // Weight -> Vision Left or Notes
+        // Weight -> Vision Left (skip notes)
         if (measurementItems.vision && visionLeftInput.value) {
           visionLeftInput.value.$el.querySelector('input').focus();
-        } else if (notesInput.value) {
-          notesInput.value.$el.querySelector('textarea').focus();
         }
+        // Don't jump to notes - user can tab there manually if needed
       } else if (currentField === 'visionLeftInput') {
         // Vision Left -> Vision Right
         if (visionRightInput.value) {
@@ -1174,19 +1172,16 @@ export default {
         // Vision Right -> Vision Left Corrected
         if (visionLeftCorrectedInput.value) {
           visionLeftCorrectedInput.value.$el.querySelector('input').focus();
-        } else if (notesInput.value) {
-          notesInput.value.$el.querySelector('textarea').focus();
         }
+        // Don't jump to notes
       } else if (currentField === 'visionLeftCorrectedInput') {
         // Vision Left Corrected -> Vision Right Corrected
         if (visionRightCorrectedInput.value) {
           visionRightCorrectedInput.value.$el.querySelector('input').focus();
         }
       } else if (currentField === 'visionRightCorrectedInput') {
-        // Vision Right Corrected -> Notes
-        if (notesInput.value) {
-          notesInput.value.$el.querySelector('textarea').focus();
-        }
+        // Last field - don't jump to notes
+        // User can manually tab to notes or submit button
       }
     };
     
@@ -1290,10 +1285,9 @@ export default {
             return;
           }
         }
-      } else if (notesInput.value) {
-        // Last student -> Notes
-        notesInput.value.$el.querySelector('textarea').focus();
       }
+      // Last student - don't jump to notes
+      // User can manually tab to notes or submit button if needed
     };
     
     const getBMICategory = (bmi) => {

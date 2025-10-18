@@ -57,7 +57,7 @@ export const useClassStore = defineStore('class', () => {
     loading.value = true;
     try {
       console.log('Fetching classes...');
-      const response = await axios.get('/v1/classes');
+      const response = await axios.get('/api/v1/classes');
       
       console.log('Classes response:', response.data);
       
@@ -79,7 +79,7 @@ export const useClassStore = defineStore('class', () => {
     loading.value = true;
     try {
       console.log('Fetching class with id:', id);
-      const response = await axios.get(`/v1/classes/${id}`);
+      const response = await axios.get(`/api/v1/classes/${id}`);
       
       console.log('Class response:', response.data);
       
@@ -102,7 +102,7 @@ export const useClassStore = defineStore('class', () => {
   const createClass = async (classData) => {
     loading.value = true;
     try {
-      const response = await axios.post('/v1/classes', classData);
+      const response = await axios.post('/api/v1/classes', classData);
       
       if (response.data.success) {
         notificationStore.showSuccess('クラスを作成しました');
@@ -128,7 +128,7 @@ export const useClassStore = defineStore('class', () => {
   const updateClass = async (id, classData) => {
     loading.value = true;
     try {
-      const response = await axios.put(`/v1/classes/${id}`, classData);
+      const response = await axios.put(`/api/v1/classes/${id}`, classData);
       
       if (response.data.success) {
         notificationStore.showSuccess('クラス情報を更新しました');
@@ -155,7 +155,7 @@ export const useClassStore = defineStore('class', () => {
   const deleteClass = async (id) => {
     loading.value = true;
     try {
-      const response = await axios.delete(`/v1/classes/${id}`);
+      const response = await axios.delete(`/api/v1/classes/${id}`);
       
       if (response.data.success) {
         notificationStore.showSuccess('クラスを削除しました');
@@ -179,7 +179,7 @@ export const useClassStore = defineStore('class', () => {
   // クラスに所属する生徒一覧を取得
   const fetchClassStudents = async (classId) => {
     try {
-      const response = await axios.get(`/v1/students`, {
+      const response = await axios.get(`/api/v1/students`, {
         params: { class_id: classId }
       });
       

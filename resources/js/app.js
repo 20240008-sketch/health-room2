@@ -11,7 +11,8 @@ import App from "./App.vue";
 import router from "./router/index.js";
 
 // Axios configuration
-axios.defaults.baseURL = "http://localhost:8003/api";
+// Use current origin for API requests (works in dev and production)
+axios.defaults.baseURL = window.location.origin;
 axios.defaults.headers.common["Accept"] = "application/json";
 axios.defaults.headers.common["Content-Type"] = "application/json";
 axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";

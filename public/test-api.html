@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .result {
+            background: #f5f5f5;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            white-space: pre-wrap;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            background: #3490dc;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: #2779bd;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <h1>API接続テスト</h1>
+    
+    <div>
+        <button onclick="testSystemStats()">システム統計を取得</button>
+        <button onclick="testGradeAverages()">学年平均を取得</button>
+        <button onclick="testClassAverages()">クラス平均を取得</button>
+        <button onclick="testClasses()">クラス一覧を取得</button>
+    </div>
+    
+    <div id="result" class="result"></div>
+
+    <script>
+        const resultDiv = document.getElementById('result');
+        
+        async function testSystemStats() {
+            try {
+                resultDiv.innerHTML = '読み込み中...';
+                const response = await fetch('/api/v1/statistics/system');
+                const data = await response.json();
+                resultDiv.innerHTML = `<span class="success">✓ システム統計取得成功</span>\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">✗ エラー: ${error.message}</span>`;
+            }
+        }
+        
+        async function testGradeAverages() {
+            try {
+                resultDiv.innerHTML = '読み込み中...';
+                const response = await fetch('/api/v1/statistics/grade-averages');
+                const data = await response.json();
+                resultDiv.innerHTML = `<span class="success">✓ 学年平均取得成功</span>\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">✗ エラー: ${error.message}</span>`;
+            }
+        }
+        
+        async function testClassAverages() {
+            try {
+                resultDiv.innerHTML = '読み込み中...';
+                const response = await fetch('/api/v1/statistics/class-averages');
+                const data = await response.json();
+                resultDiv.innerHTML = `<span class="success">✓ クラス平均取得成功</span>\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">✗ エラー: ${error.message}</span>`;
+            }
+        }
+        
+        async function testClasses() {
+            try {
+                resultDiv.innerHTML = '読み込み中...';
+                const response = await fetch('/api/v1/classes');
+                const data = await response.json();
+                resultDiv.innerHTML = `<span class="success">✓ クラス一覧取得成功</span>\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">✗ エラー: ${error.message}</span>`;
+            }
+        }
+        
+        // ページロード時に自動的にシステム統計を取得
+        window.addEventListener('load', testSystemStats);
+    </script>
+</body>
+</html>

@@ -61,14 +61,19 @@ export const useStatisticsStore = defineStore('statistics', () => {
   const fetchSystemStats = async () => {
     try {
       loading.value = true;
-      const response = await axios.get('/v1/statistics/system');
+      console.log('statisticsStore: fetchSystemStats 開始');
+      const response = await axios.get('/api/v1/statistics/system');
+      
+      console.log('statisticsStore: fetchSystemStats レスポンス', response.data);
       
       if (response.data.success) {
         systemStats.value = response.data.data;
         lastUpdated.value = new Date();
+        console.log('statisticsStore: systemStats updated', systemStats.value);
       }
     } catch (error) {
       console.error('システム統計取得エラー:', error);
+      console.error('エラー詳細:', error.response?.data);
       notificationStore.showError('システム統計の取得に失敗しました');
     } finally {
       loading.value = false;
@@ -77,7 +82,7 @@ export const useStatisticsStore = defineStore('statistics', () => {
 
   const fetchBmiDistribution = async () => {
     try {
-      const response = await axios.get('/v1/statistics/health-records');
+      const response = await axios.get('/api/v1/statistics/health-records');
       
       if (response.data.success) {
         healthStats.value = response.data.data;
@@ -90,7 +95,7 @@ export const useStatisticsStore = defineStore('statistics', () => {
 
   const fetchGradeAverages = async () => {
     try {
-      const response = await axios.get('/v1/statistics/grade-averages');
+      const response = await axios.get('/api/v1/statistics/grade-averages');
       
       if (response.data.success) {
         gradeAverages.value = response.data.data.map(grade => ({
@@ -109,7 +114,7 @@ export const useStatisticsStore = defineStore('statistics', () => {
 
   const fetchClassAverages = async () => {
     try {
-      const response = await axios.get('/v1/statistics/class-averages');
+      const response = await axios.get('/api/v1/statistics/class-averages');
       
       if (response.data.success) {
         classAverages.value = response.data.data.map(cls => ({

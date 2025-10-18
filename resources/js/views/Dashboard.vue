@@ -603,12 +603,17 @@ export default {
     });
     
     // Computed
-    const statistics = computed(() => ({
-      totalStudents: statisticsStore.totalStudents,
-      totalClasses: statisticsStore.totalClasses,
-      totalHealthRecords: statisticsStore.totalHealthRecords,
-      recentHealthRecords: statisticsStore.recentHealthRecords
-    }));
+    const statistics = computed(() => {
+      const stats = {
+        totalStudents: statisticsStore.totalStudents,
+        totalClasses: statisticsStore.totalClasses,
+        totalHealthRecords: statisticsStore.totalHealthRecords,
+        recentHealthRecords: statisticsStore.recentHealthRecords
+      };
+      console.log('Dashboard statistics:', stats);
+      console.log('statisticsStore.systemStats:', statisticsStore.systemStats);
+      return stats;
+    });
     const recentHealthRecords = computed(() => healthRecordStore.recentRecords);
     const gradeAverages = computed(() => statisticsStore.gradeAverages);
     const classAverages = computed(() => statisticsStore.classAverages);
@@ -730,6 +735,7 @@ export default {
       isRefreshing.value = true;
       
       try {
+        console.log('ダッシュボード: データ更新開始');
         await Promise.all([
           statisticsStore.fetchSystemStats(),
           healthRecordStore.fetchRecentRecords(),
@@ -739,8 +745,12 @@ export default {
           classStore.fetchClasses()
         ]);
         
+        console.log('ダッシュボード: データ更新完了');
+        console.log('systemStats after fetch:', statisticsStore.systemStats);
+        
         notificationStore.showSuccess('ダッシュボードのデータを更新しました');
       } catch (error) {
+        console.error('ダッシュボード: データ更新エラー', error);
         notificationStore.showError('データの更新に失敗しました');
       } finally {
         isRefreshing.value = false;
