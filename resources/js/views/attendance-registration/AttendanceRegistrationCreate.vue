@@ -315,19 +315,40 @@ export default {
       
       saving.value = true;
       try {
-        // TODO: Save attendance data to API
+        // Prepare records for API
         const records = Object.entries(attendanceData.value).map(([studentId, data]) => ({
-          date: form.value.date,
-          student_id: studentId,
-          ...data
+          student_id: parseInt(studentId),
+          status: data.status,
+          arrival_time: data.arrival_time || null,
+          departure_time: data.departure_time || null,
+          notes: data.notes || null
         }));
         
-        console.log('Saving attendance records:', records);
+        // Call API to save attendance records
+        const response = await fetch('/api/v1/attendance-records/bulk', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            date: form.value.date,
+            records: records
+          })
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || '保存に失敗しました');
+        }
+        
+        const result = await response.json();
+        console.log('Attendance records saved:', result);
         
         notificationStore.addNotification({
           type: 'success',
           title: '保存完了',
-          message: '出席記録を保存しました'
+          message: `${result.count}件の出席記録を保存しました`
         });
         
         router.push({ name: 'attendance-registration.index' });
@@ -336,7 +357,7 @@ export default {
         notificationStore.addNotification({
           type: 'danger',
           title: 'エラー',
-          message: '保存に失敗しました'
+          message: error.message || '保存に失敗しました'
         });
       } finally {
         saving.value = false;

@@ -367,8 +367,7 @@ export default {
     };
     
     const applyFilters = async () => {
-      // TODO: Implement filtering logic
-      console.log('Filters applied:', filters.value);
+      await loadAttendanceRecords();
     };
     
     const goToCreate = () => {
@@ -387,8 +386,32 @@ export default {
     const loadAttendanceRecords = async () => {
       loading.value = true;
       try {
-        // TODO: Load attendance records from API
-        attendanceRecords.value = [];
+        // Build query parameters
+        const params = new URLSearchParams();
+        if (filters.value.date) params.append('date', filters.value.date);
+        if (filters.value.grade) params.append('grade', filters.value.grade);
+        if (filters.value.class_id) params.append('class_id', filters.value.class_id);
+        if (filters.value.status) params.append('status', filters.value.status);
+        
+        // Fetch attendance records from API
+        const response = await fetch(`/api/v1/attendance-records?${params.toString()}`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error('出席記録の取得に失敗しました');
+        }
+        
+        const result = await response.json();
+        attendanceRecords.value = result.data || [];
+        
+        // Update statistics
+        if (result.statistics) {
+          statistics.value = result.statistics;
+        }
       } catch (error) {
         console.error('Failed to load attendance records:', error);
         notificationStore.addNotification({

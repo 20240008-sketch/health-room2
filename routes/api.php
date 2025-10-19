@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\ClassController;
 use App\Http\Controllers\HealthRecordController;
+use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\Api\V1\NursingLogController;
 
@@ -64,6 +65,15 @@ Route::group(['prefix' => 'v1'], function () {
     
     // 健康記録管理API
     Route::apiResource('health-records', HealthRecordController::class);
+    
+    // 出席記録関連の追加エンドポイント
+    Route::post('attendance-records/bulk', [AttendanceController::class, 'bulkStore'])
+        ->name('attendance-records.bulk-store');
+    Route::get('attendance-records/statistics', [AttendanceController::class, 'statistics'])
+        ->name('attendance-records.statistics');
+    
+    // 出席記録管理API
+    Route::apiResource('attendance-records', AttendanceController::class);
     
     // 養護日誌PDF生成API
     Route::get('nursing-log/test-pdf', [NursingLogController::class, 'test'])
