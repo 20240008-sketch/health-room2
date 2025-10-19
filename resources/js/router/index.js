@@ -15,6 +15,7 @@ const HealthRecordIndex = () => import('@/views/health-records/HealthRecordIndex
 const HealthRecordCreate = () => import('@/views/health-records/HealthRecordCreate.vue');
 const HealthRecordShow = () => import('@/views/health-records/HealthRecordShow.vue');
 const HealthRecordEdit = () => import('@/views/health-records/HealthRecordEdit.vue');
+const AttendanceIndex = () => import('@/views/attendance/AttendanceIndex.vue');
 const ReportsHealthCheckup = () => import('@/views/Dashboard.vue'); // 一時的
 const ReportsBmiAnalysis = () => import('@/views/Dashboard.vue'); // 一時的
 const ReportsGrowth = () => import('@/views/Dashboard.vue'); // 一時的
@@ -234,6 +235,53 @@ const routes = [
         { name: 'ホーム', href: '/dashboard' },
         { name: '健康記録', href: '/health-records' },
         { name: '統計・分析', href: '/health-records/statistics' }
+      ]
+    }
+  },
+  
+  // Attendance Registration routes
+  {
+    path: '/attendance-registration',
+    name: 'attendance-registration.index',
+    component: () => import('@/views/attendance-registration/AttendanceRegistrationIndex.vue'),
+    meta: {
+      requiresAuth: true,
+      layout: AppLayout,
+      title: '出席登録',
+      breadcrumb: [
+        { name: 'ホーム', href: '/dashboard' },
+        { name: '出席登録', href: '/attendance-registration' }
+      ]
+    }
+  },
+  {
+    path: '/attendance-registration/create',
+    name: 'attendance-registration.create',
+    component: () => import('@/views/attendance-registration/AttendanceRegistrationCreate.vue'),
+    meta: {
+      requiresAuth: true,
+      layout: AppLayout,
+      title: '出席入力',
+      breadcrumb: [
+        { name: 'ホーム', href: '/dashboard' },
+        { name: '出席登録', href: '/attendance-registration' },
+        { name: '出席入力', href: '/attendance-registration/create' }
+      ]
+    }
+  },
+  
+  // Attendance routes
+  {
+    path: '/attendance',
+    name: 'attendance.index',
+    component: AttendanceIndex,
+    meta: {
+      requiresAuth: true,
+      layout: AppLayout,
+      title: '出席確認',
+      breadcrumb: [
+        { name: 'ホーム', href: '/dashboard' },
+        { name: '出席確認', href: '/attendance' }
       ]
     }
   },

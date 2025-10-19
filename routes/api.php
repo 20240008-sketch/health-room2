@@ -7,6 +7,7 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\ClassController;
 use App\Http\Controllers\HealthRecordController;
 use App\Http\Controllers\StatisticsController;
+use App\Http\Controllers\Api\V1\NursingLogController;
 
 /*
 |--------------------------------------------------------------------------
@@ -63,6 +64,12 @@ Route::group(['prefix' => 'v1'], function () {
     
     // 健康記録管理API
     Route::apiResource('health-records', HealthRecordController::class);
+    
+    // 養護日誌PDF生成API
+    Route::get('nursing-log/test-pdf', [NursingLogController::class, 'test'])
+        ->name('nursing-log.test-pdf');
+    Route::post('nursing-log/generate-pdf', [NursingLogController::class, 'generatePdf'])
+        ->name('nursing-log.generate-pdf');
     
     // 統計データAPI
     Route::prefix('statistics')->name('statistics.')->group(function () {

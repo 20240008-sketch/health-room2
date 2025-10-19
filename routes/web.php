@@ -7,6 +7,7 @@ Route::get('/', function () {
 });
 
 // SPA用のcatch-allルート - Vue.jsがルーティングを処理
+// APIルートを除外する
 Route::get('/{path?}', function () {
     return view('app');
-})->where('path', '.*');
+})->where('path', '^(?!api).*$');

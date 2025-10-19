@@ -176,6 +176,32 @@ export default {
           ]
         },
         {
+          name: '出席登録',
+          href: '/attendance-registration',
+          routeName: 'attendance-registration',
+          icon: 'ClipboardDocumentCheckIcon',
+          current: route.name?.startsWith('attendance-registration'),
+          children: [
+            {
+              name: '出席記録',
+              href: '/attendance-registration',
+              routeName: 'attendance-registration.index'
+            },
+            {
+              name: '出席入力',
+              href: '/attendance-registration/create',
+              routeName: 'attendance-registration.create'
+            }
+          ]
+        },
+        {
+          name: '出席確認',
+          href: '/attendance',
+          routeName: 'attendance.index',
+          icon: 'ClipboardCheckIcon',
+          current: route.name?.startsWith('attendance')
+        },
+        {
           name: 'レポート',
           href: '/reports',
           routeName: 'reports',
