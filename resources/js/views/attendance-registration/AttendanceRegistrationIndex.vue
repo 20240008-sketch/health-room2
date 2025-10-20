@@ -36,26 +36,42 @@
       <BaseCard>
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-4">
           <BaseInput
-            type="date"
-            v-model="filters.date"
-            label="日付"
-            @change="applyFilters"
+            type="text"
+            v-model="filters.search"
+            label="学生名検索"
+            placeholder="学生名、出席番号..."
+            @input="applyFilters"
           />
           
-          <BaseInput
-            type="select"
-            v-model="filters.grade"
-            label="学年"
-            @change="onGradeChange"
-          >
-            <option value="">全学年</option>
-            <option value="1">1年生</option>
-            <option value="2">2年生</option>
-            <option value="3">3年生</option>
-            <option value="4">4年生</option>
-            <option value="5">5年生</option>
-            <option value="6">6年生</option>
-          </BaseInput>
+          <!-- Date Selection (Scroll Type) -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              日付
+            </label>
+            <div class="grid grid-cols-3 gap-1">
+              <select
+                v-model="dateComponents.year"
+                @change="updateDateFilter"
+                class="block w-full px-2 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              >
+                <option v-for="y in years" :key="y" :value="y">{{ y }}年</option>
+              </select>
+              <select
+                v-model="dateComponents.month"
+                @change="updateDateFilter"
+                class="block w-full px-2 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              >
+                <option v-for="m in 12" :key="m" :value="m">{{ m }}月</option>
+              </select>
+              <select
+                v-model="dateComponents.day"
+                @change="updateDateFilter"
+                class="block w-full px-2 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              >
+                <option v-for="d in daysInMonth" :key="d" :value="d">{{ d }}日</option>
+              </select>
+            </div>
+          </div>
           
           <BaseInput
             type="select"
@@ -65,7 +81,7 @@
           >
             <option value="">全クラス</option>
             <option
-              v-for="cls in filteredClasses"
+              v-for="cls in classes"
               :key="cls.id"
               :value="cls.class_id"
             >
@@ -306,9 +322,16 @@ export default {
     // State
     const loading = ref(false);
     const attendanceRecords = ref([]);
+    const today = new Date();
+    const dateComponents = ref({
+      year: today.getFullYear(),
+      month: today.getMonth() + 1,
+      day: today.getDate()
+    });
+    
     const filters = ref({
+      search: '',
       date: new Date().toISOString().split('T')[0],
-      grade: '',
       class_id: '',
       status: ''
     });
@@ -320,13 +343,24 @@ export default {
       early_leave: 0
     });
     
+    // Date-related computed
+    const years = computed(() => {
+      const currentYear = new Date().getFullYear();
+      const yearList = [];
+      for (let i = currentYear - 5; i <= currentYear + 1; i++) {
+        yearList.push(i);
+      }
+      return yearList;
+    });
+    
+    const daysInMonth = computed(() => {
+      const year = dateComponents.value.year;
+      const month = dateComponents.value.month;
+      return new Date(year, month, 0).getDate();
+    });
+    
     // Computed
     const classes = computed(() => classStore.classes);
-    
-    const filteredClasses = computed(() => {
-      if (!filters.value.grade) return classes.value;
-      return classes.value.filter(c => c.grade.toString() === filters.value.grade);
-    });
     
     // Table columns
     const columns = [
@@ -361,8 +395,11 @@ export default {
     ];
     
     // Methods
-    const onGradeChange = () => {
-      filters.value.class_id = '';
+    const updateDateFilter = () => {
+      const year = dateComponents.value.year;
+      const month = String(dateComponents.value.month).padStart(2, '0');
+      const day = String(dateComponents.value.day).padStart(2, '0');
+      filters.value.date = `${year}-${month}-${day}`;
       applyFilters();
     };
     
@@ -388,8 +425,8 @@ export default {
       try {
         // Build query parameters
         const params = new URLSearchParams();
+        if (filters.value.search) params.append('search', filters.value.search);
         if (filters.value.date) params.append('date', filters.value.date);
-        if (filters.value.grade) params.append('grade', filters.value.grade);
         if (filters.value.class_id) params.append('class_id', filters.value.class_id);
         if (filters.value.status) params.append('status', filters.value.status);
         
@@ -406,7 +443,28 @@ export default {
         }
         
         const result = await response.json();
-        attendanceRecords.value = result.data || [];
+        
+        // Filter by search query on frontend if needed
+        let records = result.data || [];
+        if (filters.value.search) {
+          const query = filters.value.search.toLowerCase().trim();
+          records = records.filter(record => {
+            const student = record.student;
+            if (!student) return false;
+            
+            const name = (student.name || '').toLowerCase();
+            const nameKana = (student.name_kana || '').toLowerCase();
+            const studentNumber = String(student.student_number || '');
+            const studentId = String(student.student_id || '');
+            
+            return name.includes(query) ||
+                   nameKana.includes(query) ||
+                   studentNumber.includes(query) ||
+                   studentId.includes(query);
+          });
+        }
+        
+        attendanceRecords.value = records;
         
         // Update statistics
         if (result.statistics) {
@@ -438,12 +496,14 @@ export default {
       loading,
       attendanceRecords,
       filters,
+      dateComponents,
+      years,
+      daysInMonth,
       statistics,
       classes,
-      filteredClasses,
       columns,
       actions,
-      onGradeChange,
+      updateDateFilter,
       applyFilters,
       goToCreate,
       exportData

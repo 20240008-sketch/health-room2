@@ -46,6 +46,11 @@ class StudentController extends Controller
             }
             
             // 学年フィルター
+            if ($request->filled('grade')) {
+                $query->where('grade_id', $request->grade);
+            }
+            
+            // 学年フィルター（互換性のため）
             if ($request->filled('grade_id')) {
                 $query->where('grade_id', $request->grade_id);
             }

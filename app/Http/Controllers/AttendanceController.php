@@ -17,6 +17,19 @@ class AttendanceController extends Controller
     {
         $query = AttendanceRecord::with('student');
 
+        // Filter by search (student name or number)
+        if ($request->has('search') && !empty($request->search)) {
+            $searchTerm = $request->search;
+            $query->whereHas('student', function ($q) use ($searchTerm) {
+                $q->where(function($query) use ($searchTerm) {
+                    $query->where('name', 'like', '%' . $searchTerm . '%')
+                        ->orWhere('name_kana', 'like', '%' . $searchTerm . '%')
+                        ->orWhere('student_number', 'like', '%' . $searchTerm . '%')
+                        ->orWhere('student_id', 'like', '%' . $searchTerm . '%');
+                });
+            });
+        }
+
         // Filter by date
         if ($request->has('date')) {
             $query->whereDate('date', $request->date);

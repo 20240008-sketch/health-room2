@@ -75,6 +75,15 @@ Route::group(['prefix' => 'v1'], function () {
     // 出席記録管理API
     Route::apiResource('attendance-records', AttendanceController::class);
     
+    // 保健室来室記録関連の追加エンドポイント
+    Route::post('nursing-visits/bulk', [App\Http\Controllers\NursingVisitController::class, 'bulkStore'])
+        ->name('nursing-visits.bulk-store');
+    Route::get('nursing-visits/statistics', [App\Http\Controllers\NursingVisitController::class, 'statistics'])
+        ->name('nursing-visits.statistics');
+    
+    // 保健室来室記録管理API
+    Route::apiResource('nursing-visits', App\Http\Controllers\NursingVisitController::class);
+    
     // 養護日誌PDF生成API
     Route::get('nursing-log/test-pdf', [NursingLogController::class, 'test'])
         ->name('nursing-log.test-pdf');
