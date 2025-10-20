@@ -228,7 +228,7 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useClassStore } from '@/stores/class.js';
 import { useNotificationStore } from '@/stores/notification.js';
@@ -319,8 +319,8 @@ export default {
     const classStore = useClassStore();
     const notificationStore = useNotificationStore();
     
-    // Get record type from route
-    const recordType = router.currentRoute.value.meta.recordType || 'attendance';
+    // Get record type from route - use computed to make it reactive
+    const recordType = computed(() => router.currentRoute.value.meta.recordType || 'attendance');
     
     // State
     const loading = ref(false);
@@ -370,28 +370,28 @@ export default {
     });
     
     const pageDescription = computed(() => {
-      if (recordType === 'nursing') {
+      if (recordType.value === 'nursing') {
         return '日々の保健室利用を登録・管理します';
       }
       return '日々の出席状況を登録・管理します';
     });
     
     const createButtonText = computed(() => {
-      if (recordType === 'nursing') {
+      if (recordType.value === 'nursing') {
         return '保健室記録入力';
       }
       return '出席記録入力';
     });
     
     const recordListTitle = computed(() => {
-      if (recordType === 'nursing') {
+      if (recordType.value === 'nursing') {
         return '保健室記録一覧';
       }
       return '出席記録一覧';
     });
     
     const emptyMessage = computed(() => {
-      if (recordType === 'nursing') {
+      if (recordType.value === 'nursing') {
         return '保健室記録がありません';
       }
       return '出席記録がありません';
@@ -399,7 +399,7 @@ export default {
     
     // Table columns - Different columns for nursing vs attendance
     const columns = computed(() => {
-      if (recordType === 'nursing') {
+      if (recordType.value === 'nursing') {
         return [
           { key: 'date', label: '日付' },
           { key: 'time', label: '時間' },
@@ -457,7 +457,7 @@ export default {
     };
     
     const goToCreate = () => {
-      if (recordType === 'nursing') {
+      if (recordType.value === 'nursing') {
         router.push({ name: 'attendance-registration.nursing.create' });
       } else {
         router.push({ name: 'attendance-registration.attendance.create' });
@@ -484,7 +484,7 @@ export default {
         if (filters.value.status) params.append('status', filters.value.status);
         
         // Choose API endpoint based on record type
-        const apiEndpoint = recordType === 'nursing' 
+        const apiEndpoint = recordType.value === 'nursing' 
           ? '/api/v1/nursing-visits' 
           : '/api/v1/attendance-records';
         
@@ -502,24 +502,18 @@ export default {
         
         const result = await response.json();
         
-        // Filter by search query on frontend if needed
+        // Format attendance records to match the nursing visit format
         let records = result.data || [];
-        if (filters.value.search) {
-          const query = filters.value.search.toLowerCase().trim();
-          records = records.filter(record => {
-            const student = record.student;
-            if (!student) return false;
-            
-            const name = (student.name || '').toLowerCase();
-            const nameKana = (student.name_kana || '').toLowerCase();
-            const studentNumber = String(student.student_number || '');
-            const studentId = String(student.student_id || '');
-            
-            return name.includes(query) ||
-                   nameKana.includes(query) ||
-                   studentNumber.includes(query) ||
-                   studentId.includes(query);
-          });
+        if (recordType.value === 'attendance') {
+          records = records.map(record => ({
+            ...record,
+            date: record.date ? record.date.split('T')[0] : '',
+            student_name: record.student?.name || '',
+            student_number: record.student?.student_number || '',
+            class_name: record.student?.school_class?.name || '',
+            grade: record.student?.school_class?.grade || '',
+            gender: record.student?.gender || ''
+          }));
         }
         
         attendanceRecords.value = records;
@@ -547,6 +541,14 @@ export default {
         await loadAttendanceRecords();
       } catch (error) {
         console.error('Failed to initialize:', error);
+      }
+    });
+    
+    // Watch for route changes and reload data
+    watch(() => router.currentRoute.value.meta.recordType, async (newType, oldType) => {
+      if (newType && newType !== oldType) {
+        console.log('Route changed, reloading data for:', newType);
+        await loadAttendanceRecords();
       }
     });
     

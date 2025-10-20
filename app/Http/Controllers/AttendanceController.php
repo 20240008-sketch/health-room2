@@ -15,7 +15,7 @@ class AttendanceController extends Controller
      */
     public function index(Request $request)
     {
-        $query = AttendanceRecord::with('student');
+        $query = AttendanceRecord::with(['student', 'student.schoolClass']);
 
         // Filter by search (student name or number)
         if ($request->has('search') && !empty($request->search)) {
@@ -56,7 +56,7 @@ class AttendanceController extends Controller
 
         $attendanceRecords = $query->orderBy('date', 'desc')
             ->orderBy('created_at', 'desc')
-            ->paginate(50);
+            ->get();
 
         // Calculate statistics
         $statistics = [
@@ -75,15 +75,10 @@ class AttendanceController extends Controller
             ];
         }
 
+        // Return data with student relationship
         return response()->json([
-            'data' => $attendanceRecords->items(),
-            'statistics' => $statistics,
-            'meta' => [
-                'current_page' => $attendanceRecords->currentPage(),
-                'per_page' => $attendanceRecords->perPage(),
-                'total' => $attendanceRecords->total(),
-                'last_page' => $attendanceRecords->lastPage(),
-            ]
+            'data' => $attendanceRecords,
+            'statistics' => $statistics
         ]);
     }
 
