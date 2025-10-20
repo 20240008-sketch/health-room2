@@ -5,10 +5,10 @@
       <div class="md:flex md:items-center md:justify-between">
         <div class="flex-1 min-w-0">
           <h1 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-            出席入力
+            {{ pageTitle }}
           </h1>
           <p class="mt-1 text-sm text-gray-500">
-            クラス単位で出席状況を一括入力します
+            {{ pageDescription }}
           </p>
         </div>
       </div>
@@ -412,7 +412,7 @@
                             :key="student.id"
                             :value="student.id"
                           >
-                            {{ student.student_number }}番 {{ student.name }} ({{ student.gender === 'male' ? '男' : '女' }})
+                            {{ student.student_number }}番 {{ student.name }} ({{ getGenderLabel(student.gender) }})
                           </option>
                         </select>
                         <p v-if="visit.selectedClass && getFilteredStudents(index).length === 0" class="mt-1 text-xs text-red-600">
@@ -432,7 +432,7 @@
                               {{ getStudentById(visit.student_id)?.schoolClass?.grade || '-' }}年 
                               {{ getStudentById(visit.student_id)?.schoolClass?.name?.replace(/[0-9]年/, '') || '-' }}組 
                               {{ getStudentById(visit.student_id)?.student_number || '-' }}番 
-                              ({{ getStudentById(visit.student_id)?.gender === 'male' ? '男' : '女' }})
+                              ({{ getGenderLabel(getStudentById(visit.student_id)?.gender) }})
                             </div>
                           </div>
                           <button
@@ -548,8 +548,9 @@ export default {
     const studentStore = useStudentStore();
     const notificationStore = useNotificationStore();
     
-    // Tab State
-    const activeTab = ref('attendance');
+    // Tab State - Initialize based on route meta
+    const recordType = router.currentRoute.value.meta.recordType || 'attendance';
+    const activeTab = ref(recordType);
     
     // Attendance State
     const saving = ref(false);
@@ -604,6 +605,17 @@ export default {
     
     // Computed
     const classes = computed(() => classStore.classes);
+    
+    const pageTitle = computed(() => {
+      return router.currentRoute.value.meta.title || '出席・保健室記録';
+    });
+    
+    const pageDescription = computed(() => {
+      if (recordType === 'nursing') {
+        return 'クラス単位で保健室来室記録を入力します';
+      }
+      return 'クラス単位で出席状況を入力します';
+    });
     
     const filteredStudents = computed(() => {
       if (!searchQuery.value) return students.value;
@@ -786,7 +798,7 @@ export default {
           message: `${result.count}件の出席記録を保存しました`
         });
         
-        router.push({ name: 'attendance-registration.index' });
+        router.push({ name: 'attendance-registration.attendance.index' });
       } catch (error) {
         console.error('Failed to save attendance:', error);
         notificationStore.addNotification({
@@ -800,7 +812,11 @@ export default {
     };
     
     const cancel = () => {
-      router.push({ name: 'attendance-registration.index' });
+      if (recordType === 'nursing') {
+        router.push({ name: 'attendance-registration.nursing.index' });
+      } else {
+        router.push({ name: 'attendance-registration.attendance.index' });
+      }
     };
     
     // Tab switching
@@ -862,6 +878,16 @@ export default {
     
     const getStudentById = (studentId) => {
       return nursingStudents.value.find(s => s.id === studentId);
+    };
+    
+    const getGenderLabel = (gender) => {
+      console.log('Gender value:', gender, 'Type:', typeof gender);
+      if (gender === 'male' || gender === 'M' || gender === 'm' || gender === '男') {
+        return '男';
+      } else if (gender === 'female' || gender === 'F' || gender === 'f' || gender === '女') {
+        return '女';
+      }
+      return gender || '不明';
     };
     
     const getFilteredStudents = (index) => {
@@ -980,6 +1006,9 @@ export default {
           treatment_notes: visit.treatment_notes || null
         }));
         
+        console.log('=== Saving Nursing Visits ===');
+        console.log('Visits data:', JSON.stringify(visits, null, 2));
+        
         // Call API to save nursing visits
         const response = await fetch('/api/v1/nursing-visits/bulk', {
           method: 'POST',
@@ -1006,10 +1035,8 @@ export default {
           message: result.message || '来室記録を保存しました'
         });
         
-        // Clear form
-        nursingVisits.value = [];
-        nursingForm.value.class_id = '';
-        nursingSearchQuery.value = '';
+        // Redirect to nursing list page
+        router.push({ name: 'attendance-registration.nursing.index' });
       } catch (error) {
         console.error('Failed to save nursing visits:', error);
         notificationStore.addNotification({
@@ -1045,6 +1072,8 @@ export default {
       attendanceData,
       searchQuery,
       classes,
+      pageTitle,
+      pageDescription,
       filteredStudents,
       updateDate,
       loadStudents,
@@ -1071,6 +1100,7 @@ export default {
       getStudentById,
       saveNursingVisits,
       getFilteredStudents,
+      getGenderLabel,
       onClassChange,
       clearStudent
     };

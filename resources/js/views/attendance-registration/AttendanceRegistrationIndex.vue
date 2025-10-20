@@ -5,10 +5,10 @@
       <div class="md:flex md:items-center md:justify-between">
         <div class="flex-1 min-w-0">
           <h1 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-            出席登録
+            {{ pageTitle }}
           </h1>
           <p class="mt-1 text-sm text-gray-500">
-            日々の出席状況を登録・管理します
+            {{ pageDescription }}
           </p>
         </div>
         <div class="mt-4 flex space-x-3 md:mt-0 md:ml-4">
@@ -24,7 +24,7 @@
             @click="goToCreate"
           >
             <PlusIcon class="h-4 w-4 mr-2" />
-            出席入力
+            {{ createButtonText }}
           </BaseButton>
         </div>
       </div>
@@ -104,8 +104,8 @@
         </div>
       </BaseCard>
 
-      <!-- Attendance Statistics -->
-      <div class="grid grid-cols-1 gap-5 sm:grid-cols-4">
+      <!-- Attendance Statistics (Only for attendance records) -->
+      <div v-if="recordType === 'attendance'" class="grid grid-cols-1 gap-5 sm:grid-cols-4">
         <BaseCard class="overflow-hidden">
           <div class="p-5">
             <div class="flex items-center">
@@ -190,7 +190,7 @@
       <!-- Attendance List -->
       <BaseCard>
         <template #header>
-          <h2 class="text-lg font-medium text-gray-900">出席記録一覧</h2>
+          <h2 class="text-lg font-medium text-gray-900">{{ recordListTitle }}</h2>
         </template>
 
         <div v-if="loading" class="text-center py-12">
@@ -200,9 +200,9 @@
 
         <div v-else-if="attendanceRecords.length === 0" class="text-center py-12">
           <CalendarIcon class="mx-auto h-12 w-12 text-gray-400" />
-          <h3 class="mt-2 text-sm font-medium text-gray-900">出席記録がありません</h3>
+          <h3 class="mt-2 text-sm font-medium text-gray-900">{{ emptyMessage }}</h3>
           <p class="mt-1 text-sm text-gray-500">
-            新しい出席記録を追加してください
+            新しい{{ recordType === 'nursing' ? '保健室記録' : '出席記録' }}を追加してください
           </p>
           <div class="mt-6">
             <BaseButton
@@ -210,7 +210,7 @@
               @click="goToCreate"
             >
               <PlusIcon class="h-4 w-4 mr-2" />
-              出席入力
+              {{ createButtonText }}
             </BaseButton>
           </div>
         </div>
@@ -319,6 +319,9 @@ export default {
     const classStore = useClassStore();
     const notificationStore = useNotificationStore();
     
+    // Get record type from route
+    const recordType = router.currentRoute.value.meta.recordType || 'attendance';
+    
     // State
     const loading = ref(false);
     const attendanceRecords = ref([]);
@@ -362,14 +365,60 @@ export default {
     // Computed
     const classes = computed(() => classStore.classes);
     
-    // Table columns
-    const columns = [
-      { key: 'date', label: '日付' },
-      { key: 'student_name', label: '学生名' },
-      { key: 'class_name', label: 'クラス' },
-      { key: 'status', label: '状態' },
-      { key: 'notes', label: '備考' }
-    ];
+    const pageTitle = computed(() => {
+      return router.currentRoute.value.meta.title || '出席・保健室記録';
+    });
+    
+    const pageDescription = computed(() => {
+      if (recordType === 'nursing') {
+        return '日々の保健室利用を登録・管理します';
+      }
+      return '日々の出席状況を登録・管理します';
+    });
+    
+    const createButtonText = computed(() => {
+      if (recordType === 'nursing') {
+        return '保健室記録入力';
+      }
+      return '出席記録入力';
+    });
+    
+    const recordListTitle = computed(() => {
+      if (recordType === 'nursing') {
+        return '保健室記録一覧';
+      }
+      return '出席記録一覧';
+    });
+    
+    const emptyMessage = computed(() => {
+      if (recordType === 'nursing') {
+        return '保健室記録がありません';
+      }
+      return '出席記録がありません';
+    });
+    
+    // Table columns - Different columns for nursing vs attendance
+    const columns = computed(() => {
+      if (recordType === 'nursing') {
+        return [
+          { key: 'date', label: '日付' },
+          { key: 'time', label: '時間' },
+          { key: 'student_name', label: '学生名' },
+          { key: 'class_name', label: 'クラス' },
+          { key: 'type', label: '種別' },
+          { key: 'occurrence_time', label: '発生時刻' },
+          { key: 'treatment_notes', label: '処置内容' }
+        ];
+      } else {
+        return [
+          { key: 'date', label: '日付' },
+          { key: 'student_name', label: '学生名' },
+          { key: 'class_name', label: 'クラス' },
+          { key: 'status', label: '状態' },
+          { key: 'notes', label: '備考' }
+        ];
+      }
+    });
     
     // Table actions
     const actions = [
@@ -408,7 +457,11 @@ export default {
     };
     
     const goToCreate = () => {
-      router.push({ name: 'attendance-registration.create' });
+      if (recordType === 'nursing') {
+        router.push({ name: 'attendance-registration.nursing.create' });
+      } else {
+        router.push({ name: 'attendance-registration.attendance.create' });
+      }
     };
     
     const exportData = () => {
@@ -430,8 +483,13 @@ export default {
         if (filters.value.class_id) params.append('class_id', filters.value.class_id);
         if (filters.value.status) params.append('status', filters.value.status);
         
-        // Fetch attendance records from API
-        const response = await fetch(`/api/v1/attendance-records?${params.toString()}`, {
+        // Choose API endpoint based on record type
+        const apiEndpoint = recordType === 'nursing' 
+          ? '/api/v1/nursing-visits' 
+          : '/api/v1/attendance-records';
+        
+        // Fetch records from API
+        const response = await fetch(`${apiEndpoint}?${params.toString()}`, {
           method: 'GET',
           headers: {
             'Accept': 'application/json'
@@ -493,6 +551,7 @@ export default {
     });
     
     return {
+      recordType,
       loading,
       attendanceRecords,
       filters,
@@ -501,6 +560,11 @@ export default {
       daysInMonth,
       statistics,
       classes,
+      pageTitle,
+      pageDescription,
+      createButtonText,
+      recordListTitle,
+      emptyMessage,
       columns,
       actions,
       updateDateFilter,

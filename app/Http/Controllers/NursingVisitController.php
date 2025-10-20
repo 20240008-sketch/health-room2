@@ -18,7 +18,7 @@ class NursingVisitController extends Controller
 
         // 日付フィルター
         if ($request->has('date')) {
-            $query->where('date', $request->date);
+            $query->whereDate('date', $request->date);
         }
 
         // 学生検索（名前、かな、出席番号）
@@ -198,10 +198,10 @@ class NursingVisitController extends Controller
 
         // 日付範囲フィルター
         if ($request->has('start_date')) {
-            $query->where('date', '>=', $request->start_date);
+            $query->whereDate('date', '>=', $request->start_date);
         }
         if ($request->has('end_date')) {
-            $query->where('date', '<=', $request->end_date);
+            $query->whereDate('date', '<=', $request->end_date);
         }
 
         $total = $query->count();
