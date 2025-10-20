@@ -384,7 +384,7 @@
                           @change="onClassChange(index)"
                           class="block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         >
-                          <option value="">すべてのクラス</option>
+                          <option value="">クラスを選択</option>
                           <option
                             v-for="cls in classes"
                             :key="cls.id"
@@ -395,27 +395,10 @@
                         </select>
                       </div>
                       
-                      <!-- 出席番号選択 -->
-                      <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">出席番号</label>
-                        <input
-                          type="number"
-                          v-model.number="visit.selectedStudentNumber"
-                          @input="onStudentNumberChange(index)"
-                          min="1"
-                          max="99"
-                          class="block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                          placeholder="番号を入力"
-                        />
-                      </div>
-                      
-                      <!-- 人名選択 -->
+                      <!-- 学生選択 -->
                       <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">
-                          人名
-                          <span v-if="visit.selectedClass && !visit.selectedStudentNumber" class="text-gray-500 font-normal ml-1">
-                            (出席番号を入力してください)
-                          </span>
+                          学生
                         </label>
                         <select
                           v-model="visit.student_id"
@@ -423,7 +406,7 @@
                           class="block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                           :disabled="!visit.selectedClass"
                         >
-                          <option value="">人名を選択</option>
+                          <option value="">学生を選択</option>
                           <option
                             v-for="student in getFilteredStudents(index)"
                             :key="student.id"
@@ -432,11 +415,11 @@
                             {{ student.student_number }}番 {{ student.name }} ({{ student.gender === 'male' ? '男' : '女' }})
                           </option>
                         </select>
-                        <p v-if="visit.selectedClass && visit.selectedStudentNumber && getFilteredStudents(index).length === 0" class="mt-1 text-xs text-red-600">
+                        <p v-if="visit.selectedClass && getFilteredStudents(index).length === 0" class="mt-1 text-xs text-red-600">
                           該当する学生が見つかりません
                         </p>
-                        <p v-else-if="visit.selectedClass && !visit.selectedStudentNumber && getFilteredStudents(index).length > 0" class="mt-1 text-xs text-blue-600">
-                          {{ getFilteredStudents(index).length }}人の学生がいます
+                        <p v-else-if="visit.selectedClass && getFilteredStudents(index).length > 0 && !visit.student_id" class="mt-1 text-xs text-gray-500">
+                          {{ getFilteredStudents(index).length }}人の学生から選択
                         </p>
                       </div>
                       
@@ -865,8 +848,7 @@ export default {
         type: 'illness',
         occurrence_time: '',
         treatment_notes: '',
-        selectedClass: '',
-        selectedStudentNumber: ''
+        selectedClass: ''
       });
     };
     
@@ -886,57 +868,34 @@ export default {
       const visit = nursingVisits.value[index];
       let filtered = nursingStudents.value;
       
-      console.log('=== Filtering Students ===');
-      console.log('Total nursing students:', filtered.length);
-      console.log('Selected class:', visit.selectedClass);
-      console.log('Selected student number:', visit.selectedStudentNumber);
+      console.log('=== getFilteredStudents DEBUG ===');
+      console.log('Total students:', filtered.length);
+      console.log('Selected class:', visit.selectedClass, 'Type:', typeof visit.selectedClass);
       
-      // サンプル学生データを出力
       if (filtered.length > 0) {
-        console.log('Sample student data:', {
-          id: filtered[0].id,
+        console.log('First student sample:', {
           name: filtered[0].name,
-          student_number: filtered[0].student_number,
           class_id: filtered[0].class_id,
           class_id_type: typeof filtered[0].class_id,
-          schoolClass: filtered[0].schoolClass
+          student_number: filtered[0].student_number,
+          fullData: filtered[0]
         });
       }
-      
-      // 全学生のclass_idをリスト表示
-      console.log('All student class_ids:', filtered.map(s => ({ name: s.name, class_id: s.class_id, type: typeof s.class_id })));
       
       // クラスでフィルター
       if (visit.selectedClass) {
         console.log('Filtering by class...');
-        const beforeCount = filtered.length;
         filtered = filtered.filter(s => {
-          const match = s.class_id == visit.selectedClass;
-          if (match) {
-            console.log('Match found:', s.name, 'class_id:', s.class_id);
-          }
-          return match;
+          console.log(`Comparing: student.class_id="${s.class_id}" (${typeof s.class_id}) == selected="${visit.selectedClass}" (${typeof visit.selectedClass}) -> ${s.class_id == visit.selectedClass}`);
+          return s.class_id == visit.selectedClass;
         });
-        console.log('After class filter:', filtered.length, '(was', beforeCount, ')');
+        console.log('After filter:', filtered.length);
       }
       
-      // 出席番号でフィルター
-      if (visit.selectedStudentNumber) {
-        console.log('Filtering by student number...');
-        const beforeCount = filtered.length;
-        filtered = filtered.filter(s => {
-          const match = s.student_number == visit.selectedStudentNumber;
-          if (match) {
-            console.log('Match found:', s.name, 'number:', s.student_number);
-          }
-          return match;
-        });
-        console.log('After number filter:', filtered.length, '(was', beforeCount, ')');
-      }
+      // 出席番号順にソート
+      filtered.sort((a, b) => (a.student_number || 0) - (b.student_number || 0));
       
-      console.log('Final result:', filtered.length, 'students');
-      console.log('======================');
-      
+      console.log('=================================');
       return filtered;
     };
     
@@ -954,24 +913,27 @@ export default {
       return numbers.sort((a, b) => a - b);
     };
     
-    const onClassChange = (index) => {
+    const onClassChange = async (index) => {
       const visit = nursingVisits.value[index];
-      // クラスが変更されたら出席番号と学生の選択をリセット
-      visit.selectedStudentNumber = '';
+      // クラスが変更されたら学生の選択をリセット
       visit.student_id = '';
-    };
-    
-    const onStudentNumberChange = (index) => {
-      const visit = nursingVisits.value[index];
-      // 出席番号が変更されたら学生の選択をリセット
-      visit.student_id = '';
+      
+      // 選択されたクラスの学生をAPIから読み込む
+      if (visit.selectedClass) {
+        try {
+          await studentStore.fetchStudents({ class_id: visit.selectedClass });
+          nursingStudents.value = studentStore.students;
+          console.log(`Loaded ${nursingStudents.value.length} students for class ${visit.selectedClass}`);
+        } catch (error) {
+          console.error('Failed to load students for class:', error);
+        }
+      }
     };
     
     const clearStudent = (index) => {
       const visit = nursingVisits.value[index];
       visit.student_id = '';
       visit.selectedClass = '';
-      visit.selectedStudentNumber = '';
     };
     
     const saveNursingVisits = async () => {
@@ -1109,9 +1071,7 @@ export default {
       getStudentById,
       saveNursingVisits,
       getFilteredStudents,
-      getAvailableStudentNumbers,
       onClassChange,
-      onStudentNumberChange,
       clearStudent
     };
   }
