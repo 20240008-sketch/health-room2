@@ -544,56 +544,35 @@ export default {
         
         const result = await response.json();
         
-        console.log('=== API Response ===');
-        console.log('Record Type:', recordType.value);
-        console.log('Result:', result);
-        console.log('First Record:', result.data?.[0]);
-        console.log('==================');
-        
         // Format records based on record type
         let records = result.data || [];
         if (recordType.value === 'attendance') {
           records = records.map(record => ({
             ...record,
             date: record.date ? record.date.split('T')[0] : '',
-            student_name: record.student?.name || '',
-            student_number: record.student?.student_number || '',
-            class_name: record.student?.school_class?.name || '',
-            grade: record.student?.school_class?.grade || '',
+            student_name: record.student_name || '',
+            student_number: record.student_number || '',
+            class_name: record.class_name || '',
+            grade: record.grade || '',
             gender: record.student?.gender || ''
           }));
         } else if (recordType.value === 'nursing') {
-          records = records.map(record => {
-            console.log('=== Detailed Mapping ===');
-            console.log('record:', record);
-            console.log('record.student:', record.student);
-            console.log('record.student?.name:', record.student?.name);
-            console.log('record.student?.school_class:', record.student?.school_class);
-            console.log('record.student?.school_class?.name:', record.student?.school_class?.name);
-            console.log('record.student_name:', record.student_name);
-            console.log('record.class_name:', record.class_name);
-            
-            const mapped = {
-              ...record,
-              date: record.date ? record.date.split('T')[0] : '',
-              time: record.time || '',
-              student_name: record.student?.name || record.student_name || '',
-              student_number: record.student?.student_number || '',
-              class_name: record.student?.school_class?.name || record.class_name || '',
-              grade: record.student?.school_class?.grade || '',
-              category: record.category || '',
-              type_detail: record.type_detail || '',
-              occurrence_time: record.occurrence_time || '',
-              treatment_notes: record.treatment_notes || ''
-            };
-            console.log('Mapped result:', mapped);
-            console.log('========================');
-            return mapped;
-          });
+          records = records.map(record => ({
+            ...record,
+            date: record.date ? record.date.split('T')[0] : '',
+            time: record.time || '',
+            student_name: record.student_name || '',
+            student_number: record.student_number || '',
+            class_name: record.class_name || '',
+            grade: record.grade || '',
+            category: record.category || '',
+            type_detail: record.type_detail || '',
+            occurrence_time: record.occurrence_time || '',
+            treatment_notes: record.treatment_notes || ''
+          }));
         }
         
         attendanceRecords.value = records;
-        console.log('Final attendanceRecords:', attendanceRecords.value);
         
         // Update statistics
         if (result.statistics) {

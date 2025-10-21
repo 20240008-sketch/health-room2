@@ -397,6 +397,35 @@ export default {
       return Object.values(data).reduce((sum, val) => sum + (val || 0), 0);
     };
 
+    const getTypeLabel = (typeDetail) => {
+      const typeLabels = {
+        // Internal (内科)
+        'stomachache': '腹痛',
+        'headache': '頭痛',
+        'fever': '発熱',
+        'cough': '咳',
+        // Surgical (外科)
+        'cut': '切り傷',
+        'bruise': '打撲',
+        'sprain': '捻挫',
+        'fracture': '骨折',
+        // Other (その他)
+        'counseling': '相談',
+        'rest': '休養',
+        'other': 'その他',
+        // Absence (欠席)
+        'sick': '病欠',
+        'accident': '事故欠',
+        'suspension': '出停',
+        'mourning': '忌引',
+        // Categories
+        'internal': '内科',
+        'surgical': '外科',
+        'absence': '欠席'
+      };
+      return typeLabels[typeDetail] || typeDetail;
+    };
+
     const addVisit = () => {
       visits.value.push({
         time: '',
@@ -412,11 +441,115 @@ export default {
     };
 
     const loadDiary = async () => {
-      // TODO: Load diary data from API
-      const date = new Date(diary.value.date);
-      diary.value.year = date.getFullYear() - 2018;
-      diary.value.month = date.getMonth() + 1;
-      diary.value.day = date.getDate();
+      try {
+        // Update date fields
+        const date = new Date(diary.value.date);
+        diary.value.year = date.getFullYear() - 2018;
+        diary.value.month = date.getMonth() + 1;
+        diary.value.day = date.getDate();
+
+        // Reset absence data
+        absence.value = {
+          absent: { grade1: 0, grade2: 0, grade3: 0, grade4: 0, grade5: 0, grade6: 0 },
+          sick: { grade1: 0, grade2: 0, grade3: 0, grade4: 0, grade5: 0, grade6: 0 },
+          accident: { grade1: 0, grade2: 0, grade3: 0, grade4: 0, grade5: 0, grade6: 0 },
+          suspension: { grade1: 0, grade2: 0, grade3: 0, grade4: 0, grade5: 0, grade6: 0 },
+          mourning: { grade1: 0, grade2: 0, grade3: 0, grade4: 0, grade5: 0, grade6: 0 }
+        };
+
+        // Load attendance records for the selected date
+        const attendanceResponse = await fetch(`/api/v1/attendance-records?date=${diary.value.date}&status=absent`);
+        if (attendanceResponse.ok) {
+          const attendanceData = await attendanceResponse.json();
+          
+          // Process attendance records (status=absent)
+          if (attendanceData.data) {
+            attendanceData.data.forEach(record => {
+              const grade = record.student?.school_class?.grade || record.grade;
+              if (grade >= 1 && grade <= 6) {
+                const gradeKey = `grade${grade}`;
+                absence.value.absent[gradeKey]++;
+              }
+            });
+          }
+        }
+
+        // Load nursing visit records for the selected date
+        const nursingResponse = await fetch(`/api/v1/nursing-visits?date=${diary.value.date}`);
+        if (nursingResponse.ok) {
+          const nursingData = await nursingResponse.json();
+          
+          // Clear existing visits
+          visits.value = [];
+
+          // Process nursing visit records
+          if (nursingData.data && nursingData.data.length > 0) {
+            nursingData.data.forEach(record => {
+              const grade = record.grade;
+              
+              // Count absence types from nursing visits with category='absence'
+              if (record.category === 'absence' && grade >= 1 && grade <= 6) {
+                const gradeKey = `grade${grade}`;
+                
+                // Map type_detail to absence categories
+                // type_detail values could be: sick, accident, suspension, mourning, etc.
+                if (record.type_detail === 'sick' || record.type_detail === '病欠') {
+                  absence.value.sick[gradeKey]++;
+                } else if (record.type_detail === 'accident' || record.type_detail === '事故欠') {
+                  absence.value.accident[gradeKey]++;
+                } else if (record.type_detail === 'suspension' || record.type_detail === '出停') {
+                  absence.value.suspension[gradeKey]++;
+                } else if (record.type_detail === 'mourning' || record.type_detail === '忌引') {
+                  absence.value.mourning[gradeKey]++;
+                }
+              }
+              
+              // Extract class name without grade prefix (e.g., "3進学" -> "進学")
+              const className = record.class_name ? record.class_name.replace(/^[0-9]/, '') : '';
+              
+              // Add to visits list
+              visits.value.push({
+                time: record.time || '',
+                grade: record.grade || '',
+                class: className,
+                number: record.student_number || '',
+                name: record.student_name || '',
+                gender: record.gender === '男' ? '男' : record.gender === '女' ? '女' : '',
+                type: getTypeLabel(record.type_detail) || getTypeLabel(record.category) || record.type || '',
+                occurrence: record.occurrence_time || '',
+                treatment: record.treatment_notes || ''
+              });
+            });
+          }
+          
+          // Add empty rows if needed (minimum 5 rows)
+          while (visits.value.length < 5) {
+            visits.value.push({
+              time: '',
+              grade: '',
+              class: '',
+              number: '',
+              name: '',
+              gender: '',
+              type: '',
+              occurrence: '',
+              treatment: ''
+            });
+          }
+        }
+
+        console.log('Loaded diary data for:', diary.value.date);
+        console.log('Absence data:', absence.value);
+        console.log('Visits data:', visits.value);
+
+      } catch (error) {
+        console.error('Error loading diary data:', error);
+        notificationStore.addNotification({
+          type: 'danger',
+          title: 'エラー',
+          message: 'データの読み込みに失敗しました'
+        });
+      }
     };
 
     const saveDiary = async () => {
@@ -566,6 +699,7 @@ export default {
       visits,
       getDayOfWeek,
       absenceTotal,
+      getTypeLabel,
       addVisit,
       loadDiary,
       saveDiary,

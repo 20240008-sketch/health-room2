@@ -489,8 +489,10 @@
                       </template>
                       <template v-else-if="visit.category === 'absence'">
                         <option value="sick">病欠</option>
-                        <option value="injury">怪我</option>
-                        <option value="family">家庭の事情</option>
+                        <option value="accident">事故欠</option>
+                        <option value="suspension">出停</option>
+                        <option value="mourning">忌引</option>
+                        <option value="other">その他</option>
                       </template>
                     </select>
                   </td>
