@@ -1,5 +1,5 @@
 <template>
-  <AppLayout :show-right-sidebar="true">
+  <AppLayout>
     <!-- Page Header -->
     <template #header>
       <div class="md:flex md:items-center md:justify-between">
@@ -247,6 +247,31 @@
             :show-pagination="false"
             @row-click="handleHealthRecordClick"
           >
+            <!-- Measured Date Column -->
+            <template #measured_date="{ row }">
+              <span class="text-sm text-gray-900">{{ formatDate(row.measured_date) }}</span>
+            </template>
+
+            <!-- Height Column -->
+            <template #height="{ row }">
+              <span class="text-sm text-gray-900">{{ row.height ? row.height + ' cm' : '-' }}</span>
+            </template>
+
+            <!-- Weight Column -->
+            <template #weight="{ row }">
+              <span class="text-sm text-gray-900">{{ row.weight ? row.weight + ' kg' : '-' }}</span>
+            </template>
+
+            <!-- Vision Column -->
+            <template #vision="{ row }">
+              <div class="text-sm text-gray-900">
+                <span v-if="row.vision_left || row.vision_right">
+                  {{ row.vision_left || '-' }} / {{ row.vision_right || '-' }}
+                </span>
+                <span v-else class="text-gray-400">-</span>
+              </div>
+            </template>
+
             <!-- BMI Column -->
             <template #bmi="{ row }">
               <div v-if="row.bmi" class="flex items-center">
@@ -260,11 +285,6 @@
                 </BaseBadge>
               </div>
               <span v-else class="text-gray-400">-</span>
-            </template>
-
-            <!-- Date Column -->
-            <template #recorded_date="{ row }">
-              {{ formatDate(row.recorded_date) }}
             </template>
           </BaseTable>
         </div>
@@ -299,68 +319,6 @@
         </div>
       </BaseCard>
     </div>
-
-    <!-- Right Sidebar -->
-    <template #rightSidebar>
-      <div class="space-y-6">
-        <!-- Quick Actions -->
-        <div>
-          <h3 class="text-sm font-medium text-gray-900 mb-3">クイックアクション</h3>
-          <div class="space-y-2">
-            <BaseButton
-              variant="primary"
-              size="sm"
-              class="w-full justify-start"
-              @click="$router.push(`/health-records/create?student_id=${student?.id}`)"
-            >
-              <PlusIcon class="h-4 w-4 mr-2" />
-              健康記録追加
-            </BaseButton>
-            <BaseButton
-              variant="secondary"
-              size="sm"
-              class="w-full justify-start"
-              @click="$router.push(`/students/${student?.id}/edit`)"
-            >
-              <PencilIcon class="h-4 w-4 mr-2" />
-              情報編集
-            </BaseButton>
-            <BaseButton
-              variant="info"
-              size="sm"
-              class="w-full justify-start"
-              @click="generateReport"
-            >
-              <DocumentIcon class="h-4 w-4 mr-2" />
-              レポート生成
-            </BaseButton>
-          </div>
-        </div>
-
-        <!-- Health Trends -->
-        <div v-if="healthRecords.length > 1">
-          <h3 class="text-sm font-medium text-gray-900 mb-3">成長トレンド</h3>
-          <div class="space-y-3">
-            <div class="bg-gray-50 rounded-lg p-3">
-              <div class="flex justify-between items-center">
-                <span class="text-xs text-gray-500">身長変化</span>
-                <span class="text-sm font-medium" :class="getHeightTrendColor()">
-                  {{ getHeightTrend() }}
-                </span>
-              </div>
-            </div>
-            <div class="bg-gray-50 rounded-lg p-3">
-              <div class="flex justify-between items-center">
-                <span class="text-xs text-gray-500">体重変化</span>
-                <span class="text-sm font-medium" :class="getWeightTrendColor()">
-                  {{ getWeightTrend() }}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </template>
   </AppLayout>
 </template>
 
@@ -463,23 +421,28 @@ export default {
     const healthRecordColumns = [
       {
         key: 'measured_date',
-        label: '記録日',
-        width: '100px'
+        label: '測定日',
+        width: '110px'
       },
       {
         key: 'height',
         label: '身長(cm)',
-        width: '80px'
+        width: '90px'
       },
       {
         key: 'weight',
         label: '体重(kg)',
-        width: '80px'
+        width: '90px'
+      },
+      {
+        key: 'vision',
+        label: '視力(左/右)',
+        width: '110px'
       },
       {
         key: 'bmi',
         label: 'BMI',
-        width: '120px'
+        width: '100px'
       }
     ];
     
@@ -531,54 +494,6 @@ export default {
         case 'graduated': return '卒業';
         default: return '不明';
       }
-    };
-    
-    const getHeightTrend = () => {
-      if (healthRecords.value.length < 2) return '-';
-      
-      const latest = healthRecords.value[0];
-      const previous = healthRecords.value[1];
-      const diff = latest.height - previous.height;
-      
-      if (diff > 0) return `+${diff.toFixed(1)}cm`;
-      if (diff < 0) return `${diff.toFixed(1)}cm`;
-      return '±0cm';
-    };
-    
-    const getHeightTrendColor = () => {
-      if (healthRecords.value.length < 2) return 'text-gray-500';
-      
-      const latest = healthRecords.value[0];
-      const previous = healthRecords.value[1];
-      const diff = latest.height - previous.height;
-      
-      if (diff > 0) return 'text-green-600';
-      if (diff < 0) return 'text-red-600';
-      return 'text-gray-600';
-    };
-    
-    const getWeightTrend = () => {
-      if (healthRecords.value.length < 2) return '-';
-      
-      const latest = healthRecords.value[0];
-      const previous = healthRecords.value[1];
-      const diff = latest.weight - previous.weight;
-      
-      if (diff > 0) return `+${diff.toFixed(1)}kg`;
-      if (diff < 0) return `${diff.toFixed(1)}kg`;
-      return '±0kg';
-    };
-    
-    const getWeightTrendColor = () => {
-      if (healthRecords.value.length < 2) return 'text-gray-500';
-      
-      const latest = healthRecords.value[0];
-      const previous = healthRecords.value[1];
-      const diff = latest.weight - previous.weight;
-      
-      if (diff > 0) return 'text-blue-600';
-      if (diff < 0) return 'text-orange-600';
-      return 'text-gray-600';
     };
     
     const handleHealthRecordClick = (record) => {
@@ -641,10 +556,6 @@ export default {
       getBmiStatus,
       getStatusVariant,
       getStatusText,
-      getHeightTrend,
-      getHeightTrendColor,
-      getWeightTrend,
-      getWeightTrendColor,
       handleHealthRecordClick,
       generateReport
     };

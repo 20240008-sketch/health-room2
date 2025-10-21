@@ -103,7 +103,7 @@
               <div class="flex justify-between">
                 <span class="text-sm text-gray-500">性別</span>
                 <span class="text-sm font-medium text-gray-900">
-                  {{ record.student?.gender === 'male' ? '男性' : '女性' }}
+                  {{ record.student?.gender === '男' ? '男性' : record.student?.gender === '女' ? '女性' : record.student?.gender || '不明' }}
                 </span>
               </div>
               <div class="flex justify-between">
