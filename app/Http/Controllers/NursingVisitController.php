@@ -14,7 +14,7 @@ class NursingVisitController extends Controller
      */
     public function index(Request $request)
     {
-        $query = NursingVisit::with('student');
+        $query = NursingVisit::with(['student.schoolClass']);
 
         // 日付フィルター
         if ($request->has('date')) {
@@ -54,14 +54,16 @@ class NursingVisitController extends Controller
                 'date' => $visit->date->format('Y-m-d'),
                 'time' => $visit->time->format('H:i'),
                 'student_id' => $visit->student_id,
-                'student_name' => $visit->student->name,
-                'student_number' => $visit->student->student_number,
+                'student_name' => $visit->student->name ?? '',
+                'student_number' => $visit->student->student_number ?? '',
                 'class_name' => $visit->student->schoolClass->name ?? '',
                 'grade' => $visit->student->schoolClass->grade ?? '',
-                'gender' => $visit->student->gender,
-                'type' => $visit->type,
-                'occurrence_time' => $visit->occurrence_time,
-                'treatment_notes' => $visit->treatment_notes,
+                'gender' => $visit->student->gender ?? '',
+                'category' => $visit->category ?? '',
+                'type' => $visit->type ?? '',
+                'type_detail' => $visit->type_detail ?? '',
+                'occurrence_time' => $visit->occurrence_time ?? '',
+                'treatment_notes' => $visit->treatment_notes ?? '',
                 'created_at' => $visit->created_at->toISOString(),
             ];
         });
@@ -80,7 +82,9 @@ class NursingVisitController extends Controller
             'date' => 'required|date',
             'time' => 'required',
             'student_id' => 'required|exists:students,id',
-            'type' => 'required|in:injury,illness,other',
+            'category' => 'nullable|string|max:20',
+            'type' => 'nullable|string|max:50',
+            'type_detail' => 'nullable|string|max:50',
             'occurrence_time' => 'nullable|string|max:255',
             'treatment_notes' => 'nullable|string',
         ]);
@@ -96,7 +100,7 @@ class NursingVisitController extends Controller
 
         return response()->json([
             'message' => '来室記録を保存しました',
-            'data' => $visit->load('student')
+            'data' => $visit->load(['student.schoolClass'])
         ], 201);
     }
 
@@ -110,7 +114,9 @@ class NursingVisitController extends Controller
             'visits.*.date' => 'required|date',
             'visits.*.time' => 'required',
             'visits.*.student_id' => 'required|exists:students,id',
-            'visits.*.type' => 'required|in:injury,illness,other',
+            'visits.*.category' => 'nullable|string|max:20',
+            'visits.*.type' => 'nullable|string|max:50',
+            'visits.*.type_detail' => 'nullable|string|max:50',
             'visits.*.occurrence_time' => 'nullable|string|max:255',
             'visits.*.treatment_notes' => 'nullable|string',
         ]);
@@ -124,7 +130,9 @@ class NursingVisitController extends Controller
 
         $visits = [];
         foreach ($request->visits as $visitData) {
-            $visits[] = NursingVisit::create($visitData);
+            $visit = NursingVisit::create($visitData);
+            $visit->load(['student.schoolClass']);
+            $visits[] = $visit;
         }
 
         return response()->json([

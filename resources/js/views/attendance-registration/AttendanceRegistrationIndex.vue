@@ -220,7 +220,14 @@
             :columns="columns"
             :data="attendanceRecords"
             :actions="actions"
-          />
+          >
+            <template #cell(category)="{ item }">
+              <span>{{ getCategoryLabel(item.category) }}</span>
+            </template>
+            <template #cell(type_detail)="{ item }">
+              <span>{{ getTypeDetailLabel(item.type_detail) }}</span>
+            </template>
+          </BaseTable>
         </div>
       </BaseCard>
     </div>
@@ -405,7 +412,8 @@ export default {
           { key: 'time', label: '時間' },
           { key: 'student_name', label: '学生名' },
           { key: 'class_name', label: 'クラス' },
-          { key: 'type', label: '種別' },
+          { key: 'category', label: '分類' },
+          { key: 'type_detail', label: '種別' },
           { key: 'occurrence_time', label: '発生時刻' },
           { key: 'treatment_notes', label: '処置内容' }
         ];
@@ -472,6 +480,40 @@ export default {
         message: 'エクスポート機能は開発中です'
       });
     };
+
+    const getCategoryLabel = (category) => {
+      const labels = {
+        'internal': '内科',
+        'surgical': '外科',
+        'other': 'その他',
+        'absence': '欠席'
+      };
+      return labels[category] || category || '-';
+    };
+
+    const getTypeDetailLabel = (typeDetail) => {
+      const labels = {
+        // 内科
+        'stomachache': '腹痛',
+        'headache': '頭痛',
+        'fever': '発熱',
+        'cough': '咳',
+        // 外科
+        'cut': '切り傷',
+        'bruise': '打撲',
+        'sprain': '捻挫',
+        'fracture': '骨折',
+        // その他
+        'counseling': '相談',
+        'rest': '休養',
+        'other': 'その他',
+        // 欠席
+        'sick': '病欠',
+        'injury': '怪我',
+        'family': '家庭の事情'
+      };
+      return labels[typeDetail] || typeDetail || '-';
+    };
     
     const loadAttendanceRecords = async () => {
       loading.value = true;
@@ -502,7 +544,13 @@ export default {
         
         const result = await response.json();
         
-        // Format attendance records to match the nursing visit format
+        console.log('=== API Response ===');
+        console.log('Record Type:', recordType.value);
+        console.log('Result:', result);
+        console.log('First Record:', result.data?.[0]);
+        console.log('==================');
+        
+        // Format records based on record type
         let records = result.data || [];
         if (recordType.value === 'attendance') {
           records = records.map(record => ({
@@ -514,9 +562,38 @@ export default {
             grade: record.student?.school_class?.grade || '',
             gender: record.student?.gender || ''
           }));
+        } else if (recordType.value === 'nursing') {
+          records = records.map(record => {
+            console.log('=== Detailed Mapping ===');
+            console.log('record:', record);
+            console.log('record.student:', record.student);
+            console.log('record.student?.name:', record.student?.name);
+            console.log('record.student?.school_class:', record.student?.school_class);
+            console.log('record.student?.school_class?.name:', record.student?.school_class?.name);
+            console.log('record.student_name:', record.student_name);
+            console.log('record.class_name:', record.class_name);
+            
+            const mapped = {
+              ...record,
+              date: record.date ? record.date.split('T')[0] : '',
+              time: record.time || '',
+              student_name: record.student?.name || record.student_name || '',
+              student_number: record.student?.student_number || '',
+              class_name: record.student?.school_class?.name || record.class_name || '',
+              grade: record.student?.school_class?.grade || '',
+              category: record.category || '',
+              type_detail: record.type_detail || '',
+              occurrence_time: record.occurrence_time || '',
+              treatment_notes: record.treatment_notes || ''
+            };
+            console.log('Mapped result:', mapped);
+            console.log('========================');
+            return mapped;
+          });
         }
         
         attendanceRecords.value = records;
+        console.log('Final attendanceRecords:', attendanceRecords.value);
         
         // Update statistics
         if (result.statistics) {
@@ -572,7 +649,9 @@ export default {
       updateDateFilter,
       applyFilters,
       goToCreate,
-      exportData
+      exportData,
+      getCategoryLabel,
+      getTypeDetailLabel
     };
   }
 };

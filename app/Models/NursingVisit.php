@@ -11,7 +11,9 @@ class NursingVisit extends Model
         'date',
         'time',
         'student_id',
+        'category',
         'type',
+        'type_detail',
         'occurrence_time',
         'treatment_notes',
     ];

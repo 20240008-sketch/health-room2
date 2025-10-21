@@ -346,6 +346,9 @@
                   <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     学生情報（年・組・番・氏名・性）
                   </th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                    分類
+                  </th>
                   <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
                     種別
                   </th>
@@ -450,12 +453,45 @@
                   </td>
                   <td class="px-4 py-4 whitespace-nowrap">
                     <select
-                      v-model="visit.type"
-                      class="block w-24 px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      v-model="visit.category"
+                      @change="onCategoryChange(index)"
+                      class="block w-20 px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     >
-                      <option value="injury">けが</option>
-                      <option value="illness">病気</option>
+                      <option value="internal">内科</option>
+                      <option value="surgical">外科</option>
                       <option value="other">その他</option>
+                      <option value="absence">欠席</option>
+                    </select>
+                  </td>
+                  <td class="px-4 py-4 whitespace-nowrap">
+                    <select
+                      v-model="visit.type_detail"
+                      class="block w-24 px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      :disabled="!visit.category"
+                    >
+                      <option value="">選択</option>
+                      <template v-if="visit.category === 'internal'">
+                        <option value="stomachache">腹痛</option>
+                        <option value="headache">頭痛</option>
+                        <option value="fever">発熱</option>
+                        <option value="cough">咳</option>
+                      </template>
+                      <template v-else-if="visit.category === 'surgical'">
+                        <option value="cut">切り傷</option>
+                        <option value="bruise">打撲</option>
+                        <option value="sprain">捻挫</option>
+                        <option value="fracture">骨折</option>
+                      </template>
+                      <template v-else-if="visit.category === 'other'">
+                        <option value="counseling">相談</option>
+                        <option value="rest">休養</option>
+                        <option value="other">その他</option>
+                      </template>
+                      <template v-else-if="visit.category === 'absence'">
+                        <option value="sick">病欠</option>
+                        <option value="injury">怪我</option>
+                        <option value="family">家庭の事情</option>
+                      </template>
                     </select>
                   </td>
                   <td class="px-4 py-4 whitespace-nowrap">
@@ -861,11 +897,18 @@ export default {
       nursingVisits.value.push({
         time: now.toTimeString().slice(0, 5), // HH:MM format
         student_id: '',
+        category: 'internal',
         type: 'illness',
+        type_detail: '',
         occurrence_time: '',
         treatment_notes: '',
         selectedClass: ''
       });
+    };
+
+    const onCategoryChange = (index) => {
+      // 分類が変更されたら種別詳細をリセット
+      nursingVisits.value[index].type_detail = '';
     };
     
     const removeNursingVisit = (index) => {
@@ -984,11 +1027,11 @@ export default {
       // Validate all visits have required fields
       for (let i = 0; i < nursingVisits.value.length; i++) {
         const visit = nursingVisits.value[i];
-        if (!visit.student_id || !visit.time || !visit.type) {
+        if (!visit.student_id || !visit.time || !visit.category) {
           notificationStore.addNotification({
             type: 'danger',
             title: 'エラー',
-            message: `${i + 1}行目：学生、時間、種別は必須です`
+            message: `${i + 1}行目：学生、時間、分類は必須です`
           });
           return;
         }
@@ -1001,7 +1044,9 @@ export default {
           date: nursingForm.value.date,
           time: visit.time,
           student_id: visit.student_id,
+          category: visit.category,
           type: visit.type,
+          type_detail: visit.type_detail || null,
           occurrence_time: visit.occurrence_time || null,
           treatment_notes: visit.treatment_notes || null
         }));
@@ -1096,6 +1141,7 @@ export default {
       loadStudentsForNursing,
       addNursingVisit,
       removeNursingVisit,
+      onCategoryChange,
       onStudentSelect,
       getStudentById,
       saveNursingVisits,
