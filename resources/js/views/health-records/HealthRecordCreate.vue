@@ -1418,6 +1418,7 @@ export default {
           const recordData = {
             student_id: selectedStudent.value.id,
             year: parseInt(form.academic_year), // academic_year → year
+            measured_date: form.measured_date || null,
             height: measurementItems.height && form.height ? parseFloat(form.height) : null,
             weight: measurementItems.weight && form.weight ? parseFloat(form.weight) : null,
             vision_left: measurementItems.vision && form.vision_left ? parseFloat(form.vision_left) : null,
@@ -1426,6 +1427,14 @@ export default {
             vision_right_corrected: measurementItems.vision && form.vision_right_corrected ? parseFloat(form.vision_right_corrected) : null,
             notes: form.notes || null
           };
+          
+          console.log('=== Individual Record Submission ===');
+          console.log('Form data:', form);
+          console.log('form.academic_year:', form.academic_year, 'Type:', typeof form.academic_year);
+          console.log('parseInt(form.academic_year):', parseInt(form.academic_year));
+          console.log('Selected student:', selectedStudent.value);
+          console.log('Record data to submit:', recordData);
+          console.log('===================================');
           
           const newRecord = await healthRecordStore.createHealthRecord(recordData);
           
@@ -1443,6 +1452,7 @@ export default {
             return {
               student_id: studentId,
               year: parseInt(form.academic_year), // academic_year → year
+              measured_date: form.measured_date || null,
               height: measurementItems.height && measurement.height ? parseFloat(measurement.height) : null,
               weight: measurementItems.weight && measurement.weight ? parseFloat(measurement.weight) : null,
               vision_left: measurementItems.vision && measurement.vision_left ? parseFloat(measurement.vision_left) : null,
@@ -1464,6 +1474,13 @@ export default {
           router.push('/health-records');
         }
       } catch (error) {
+        console.error('=== Health Record Creation Error ===');
+        console.error('Error:', error);
+        console.error('Response:', error.response);
+        console.error('Response data:', error.response?.data);
+        console.error('Validation errors:', error.response?.data?.errors);
+        console.error('===================================');
+        
         if (error.response?.data?.errors) {
           errors.value = error.response.data.errors;
         }

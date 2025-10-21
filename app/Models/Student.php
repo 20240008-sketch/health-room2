@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Student extends Model
 {
@@ -68,11 +69,11 @@ class Student extends Model
     }
 
     /**
-     * Get the latest health record for the student.
+     * Get the latest health record for the student (single record).
      */
-    public function latestHealthRecord(): HasMany
+    public function latestHealthRecord(): HasOne
     {
-        return $this->hasMany(HealthRecord::class)->latest('measured_date');
+        return $this->hasOne(HealthRecord::class)->latestOfMany('created_at');
     }
 
     /**

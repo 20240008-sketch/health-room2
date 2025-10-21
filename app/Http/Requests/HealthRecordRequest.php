@@ -90,6 +90,20 @@ class HealthRecordRequest extends FormRequest
                 'min:0',
                 'max:2',
             ],
+            'vision_left_corrected' => [
+                'sometimes',
+                'nullable',
+                'numeric',
+                'min:0',
+                'max:3',
+            ],
+            'vision_right_corrected' => [
+                'sometimes',
+                'nullable',
+                'numeric',
+                'min:0',
+                'max:3',
+            ],
             'hearing_left' => [
                 'sometimes',
                 'nullable',
@@ -164,32 +178,52 @@ class HealthRecordRequest extends FormRequest
     public function withValidator($validator): void
     {
         $validator->after(function ($validator) {
-            // 身長・体重の両方が空の場合は警告
-            if (empty($this->height) && empty($this->weight)) {
-                $validator->addFailure('height', 'height_or_weight', '身長または体重のいずれかは入力してください。');
+            // 少なくとも1つの測定項目が入力されているか確認
+            $hasAnyMeasurement = !empty($this->height) || 
+                                !empty($this->weight) || 
+                                !empty($this->vision_left) || 
+                                !empty($this->vision_right) ||
+                                !empty($this->vision_left_corrected) ||
+                                !empty($this->vision_right_corrected);
+            
+            if (!$hasAnyMeasurement) {
+                $validator->addFailure('height', 'no_measurements', '少なくとも1つの測定項目を入力してください。');
             }
 
-            // 既存レコードの重複チェック（同じ生徒・年度）
+            // 既存レコードの重複チェック（同じ生徒・年度・測定日）
+            // measured_dateが同じ場合のみ重複とみなす（個別測定で複数回保存可能にするため）
             if ($this->isMethod('POST')) {
-                $existingRecord = HealthRecord::where('student_id', $this->student_id)
-                                            ->where('year', $this->year)
-                                            ->first();
+                $query = HealthRecord::where('student_id', $this->student_id)
+                                    ->where('year', $this->year);
+                
+                // measured_dateが指定されている場合のみ、同じ日付の重複をチェック
+                if ($this->measured_date) {
+                    $query->where('measured_date', $this->measured_date);
+                }
+                
+                $existingRecord = $query->first();
 
                 if ($existingRecord) {
-                    $validator->addFailure('year', 'unique_student_year', 'この生徒の指定年度の健康記録は既に存在します。');
+                    $validator->addFailure('measured_date', 'unique_student_year_date', 'この生徒の指定年度・測定日の健康記録は既に存在します。');
                 }
             } elseif ($this->isMethod('PUT') || $this->isMethod('PATCH')) {
                 $healthRecordId = $this->route('health_record');
                 $healthRecord = HealthRecord::find($healthRecordId);
 
                 if ($healthRecord) {
-                    $existingRecord = HealthRecord::where('student_id', $healthRecord->student_id)
-                                                ->where('year', $this->year)
-                                                ->where('id', '!=', $healthRecordId)
-                                                ->first();
+                    $query = HealthRecord::where('student_id', $healthRecord->student_id)
+                                        ->where('year', $this->year)
+                                        ->where('id', '!=', $healthRecordId);
+                    
+                    // measured_dateが指定されている場合のみ、同じ日付の重複をチェック
+                    if ($this->measured_date) {
+                        $query->where('measured_date', $this->measured_date);
+                    }
+                    
+                    $existingRecord = $query->first();
 
                     if ($existingRecord) {
-                        $validator->addFailure('year', 'unique_student_year', 'この生徒の指定年度の健康記録は既に存在します。');
+                        $validator->addFailure('measured_date', 'unique_student_year_date', 'この生徒の指定年度・測定日の健康記録は既に存在します。');
                     }
                 }
             }

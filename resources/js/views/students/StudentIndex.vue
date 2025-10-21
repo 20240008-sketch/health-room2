@@ -201,10 +201,10 @@
             <!-- Last Record Date -->
             <template #cell(last_record_date)="{ item }">
               <span
-                v-if="item.latest_health_record?.recorded_date"
+                v-if="item.latest_health_record?.measured_date"
                 class="text-sm text-gray-900"
               >
-                {{ formatDate(item.latest_health_record.recorded_date) }}
+                {{ formatDate(item.latest_health_record.measured_date) }}
               </span>
               <span v-else class="text-sm text-gray-400">
                 記録なし

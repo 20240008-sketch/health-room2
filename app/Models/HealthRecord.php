@@ -13,6 +13,7 @@ class HealthRecord extends Model
     protected $fillable = [
         'student_id',
         'year',
+        'measured_date',
         'height',
         'weight',
         'vision_left',
@@ -26,6 +27,7 @@ class HealthRecord extends Model
     protected $casts = [
         'student_id' => 'integer',
         'year' => 'integer',
+        'measured_date' => 'date',
         'height' => 'decimal:2',
         'weight' => 'decimal:2',
         'vision_left' => 'decimal:2',
@@ -34,7 +36,7 @@ class HealthRecord extends Model
         'vision_right_corrected' => 'decimal:2',
     ];
 
-    protected $appends = ['bmi', 'academic_year', 'measured_date'];
+    protected $appends = ['bmi', 'academic_year'];
 
     /**
      * Get the student that owns the health record.
@@ -62,13 +64,5 @@ class HealthRecord extends Model
     public function getAcademicYearAttribute(): int
     {
         return $this->year;
-    }
-
-    /**
-     * Get the measured date (use created_at as fallback).
-     */
-    public function getMeasuredDateAttribute(): string
-    {
-        return $this->created_at ? $this->created_at->format('Y-m-d') : '';
     }
 }

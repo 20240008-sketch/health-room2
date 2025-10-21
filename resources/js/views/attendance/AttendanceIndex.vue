@@ -229,6 +229,7 @@
                     <th class="border-r border-gray-800 px-2 py-1 w-16">番</th>
                     <th class="border-r border-gray-800 px-2 py-1 w-32">氏名</th>
                     <th class="border-r border-gray-800 px-2 py-1 w-12">性</th>
+                    <th class="border-r border-gray-800 px-2 py-1 w-20">分類</th>
                     <th class="border-r border-gray-800 px-2 py-1 w-24">種別</th>
                     <th class="border-r border-gray-800 px-2 py-1 w-24">発生時</th>
                     <th class="border-r border-gray-800 px-2 py-1">処置・原因・備考</th>
@@ -253,6 +254,9 @@
                     </td>
                     <td class="border-r border-gray-300 px-1 py-1">
                       <input type="text" v-model="visit.gender" class="w-full text-center border-0 bg-transparent text-xs" maxlength="1" />
+                    </td>
+                    <td class="border-r border-gray-300 px-1 py-1">
+                      <input type="text" v-model="visit.category" class="w-full text-center border-0 bg-transparent text-xs" placeholder="内科" />
                     </td>
                     <td class="border-r border-gray-300 px-1 py-1">
                       <input type="text" v-model="visit.type" class="w-full border-0 bg-transparent text-xs" placeholder="けが" />
@@ -378,11 +382,11 @@ export default {
 
     // Health room visits
     const visits = ref([
-      { time: '', grade: '', class: '', number: '', name: '', gender: '', type: '', occurrence: '', treatment: '' },
-      { time: '', grade: '', class: '', number: '', name: '', gender: '', type: '', occurrence: '', treatment: '' },
-      { time: '', grade: '', class: '', number: '', name: '', gender: '', type: '', occurrence: '', treatment: '' },
-      { time: '', grade: '', class: '', number: '', name: '', gender: '', type: '', occurrence: '', treatment: '' },
-      { time: '', grade: '', class: '', number: '', name: '', gender: '', type: '', occurrence: '', treatment: '' }
+      { time: '', grade: '', class: '', number: '', name: '', gender: '', category: '', type: '', occurrence: '', treatment: '' },
+      { time: '', grade: '', class: '', number: '', name: '', gender: '', category: '', type: '', occurrence: '', treatment: '' },
+      { time: '', grade: '', class: '', number: '', name: '', gender: '', category: '', type: '', occurrence: '', treatment: '' },
+      { time: '', grade: '', class: '', number: '', name: '', gender: '', category: '', type: '', occurrence: '', treatment: '' },
+      { time: '', grade: '', class: '', number: '', name: '', gender: '', category: '', type: '', occurrence: '', treatment: '' }
     ]);
 
     // Methods
@@ -426,6 +430,16 @@ export default {
       return typeLabels[typeDetail] || typeDetail;
     };
 
+    const getCategoryLabel = (category) => {
+      const categoryLabels = {
+        'internal': '内科',
+        'surgical': '外科',
+        'other': 'その他',
+        'absence': '欠席'
+      };
+      return categoryLabels[category] || category;
+    };
+
     const addVisit = () => {
       visits.value.push({
         time: '',
@@ -434,6 +448,7 @@ export default {
         number: '',
         name: '',
         gender: '',
+        category: '',
         type: '',
         occurrence: '',
         treatment: ''
@@ -515,6 +530,7 @@ export default {
                 number: record.student_number || '',
                 name: record.student_name || '',
                 gender: record.gender === '男' ? '男' : record.gender === '女' ? '女' : '',
+                category: getCategoryLabel(record.category) || '',
                 type: getTypeLabel(record.type_detail) || getTypeLabel(record.category) || record.type || '',
                 occurrence: record.occurrence_time || '',
                 treatment: record.treatment_notes || ''
@@ -531,6 +547,7 @@ export default {
               number: '',
               name: '',
               gender: '',
+              category: '',
               type: '',
               occurrence: '',
               treatment: ''
@@ -699,6 +716,7 @@ export default {
       visits,
       getDayOfWeek,
       absenceTotal,
+      getCategoryLabel,
       getTypeLabel,
       addVisit,
       loadDiary,
