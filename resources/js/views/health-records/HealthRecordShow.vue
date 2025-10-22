@@ -753,10 +753,11 @@ export default {
     };
     
     const calculateAge = (birthDate, measuredDate) => {
-      if (!birthDate || !measuredDate) return 0;
+      if (!birthDate) return 0;
       
       const birth = new Date(birthDate);
-      const measured = new Date(measuredDate);
+      // measuredDateがない場合は現在の日付を使用
+      const measured = measuredDate ? new Date(measuredDate) : new Date();
       let age = measured.getFullYear() - birth.getFullYear();
       const monthDiff = measured.getMonth() - birth.getMonth();
       

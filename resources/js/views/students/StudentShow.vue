@@ -94,7 +94,7 @@
               <div>
                 <dt class="text-sm font-medium text-gray-500">性別</dt>
                 <dd class="mt-1 text-sm text-gray-900">
-                  {{ student.gender === 'male' ? '男' : student.gender === 'female' ? '女' : '-' }}
+                  {{ student.gender === 'male' || student.gender === '男' ? '男' : student.gender === 'female' || student.gender === '女' ? '女' : '-' }}
                 </dd>
               </div>
               

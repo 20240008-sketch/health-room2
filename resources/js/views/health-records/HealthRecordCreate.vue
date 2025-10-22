@@ -703,7 +703,7 @@
               </div>
               <div class="flex justify-between text-sm">
                 <span class="text-gray-500">性別</span>
-                <span class="font-medium">{{ selectedStudent.gender === 'male' ? '男' : '女' }}</span>
+                <span class="font-medium">{{ selectedStudent.gender === 'male' || selectedStudent.gender === '男' ? '男' : selectedStudent.gender === 'female' || selectedStudent.gender === '女' ? '女' : '-' }}</span>
               </div>
               <div v-if="selectedStudent.latest_health_record" class="flex justify-between text-sm">
                 <span class="text-gray-500">前回測定</span>

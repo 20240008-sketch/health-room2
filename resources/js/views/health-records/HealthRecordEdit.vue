@@ -474,7 +474,7 @@
               </div>
               <div class="flex justify-between text-sm">
                 <span class="text-gray-500">性別</span>
-                <span class="font-medium">{{ record.student?.gender === 'male' ? '男' : '女' }}</span>
+                <span class="font-medium">{{ record.student?.gender === 'male' || record.student?.gender === '男' ? '男' : record.student?.gender === 'female' || record.student?.gender === '女' ? '女' : '-' }}</span>
               </div>
               <div class="flex justify-between text-sm">
                 <span class="text-gray-500">年齢</span>
