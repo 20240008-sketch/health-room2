@@ -219,13 +219,30 @@
           <BaseTable
             :columns="columns"
             :data="attendanceRecords"
-            :actions="actions"
           >
             <template #cell(category)="{ item }">
               <span>{{ getCategoryLabel(item.category) }}</span>
             </template>
             <template #cell(type_detail)="{ item }">
               <span>{{ getTypeDetailLabel(item.type_detail) }}</span>
+            </template>
+            <template #actions="{ item }">
+              <div class="flex space-x-2">
+                <BaseButton
+                  size="sm"
+                  variant="secondary"
+                  @click.stop="router.push({ name: 'attendance-registration.edit', params: { id: item.id } })"
+                >
+                  編集
+                </BaseButton>
+                <BaseButton
+                  size="sm"
+                  variant="danger"
+                  @click.stop="handleDelete(item)"
+                >
+                  削除
+                </BaseButton>
+              </div>
             </template>
           </BaseTable>
         </div>
@@ -239,6 +256,7 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useClassStore } from '@/stores/class.js';
 import { useNotificationStore } from '@/stores/notification.js';
+import axios from 'axios';
 import {
   AppLayout,
   BaseCard,
@@ -428,30 +446,35 @@ export default {
       }
     });
     
-    // Table actions
-    const actions = [
-      {
-        label: '編集',
-        onClick: (record) => {
-          router.push({ name: 'attendance-registration.edit', params: { id: record.id } });
-        }
-      },
-      {
-        label: '削除',
-        onClick: async (record) => {
-          if (confirm('この出席記録を削除してもよろしいですか？')) {
-            // TODO: Implement delete functionality
-            notificationStore.addNotification({
-              type: 'success',
-              title: '削除完了',
-              message: '出席記録を削除しました'
-            });
-          }
+    // Methods
+    const handleDelete = async (record) => {
+      if (confirm('この記録を削除してもよろしいですか？削除した記録は元に戻せません。')) {
+        try {
+          const endpoint = recordType.value === 'nursing'
+            ? `/api/v1/nursing-visits/${record.id}`
+            : `/api/v1/attendance-records/${record.id}`;
+          
+          await axios.delete(endpoint);
+          
+          notificationStore.addNotification({
+            type: 'success',
+            title: '削除完了',
+            message: '記録を削除しました'
+          });
+          
+          // Reload data
+          await loadAttendanceRecords();
+        } catch (error) {
+          console.error('削除エラー:', error);
+          notificationStore.addNotification({
+            type: 'danger',
+            title: '削除エラー',
+            message: '記録の削除に失敗しました'
+          });
         }
       }
-    ];
+    };
     
-    // Methods
     const updateDateFilter = () => {
       const year = dateComponents.value.year;
       const month = String(dateComponents.value.month).padStart(2, '0');
@@ -624,7 +647,8 @@ export default {
       recordListTitle,
       emptyMessage,
       columns,
-      actions,
+      router,
+      handleDelete,
       updateDateFilter,
       applyFilters,
       goToCreate,
