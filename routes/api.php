@@ -62,6 +62,8 @@ Route::group(['prefix' => 'v1'], function () {
         ->name('health-records.peer-comparison');
     Route::get('health-records/statistics', [HealthRecordController::class, 'statistics'])
         ->name('health-records.statistics');
+    Route::get('health-records/statistics-pdf', [HealthRecordController::class, 'statisticsPdf'])
+        ->name('health-records.statistics-pdf');
     
     // 健康記録管理API
     Route::apiResource('health-records', HealthRecordController::class);

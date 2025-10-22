@@ -281,6 +281,7 @@
               <div>
                 <label class="text-base font-medium text-gray-900 mb-3 block">測定項目を選択</label>
                 <div class="space-y-3">
+                  <!-- Basic Measurements -->
                   <label class="flex items-center p-3 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
                     <input
                       type="checkbox"
@@ -304,6 +305,64 @@
                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
                     <span class="ml-3 text-sm font-medium text-gray-700">視力</span>
+                  </label>
+                  
+                  <!-- Medical Examinations -->
+                  <label class="flex items-center p-3 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      v-model="measurementItems.ophthalmology"
+                      class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <span class="ml-3 text-sm font-medium text-gray-700">眼科検診</span>
+                  </label>
+                  <label class="flex items-center p-3 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      v-model="measurementItems.otolaryngology"
+                      class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <span class="ml-3 text-sm font-medium text-gray-700">耳鼻科検診</span>
+                  </label>
+                  <label class="flex items-center p-3 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      v-model="measurementItems.internal_medicine"
+                      class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <span class="ml-3 text-sm font-medium text-gray-700">内科検診</span>
+                  </label>
+                  <label class="flex items-center p-3 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      v-model="measurementItems.hearing_test"
+                      class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <span class="ml-3 text-sm font-medium text-gray-700">聴力検査</span>
+                  </label>
+                  <label class="flex items-center p-3 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      v-model="measurementItems.tuberculosis_test"
+                      class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <span class="ml-3 text-sm font-medium text-gray-700">結核検査</span>
+                  </label>
+                  <label class="flex items-center p-3 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      v-model="measurementItems.urine_test"
+                      class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <span class="ml-3 text-sm font-medium text-gray-700">尿検査</span>
+                  </label>
+                  <label class="flex items-center p-3 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      v-model="measurementItems.ecg"
+                      class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <span class="ml-3 text-sm font-medium text-gray-700">心電図</span>
                   </label>
                 </div>
               </div>
@@ -434,6 +493,90 @@
                         </div>
                       </div>
                     </div>
+                  </div>
+
+                  <!-- Ophthalmology -->
+                  <div v-if="measurementItems.ophthalmology" class="sm:col-span-2">
+                    <BaseInput
+                      type="textarea"
+                      v-model="form.ophthalmology_result"
+                      label="眼科検診結果"
+                      placeholder="検診結果を入力してください"
+                      :error="errors.ophthalmology_result"
+                      rows="2"
+                    />
+                  </div>
+
+                  <!-- Otolaryngology -->
+                  <div v-if="measurementItems.otolaryngology" class="sm:col-span-2">
+                    <BaseInput
+                      type="textarea"
+                      v-model="form.otolaryngology_result"
+                      label="耳鼻科検診結果"
+                      placeholder="検診結果を入力してください"
+                      :error="errors.otolaryngology_result"
+                      rows="2"
+                    />
+                  </div>
+
+                  <!-- Internal Medicine -->
+                  <div v-if="measurementItems.internal_medicine" class="sm:col-span-2">
+                    <BaseInput
+                      type="textarea"
+                      v-model="form.internal_medicine_result"
+                      label="内科検診結果"
+                      placeholder="検診結果を入力してください"
+                      :error="errors.internal_medicine_result"
+                      rows="2"
+                    />
+                  </div>
+
+                  <!-- Hearing Test -->
+                  <div v-if="measurementItems.hearing_test" class="sm:col-span-2">
+                    <BaseInput
+                      type="textarea"
+                      v-model="form.hearing_test_result"
+                      label="聴力検査結果"
+                      placeholder="検査結果を入力してください"
+                      :error="errors.hearing_test_result"
+                      rows="2"
+                    />
+                  </div>
+
+                  <!-- Tuberculosis Test -->
+                  <div v-if="measurementItems.tuberculosis_test" class="sm:col-span-2">
+                    <BaseInput
+                      type="textarea"
+                      v-model="form.tuberculosis_test_result"
+                      label="結核検査結果"
+                      placeholder="検査結果を入力してください"
+                      :error="errors.tuberculosis_test_result"
+                      rows="2"
+                    />
+                  </div>
+
+                  <!-- Urine Test -->
+                  <div v-if="measurementItems.urine_test" class="sm:col-span-2">
+                    <BaseInput
+                      type="textarea"
+                      v-model="form.urine_test_result"
+                      label="尿検査結果"
+                      placeholder="検査結果を入力してください"
+                      :error="errors.urine_test_result"
+                      rows="2"
+                    />
+                  </div>
+
+                  <!-- ECG -->
+                  <div v-if="measurementItems.ecg" class="sm:col-span-2">
+                    <BaseInput
+                      type="textarea"
+                      v-model="form.ecg_result"
+                      label="心電図検査結果"
+                      placeholder="検査結果を入力してください"
+                      :error="errors.ecg_result"
+                      rows="2"
+                    />
                   </div>
                 </div>
 
@@ -899,7 +1042,14 @@ export default {
     const measurementItems = reactive({
       height: true,
       weight: true,
-      vision: false
+      vision: false,
+      ophthalmology: false,
+      otolaryngology: false,
+      internal_medicine: false,
+      hearing_test: false,
+      tuberculosis_test: false,
+      urine_test: false,
+      ecg: false
     });
     
     // Form data
@@ -912,6 +1062,13 @@ export default {
       vision_right: '',
       vision_left_corrected: '',
       vision_right_corrected: '',
+      ophthalmology_result: '',
+      otolaryngology_result: '',
+      internal_medicine_result: '',
+      hearing_test_result: '',
+      tuberculosis_test_result: '',
+      urine_test_result: '',
+      ecg_result: '',
       notes: ''
     });
     

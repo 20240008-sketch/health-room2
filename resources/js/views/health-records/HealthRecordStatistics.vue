@@ -13,6 +13,13 @@
         </div>
         <div class="mt-4 flex space-x-3 md:mt-0 md:ml-4">
           <BaseButton
+            variant="info"
+            @click="downloadPdf"
+          >
+            <DocumentArrowDownIcon class="h-4 w-4 mr-2" />
+            PDF出力
+          </BaseButton>
+          <BaseButton
             variant="secondary"
             @click="$router.push('/health-records')"
           >
@@ -387,6 +394,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { useNotificationStore } from '@/stores/notification';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -441,6 +449,14 @@ const DocumentTextIcon = {
   `
 };
 
+const DocumentArrowDownIcon = {
+  template: `
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+    </svg>
+  `
+};
+
 const ArrowUpIcon = {
   template: `
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -477,6 +493,7 @@ export default {
     ArrowLeftIcon,
     ChartBarIcon,
     DocumentTextIcon,
+    DocumentArrowDownIcon,
     ArrowUpIcon,
     ScaleIcon,
     HeartIcon
@@ -484,6 +501,7 @@ export default {
 
   setup() {
     const router = useRouter();
+    const notificationStore = useNotificationStore();
     const isLoading = ref(false);
     const statistics = ref(null);
     const selectedYear = ref(new Date().getFullYear());
@@ -782,6 +800,136 @@ export default {
       }
     };
 
+    // Download PDF
+    const downloadPdf = async () => {
+      try {
+        console.log('Starting PDF download...');
+        
+        const params = {
+          academic_year: selectedYear.value
+        };
+        
+        if (selectedGrade.value) {
+          params.grade = selectedGrade.value;
+        }
+        
+        if (selectedClassId.value) {
+          params.class_id = selectedClassId.value;
+        }
+        
+        console.log('PDF Request params:', params);
+        
+        notificationStore.addNotification({
+          type: 'info',
+          title: 'PDF出力中',
+          message: '統計レポートを生成しています...'
+        });
+        
+        // axiosを使用してPDF生成APIにリクエスト
+        const apiUrl = `${window.location.origin}/api/v1/health-records/statistics-pdf`;
+        console.log('Request URL:', apiUrl);
+        
+        const response = await axios.get(apiUrl, {
+          params: params,
+          responseType: 'blob',
+          headers: {
+            'Accept': 'application/pdf'
+          }
+        });
+
+        console.log('Response received:', {
+          status: response.status,
+          headers: response.headers,
+          dataType: typeof response.data,
+          dataSize: response.data.size
+        });
+
+        // レスポンスのContent-Typeを確認
+        const contentType = response.headers['content-type'];
+        console.log('Response Content-Type:', contentType);
+
+        // Blobのサイズを確認
+        const blob = response.data;
+        console.log('Blob size:', blob.size, 'Blob type:', blob.type);
+        
+        if (blob.size === 0) {
+          throw new Error('PDFファイルが空です');
+        }
+
+        // Blobの内容がPDFかどうか確認
+        if (!contentType || !contentType.includes('application/pdf')) {
+          // エラーレスポンスの可能性
+          const text = await blob.text();
+          console.error('Unexpected response:', text);
+          throw new Error('PDFではないレスポンスを受信しました: ' + text.substring(0, 100));
+        }
+
+        // PDFファイルをダウンロード
+        const blobUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        
+        // ファイル名を生成
+        let filename = `health_statistics_${selectedYear.value}`;
+        if (selectedGrade.value) {
+          filename += `_grade${selectedGrade.value}`;
+        }
+        if (selectedClassId.value) {
+          filename += `_class${selectedClassId.value}`;
+        }
+        filename += '.pdf';
+        
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        
+        // クリーンアップ
+        setTimeout(() => {
+          window.URL.revokeObjectURL(blobUrl);
+          document.body.removeChild(a);
+        }, 100);
+
+        notificationStore.addNotification({
+          type: 'success',
+          title: 'PDF出力完了',
+          message: '健康記録統計をPDFで出力しました'
+        });
+      } catch (error) {
+        console.error('PDF download error:', error);
+        console.error('Error details:', {
+          message: error.message,
+          response: error.response,
+          stack: error.stack
+        });
+        
+        let errorMessage = 'PDF出力に失敗しました';
+        
+        if (error.response) {
+          // サーバーからのエラーレスポンス
+          if (error.response.data instanceof Blob) {
+            const text = await error.response.data.text();
+            console.error('Server error response:', text);
+            try {
+              const jsonError = JSON.parse(text);
+              errorMessage = jsonError.message || errorMessage;
+            } catch (e) {
+              errorMessage = text.substring(0, 100);
+            }
+          } else {
+            errorMessage = error.response.data.message || errorMessage;
+          }
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        
+        notificationStore.addNotification({
+          type: 'danger',
+          title: 'エラー',
+          message: errorMessage
+        });
+      }
+    };
+
     // Lifecycle
     onMounted(() => {
       loadClasses();
@@ -813,7 +961,8 @@ export default {
       bmiChartData,
       visionChartData,
       bmiDistributionData,
-      loadStatistics
+      loadStatistics,
+      downloadPdf
     };
   }
 };

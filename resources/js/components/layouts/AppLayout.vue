@@ -212,30 +212,6 @@ export default {
           current: route.name?.startsWith('attendance')
         },
         {
-          name: 'レポート',
-          href: '/reports',
-          routeName: 'reports',
-          icon: 'ReportIcon',
-          current: route.name?.startsWith('reports'),
-          children: [
-            {
-              name: '健康診断レポート',
-              href: '/reports/health-checkup',
-              routeName: 'reports.health-checkup'
-            },
-            {
-              name: 'BMI分析',
-              href: '/reports/bmi-analysis',
-              routeName: 'reports.bmi-analysis'
-            },
-            {
-              name: '成長記録',
-              href: '/reports/growth',
-              routeName: 'reports.growth'
-            }
-          ]
-        },
-        {
           name: '設定',
           href: '/settings',
           routeName: 'settings',

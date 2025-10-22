@@ -113,7 +113,7 @@
                 type="text"
                 v-model="searchQuery"
                 class="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="名前、番号..."
+                placeholder="名前、出席番号..."
                 @input="loadStudentsBySearch"
               />
               <div v-if="searchQuery" class="absolute inset-y-0 right-0 pr-3 flex items-center">
@@ -398,32 +398,39 @@
                         </select>
                       </div>
                       
-                      <!-- 学生選択 -->
+                      <!-- 出席番号入力 -->
                       <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">
-                          学生
+                          出席番号
                         </label>
-                        <select
-                          v-model="visit.student_id"
-                          @change="onStudentSelect(index)"
+                        <input
+                          type="number"
+                          v-model.number="visit.selected_student_number"
+                          @input="onStudentNumberSelect(index)"
                           class="block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                           :disabled="!visit.selectedClass"
-                        >
-                          <option value="">学生を選択</option>
-                          <option
-                            v-for="student in getFilteredStudents(index)"
-                            :key="student.id"
-                            :value="student.id"
-                          >
-                            {{ student.student_number }}番 {{ student.name }} ({{ getGenderLabel(student.gender) }})
-                          </option>
-                        </select>
-                        <p v-if="visit.selectedClass && getFilteredStudents(index).length === 0" class="mt-1 text-xs text-red-600">
+                          placeholder="番号を入力"
+                          min="1"
+                          max="99"
+                        />
+                        <p v-if="visit.selectedClass && visit.selected_student_number && !visit.student_id" class="mt-1 text-xs text-red-600">
                           該当する学生が見つかりません
                         </p>
-                        <p v-else-if="visit.selectedClass && getFilteredStudents(index).length > 0 && !visit.student_id" class="mt-1 text-xs text-gray-500">
-                          {{ getFilteredStudents(index).length }}人の学生から選択
-                        </p>
+                      </div>
+                      
+                      <!-- 学生名表示 -->
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">
+                          学生名
+                        </label>
+                        <div class="block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm bg-gray-50 sm:text-sm min-h-[32px] flex items-center">
+                          <span v-if="visit.student_id" class="text-gray-900">
+                            {{ getStudentById(visit.student_id)?.name }} ({{ getGenderLabel(getStudentById(visit.student_id)?.gender) }})
+                          </span>
+                          <span v-else class="text-gray-400">
+                            クラスと出席番号を選択してください
+                          </span>
+                        </div>
                       </div>
                       
                       <!-- 選択された学生の表示 -->
@@ -863,7 +870,7 @@ export default {
       // 保健室タブに切り替えた時に全学生を再読み込み
       try {
         console.log('Switching to nursing tab, reloading all students...');
-        await studentStore.fetchStudents({});
+        await studentStore.fetchStudents({ per_page: 1000 }); // 全学生を取得
         nursingStudents.value = studentStore.students;
         console.log('Nursing students reloaded:', nursingStudents.value.length);
       } catch (error) {
@@ -881,7 +888,7 @@ export default {
     
     const loadStudentsForNursing = async () => {
       try {
-        const params = {};
+        const params = { per_page: 1000 }; // 全学生を取得
         if (nursingForm.value.class_id) params.class_id = nursingForm.value.class_id;
         if (nursingSearchQuery.value && nursingSearchQuery.value.length >= 2) {
           params.search = nursingSearchQuery.value;
@@ -904,7 +911,8 @@ export default {
         type_detail: '',
         occurrence_time: '',
         treatment_notes: '',
-        selectedClass: ''
+        selectedClass: '',
+        selected_student_number: ''
       });
     };
 
@@ -919,6 +927,33 @@ export default {
     
     const onStudentSelect = (index) => {
       // Student info is automatically updated via computed properties
+    };
+    
+    const onStudentNumberSelect = (index) => {
+      const visit = nursingVisits.value[index];
+      if (!visit.selectedClass || !visit.selected_student_number) {
+        visit.student_id = '';
+        return;
+      }
+      
+      // 数値型に変換（v-model.numberを使用しているが念のため）
+      const studentNumber = parseInt(visit.selected_student_number);
+      if (isNaN(studentNumber)) {
+        visit.student_id = '';
+        return;
+      }
+      
+      // クラスと出席番号から学生を検索
+      const student = nursingStudents.value.find(s => 
+        String(s.class_id) === String(visit.selectedClass) && 
+        s.student_number === studentNumber
+      );
+      
+      if (student) {
+        visit.student_id = student.id;
+      } else {
+        visit.student_id = '';
+      }
     };
     
     const getStudentById = (studentId) => {
@@ -948,23 +983,31 @@ export default {
           name: filtered[0].name,
           class_id: filtered[0].class_id,
           class_id_type: typeof filtered[0].class_id,
-          student_number: filtered[0].student_number,
-          fullData: filtered[0]
+          student_number: filtered[0].student_number
         });
       }
       
-      // クラスでフィルター
+      // クラスでフィルター（型を文字列に統一して比較）
       if (visit.selectedClass) {
         console.log('Filtering by class...');
+        const selectedClass = String(visit.selectedClass);
         filtered = filtered.filter(s => {
-          console.log(`Comparing: student.class_id="${s.class_id}" (${typeof s.class_id}) == selected="${visit.selectedClass}" (${typeof visit.selectedClass}) -> ${s.class_id == visit.selectedClass}`);
-          return s.class_id == visit.selectedClass;
+          const studentClass = String(s.class_id || '');
+          const matches = studentClass === selectedClass;
+          if (!matches && filtered.length < 10) {
+            console.log(`No match: student.class_id="${studentClass}" != selected="${selectedClass}"`);
+          }
+          return matches;
         });
-        console.log('After filter:', filtered.length);
+        console.log('After filter:', filtered.length, 'students');
       }
       
       // 出席番号順にソート
-      filtered.sort((a, b) => (a.student_number || 0) - (b.student_number || 0));
+      filtered.sort((a, b) => {
+        const numA = parseInt(a.student_number) || 0;
+        const numB = parseInt(b.student_number) || 0;
+        return numA - numB;
+      });
       
       console.log('=================================');
       return filtered;
@@ -974,9 +1017,10 @@ export default {
       const visit = nursingVisits.value[index];
       let filtered = nursingStudents.value;
       
-      // クラスでフィルター
+      // クラスでフィルター（型を文字列に統一して比較）
       if (visit.selectedClass) {
-        filtered = filtered.filter(s => s.class_id === visit.selectedClass);
+        const selectedClass = String(visit.selectedClass);
+        filtered = filtered.filter(s => String(s.class_id || '') === selectedClass);
       }
       
       // 出席番号を抽出してソート
@@ -988,11 +1032,15 @@ export default {
       const visit = nursingVisits.value[index];
       // クラスが変更されたら学生の選択をリセット
       visit.student_id = '';
+      visit.selected_student_number = '';
       
       // 選択されたクラスの学生をAPIから読み込む
       if (visit.selectedClass) {
         try {
-          await studentStore.fetchStudents({ class_id: visit.selectedClass });
+          await studentStore.fetchStudents({ 
+            class_id: visit.selectedClass,
+            per_page: 1000 // 全学生を取得
+          });
           nursingStudents.value = studentStore.students;
           console.log(`Loaded ${nursingStudents.value.length} students for class ${visit.selectedClass}`);
         } catch (error) {
@@ -1101,7 +1149,7 @@ export default {
       try {
         await classStore.fetchClasses();
         // 保健室来室記録用に全学生を読み込む
-        await studentStore.fetchStudents({});
+        await studentStore.fetchStudents({ per_page: 1000 });
         nursingStudents.value = studentStore.students;
       } catch (error) {
         console.error('Failed to load data:', error);
@@ -1145,6 +1193,7 @@ export default {
       removeNursingVisit,
       onCategoryChange,
       onStudentSelect,
+      onStudentNumberSelect,
       getStudentById,
       saveNursingVisits,
       getFilteredStudents,

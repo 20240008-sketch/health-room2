@@ -8,6 +8,7 @@ use App\Http\Requests\HealthRecordRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Log;
 use TCPDF;
 
 class HealthRecordController extends Controller
@@ -646,6 +647,142 @@ class HealthRecordController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => '統計データの取得に失敗しました',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Export health record statistics to PDF
+     */
+    public function statisticsPdf(Request $request)
+    {
+        try {
+            $academicYear = $request->input('academic_year', date('Y'));
+            $grade = $request->input('grade');
+            $classId = $request->input('class_id');
+
+            // Get records with filters
+            $query = HealthRecord::with(['student.schoolClass'])
+                ->where('year', $academicYear);
+
+            if ($grade) {
+                $query->whereHas('student', function ($q) use ($grade) {
+                    $q->where('grade_id', $grade);
+                });
+            }
+
+            if ($classId) {
+                $query->whereHas('student', function ($q) use ($classId) {
+                    $q->where('class_id', $classId);
+                });
+            }
+
+            $records = $query->get();
+
+            if ($records->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'データが見つかりません'
+                ], 404);
+            }
+
+            // Calculate statistics (same as statistics method)
+            $bmiCategories = [
+                'underweight' => $records->where('bmi', '<', 18.5)->count(),
+                'normal' => $records->whereBetween('bmi', [18.5, 24.9])->count(),
+                'overweight' => $records->whereBetween('bmi', [25, 29.9])->count(),
+                'obese' => $records->where('bmi', '>=', 30)->count()
+            ];
+
+            // Grade statistics
+            $gradeStats = $records->groupBy('student.grade_id')->map(function ($gradeRecords, $gradeId) {
+                return [
+                    'grade' => $gradeId,
+                    'count' => $gradeRecords->count(),
+                    'avg_height' => round($gradeRecords->avg('height'), 1),
+                    'avg_weight' => round($gradeRecords->avg('weight'), 1),
+                    'avg_bmi' => round($gradeRecords->avg('bmi'), 1),
+                    'avg_vision_left' => round($gradeRecords->whereNotNull('vision_left')->avg('vision_left'), 2),
+                    'avg_vision_right' => round($gradeRecords->whereNotNull('vision_right')->avg('vision_right'), 2),
+                ];
+            })->sortBy('grade')->values();
+
+            // Class statistics
+            $classStats = $records->groupBy('student.class_id')->map(function ($classRecords, $classId) {
+                $firstStudent = $classRecords->first()->student;
+                return [
+                    'class_id' => $classId,
+                    'class_name' => $firstStudent->schoolClass->name ?? '不明',
+                    'grade' => $firstStudent->grade_id ?? 0,
+                    'count' => $classRecords->count(),
+                    'avg_height' => round($classRecords->avg('height'), 1),
+                    'avg_weight' => round($classRecords->avg('weight'), 1),
+                    'avg_bmi' => round($classRecords->avg('bmi'), 1),
+                    'avg_vision_left' => round($classRecords->whereNotNull('vision_left')->avg('vision_left'), 2),
+                    'avg_vision_right' => round($classRecords->whereNotNull('vision_right')->avg('vision_right'), 2),
+                ];
+            })->sortBy('grade')->values();
+
+            $statistics = [
+                'academic_year' => $academicYear,
+                'grade' => $grade,
+                'class_id' => $classId,
+                'total_records' => $records->count(),
+                'averages' => [
+                    'height' => round($records->avg('height'), 1),
+                    'weight' => round($records->avg('weight'), 1),
+                    'bmi' => round($records->avg('bmi'), 1),
+                    'vision_left' => round($records->whereNotNull('vision_left')->avg('vision_left'), 2),
+                    'vision_right' => round($records->whereNotNull('vision_right')->avg('vision_right'), 2),
+                ],
+                'ranges' => [
+                    'height' => [
+                        'min' => $records->min('height'),
+                        'max' => $records->max('height')
+                    ],
+                    'weight' => [
+                        'min' => $records->min('weight'),
+                        'max' => $records->max('weight')
+                    ],
+                    'bmi' => [
+                        'min' => round($records->min('bmi'), 1),
+                        'max' => round($records->max('bmi'), 1)
+                    ]
+                ],
+                'bmi_distribution' => $bmiCategories,
+                'bmi_percentages' => [
+                    'underweight' => round(($bmiCategories['underweight'] / $records->count()) * 100, 1),
+                    'normal' => round(($bmiCategories['normal'] / $records->count()) * 100, 1),
+                    'overweight' => round(($bmiCategories['overweight'] / $records->count()) * 100, 1),
+                    'obese' => round(($bmiCategories['obese'] / $records->count()) * 100, 1)
+                ],
+                'by_grade' => $gradeStats,
+                'by_class' => $classStats,
+            ];
+
+            // Generate PDF
+            $pdf = app('dompdf.wrapper');
+            $pdf->loadView('pdfs.health-statistics', ['statistics' => $statistics]);
+            
+            $filename = 'health_statistics_' . $academicYear;
+            if ($grade) {
+                $filename .= '_grade' . $grade;
+            }
+            if ($classId) {
+                $filename .= '_class' . $classId;
+            }
+            $filename .= '.pdf';
+
+            return $pdf->download($filename);
+
+        } catch (\Exception $e) {
+            Log::error('Statistics PDF generation error: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'PDF生成に失敗しました',
                 'error' => $e->getMessage()
             ], 500);
         }

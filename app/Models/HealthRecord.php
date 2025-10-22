@@ -21,7 +21,14 @@ class HealthRecord extends Model
         'vision_left_corrected',
         'vision_right_corrected',
         'hearing_left',
-        'hearing_right'
+        'hearing_right',
+        'ophthalmology_result',
+        'otolaryngology_result',
+        'internal_medicine_result',
+        'hearing_test_result',
+        'tuberculosis_test_result',
+        'urine_test_result',
+        'ecg_result'
     ];
 
     protected $casts = [
