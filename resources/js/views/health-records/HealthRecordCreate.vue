@@ -152,7 +152,7 @@
               </div>
 
               <!-- Bulk Selection -->
-              <div v-else class="grid grid-cols-1 gap-6 sm:grid-cols-3">
+              <div v-else class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 <!-- Academic Year -->
                 <div>
                   <BaseInput
@@ -207,8 +207,22 @@
                   </BaseInput>
                 </div>
 
+                <!-- Gender -->
+                <div>
+                  <BaseInput
+                    type="select"
+                    v-model="bulkFilters.gender"
+                    label="性別"
+                    @change="updateBulkSelection"
+                  >
+                    <option value="">すべて</option>
+                    <option value="男">男</option>
+                    <option value="女">女</option>
+                  </BaseInput>
+                </div>
+
                 <!-- Students List for Bulk -->
-                <div v-if="bulkStudents.length > 0" class="sm:col-span-3">
+                <div v-if="bulkStudents.length > 0" class="sm:col-span-2 lg:col-span-4">
                   <label class="block text-sm font-medium text-gray-700 mb-2">
                     測定対象学生 ({{ selectedStudents.length }}/{{ bulkStudents.length }}名)
                   </label>
@@ -486,7 +500,7 @@
                       <div class="flex items-center">
                         <span class="font-medium text-gray-900">{{ student.name }}</span>
                         <BaseBadge variant="info" class="ml-2">
-                          {{ student.school_class?.name || `${student.grade}年${student.class_number}組` }}
+                          {{ getStudentClassDisplay(student) }}
                         </BaseBadge>
                         <span class="ml-2 text-sm text-gray-500">
                           出席番号: {{ student.student_number }}
@@ -738,6 +752,10 @@
                 <span class="text-gray-500">クラス</span>
                 <span class="font-medium">{{ selectedClass.name }}</span>
               </div>
+              <div v-if="bulkFilters.gender" class="flex justify-between">
+                <span class="text-gray-500">性別</span>
+                <span class="font-medium">{{ bulkFilters.gender }}</span>
+              </div>
             </div>
           </div>
         </BaseCard>
@@ -900,7 +918,8 @@ export default {
     const bulkFilters = reactive({
       academic_year: new Date().getFullYear().toString(),
       grade: '',
-      class_id: ''
+      class_id: '',
+      gender: ''
     });
     
     // Bulk measurements storage - stores measurements for each student
@@ -961,6 +980,10 @@ export default {
         result = result.filter(s => s.class_id === bulkFilters.class_id);
       }
       
+      if (bulkFilters.gender) {
+        result = result.filter(s => s.gender === bulkFilters.gender);
+      }
+      
       // Sort by student_number (ascending)
       return result.sort((a, b) => {
         const aNum = parseInt(a.student_number) || 0;
@@ -970,7 +993,14 @@ export default {
     });
     
     const selectedStudents = computed(() => {
-      return students.value.filter(s => selectedStudentIds.value.includes(s.id));
+      const selected = students.value.filter(s => selectedStudentIds.value.includes(s.id));
+      
+      // Sort by student_number (ascending)
+      return selected.sort((a, b) => {
+        const aNum = parseInt(a.student_number) || 0;
+        const bNum = parseInt(b.student_number) || 0;
+        return aNum - bNum;
+      });
     });
     
     const selectedClass = computed(() => {
@@ -1200,94 +1230,64 @@ export default {
       const studentIds = selectedStudentIds.value;
       const currentIndex = studentIds.indexOf(currentStudentId);
       
-      if (currentField === 'height') {
-        // Height -> Weight or Vision Left (same student)
-        if (measurementItems.weight) {
-          const weightRef = bulkInputRefs[currentStudentId]?.weight;
-          if (weightRef) {
-            weightRef.$el.querySelector('input').focus();
-            return;
-          }
-        }
-        if (measurementItems.vision) {
-          const visionLeftRef = bulkInputRefs[currentStudentId]?.vision_left;
-          if (visionLeftRef) {
-            visionLeftRef.$el.querySelector('input').focus();
-            return;
-          }
-        }
-        // Move to next student if no other fields for current student
-        moveToNextStudent(currentIndex, studentIds);
-      } else if (currentField === 'weight') {
-        // Weight -> Vision Left (same student) or next student
-        if (measurementItems.vision) {
-          const visionLeftRef = bulkInputRefs[currentStudentId]?.vision_left;
-          if (visionLeftRef) {
-            visionLeftRef.$el.querySelector('input').focus();
-            return;
-          }
-        }
-        // Move to next student
-        moveToNextStudent(currentIndex, studentIds);
-      } else if (currentField === 'vision_left') {
-        // Vision Left -> Vision Right (same student)
-        const visionRightRef = bulkInputRefs[currentStudentId]?.vision_right;
-        if (visionRightRef) {
-          visionRightRef.$el.querySelector('input').focus();
+      // Define field order
+      const fieldOrder = ['height', 'weight', 'vision_left', 'vision_right', 'vision_left_corrected', 'vision_right_corrected'];
+      const currentFieldIndex = fieldOrder.indexOf(currentField);
+      
+      // Try to focus next field in the same student
+      for (let i = currentFieldIndex + 1; i < fieldOrder.length; i++) {
+        const nextFieldName = fieldOrder[i];
+        
+        // Check if this field is enabled
+        if (nextFieldName === 'height' && !measurementItems.height) continue;
+        if (nextFieldName === 'weight' && !measurementItems.weight) continue;
+        if (['vision_left', 'vision_right', 'vision_left_corrected', 'vision_right_corrected'].includes(nextFieldName) && !measurementItems.vision) continue;
+        
+        // Try to focus this field
+        const nextFieldRef = bulkInputRefs[currentStudentId]?.[nextFieldName];
+        if (nextFieldRef) {
+          nextFieldRef.$el.querySelector('input').focus();
           return;
         }
-      } else if (currentField === 'vision_right') {
-        // Vision Right -> Vision Left Corrected (same student)
-        const visionLeftCorrectedRef = bulkInputRefs[currentStudentId]?.vision_left_corrected;
-        if (visionLeftCorrectedRef) {
-          visionLeftCorrectedRef.$el.querySelector('input').focus();
-          return;
-        }
-        // Move to next student
-        moveToNextStudent(currentIndex, studentIds);
-      } else if (currentField === 'vision_left_corrected') {
-        // Vision Left Corrected -> Vision Right Corrected (same student)
-        const visionRightCorrectedRef = bulkInputRefs[currentStudentId]?.vision_right_corrected;
-        if (visionRightCorrectedRef) {
-          visionRightCorrectedRef.$el.querySelector('input').focus();
-          return;
-        }
-      } else if (currentField === 'vision_right_corrected') {
-        // Vision Right Corrected -> next student
-        moveToNextStudent(currentIndex, studentIds);
       }
+      
+      // No more fields for current student, move to next student
+      moveToNextStudent(currentIndex, studentIds);
     };
     
     // Helper function to move to next student's first field
     const moveToNextStudent = (currentIndex, studentIds) => {
-      if (currentIndex < studentIds.length - 1) {
-        const nextStudentId = studentIds[currentIndex + 1];
+      if (currentIndex >= studentIds.length - 1) {
+        // Last student - do nothing or could focus submit button
+        return;
+      }
+      
+      const nextStudentId = studentIds[currentIndex + 1];
+      
+      // Define field order to try
+      const fieldOrder = ['height', 'weight', 'vision_left'];
+      
+      // Try to focus first available field for next student
+      for (const fieldName of fieldOrder) {
+        // Check if this field is enabled
+        if (fieldName === 'height' && !measurementItems.height) continue;
+        if (fieldName === 'weight' && !measurementItems.weight) continue;
+        if (fieldName === 'vision_left' && !measurementItems.vision) continue;
         
-        // Try to focus first available field for next student
-        if (measurementItems.height) {
-          const nextHeightRef = bulkInputRefs[nextStudentId]?.height;
-          if (nextHeightRef) {
-            nextHeightRef.$el.querySelector('input').focus();
-            return;
-          }
-        }
-        if (measurementItems.weight) {
-          const nextWeightRef = bulkInputRefs[nextStudentId]?.weight;
-          if (nextWeightRef) {
-            nextWeightRef.$el.querySelector('input').focus();
-            return;
-          }
-        }
-        if (measurementItems.vision) {
-          const nextVisionLeftRef = bulkInputRefs[nextStudentId]?.vision_left;
-          if (nextVisionLeftRef) {
-            nextVisionLeftRef.$el.querySelector('input').focus();
-            return;
+        // Try to focus this field
+        const nextFieldRef = bulkInputRefs[nextStudentId]?.[fieldName];
+        if (nextFieldRef) {
+          try {
+            const input = nextFieldRef.$el.querySelector('input');
+            if (input) {
+              input.focus();
+              return;
+            }
+          } catch (e) {
+            console.error('Error focusing field:', e);
           }
         }
       }
-      // Last student - don't jump to notes
-      // User can manually tab to notes or submit button if needed
     };
     
     const getBMICategory = (bmi) => {
@@ -1315,6 +1315,22 @@ export default {
       if (bmiValue < 25) return 'text-green-600';
       if (bmiValue < 30) return 'text-yellow-600';
       return 'text-red-600';
+    };
+    
+    const getStudentClassDisplay = (student) => {
+      // Try to find the class from classes array using class_id
+      const studentClass = classes.value.find(c => c.class_id === student.class_id);
+      
+      if (studentClass) {
+        return studentClass.class_name || studentClass.name;
+      }
+      
+      // Fallback: use grade_id if available
+      if (student.grade_id) {
+        return `${student.grade_id}年`;
+      }
+      
+      return 'クラス未設定';
     };
     
     const validateForm = () => {
@@ -1396,6 +1412,7 @@ export default {
       bulkFilters.academic_year = new Date().getFullYear().toString();
       bulkFilters.grade = '';
       bulkFilters.class_id = '';
+      bulkFilters.gender = '';
       
       errors.value = {};
     };
@@ -1604,6 +1621,7 @@ export default {
       getBMICategory,
       getBMIVariant,
       getBMIColor,
+      getStudentClassDisplay,
       getClassName,
       getClassGrade,
       resetForm,

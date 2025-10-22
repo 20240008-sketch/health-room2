@@ -58,6 +58,7 @@
                 v-model="searchQuery"
                 placeholder="学生名・学生番号で検索..."
                 @keyup.enter="handleSearch"
+                @input="currentPage = 1"
                 class="flex-1"
               >
                 <template #prepend>
@@ -451,6 +452,13 @@
               >
                 詳細
               </BaseButton>
+              <BaseButton
+                size="sm"
+                variant="danger"
+                @click.stop="confirmDelete(item)"
+              >
+                削除
+              </BaseButton>
             </div>
           </template>
         </BaseTable>
@@ -459,7 +467,8 @@
         <div class="px-4 py-3 border-t border-gray-200">
           <BasePagination
             :currentPage="currentPage"
-            :totalItems="filteredHealthRecords.length"
+            :totalPages="totalPages"
+            :total="filteredHealthRecords.length"
             :itemsPerPage="itemsPerPage"
             @page-changed="currentPage = $event"
           />
@@ -557,6 +566,13 @@
               >
                 詳細
               </BaseButton>
+              <BaseButton
+                size="sm"
+                variant="danger"
+                @click.stop="confirmDelete(record)"
+              >
+                削除
+              </BaseButton>
             </div>
           </div>
         </div>
@@ -565,14 +581,68 @@
         <div class="col-span-full">
           <BasePagination
             :currentPage="currentPage"
-            :totalItems="filteredHealthRecords.length"
-            :itemsPerPage="itemsPerPage"
+            :totalPages="totalPages"
+            :total="filteredHealthRecords.length"
+            :pageSize="itemsPerPage"
             @page-changed="currentPage = $event"
             class="justify-center"
           />
         </div>
       </div>
     </BaseCard>
+    
+    <!-- Delete Confirmation Modal -->
+    <BaseModal
+      :show="showDeleteModal"
+      @close="closeDeleteModal"
+      title="健康記録の削除確認"
+      size="md"
+    >
+      <div class="space-y-4">
+        <p class="text-gray-700">
+          本当に削除してもよろしいですか？削除した記録は元に戻せません。
+        </p>
+        
+        <div v-if="recordToDelete" class="bg-gray-50 p-4 rounded-lg space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-600">生徒名:</span>
+            <span class="font-medium">{{ recordToDelete.student?.name }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-600">測定日:</span>
+            <span class="font-medium">{{ formatDate(recordToDelete.measured_date) }}</span>
+          </div>
+          <div v-if="recordToDelete.height" class="flex items-center justify-between">
+            <span class="text-sm text-gray-600">身長:</span>
+            <span>{{ recordToDelete.height }} cm</span>
+          </div>
+          <div v-if="recordToDelete.weight" class="flex items-center justify-between">
+            <span class="text-sm text-gray-600">体重:</span>
+            <span>{{ recordToDelete.weight }} kg</span>
+          </div>
+        </div>
+      </div>
+      
+      <template #footer>
+        <div class="flex justify-end space-x-3">
+          <BaseButton
+            variant="secondary"
+            @click="closeDeleteModal"
+            :disabled="isDeleting"
+          >
+            キャンセル
+          </BaseButton>
+          <BaseButton
+            variant="danger"
+            @click="deleteRecord"
+            :disabled="isDeleting"
+          >
+            <BaseSpinner v-if="isDeleting" size="sm" class="mr-2" />
+            削除する
+          </BaseButton>
+        </div>
+      </template>
+    </BaseModal>
   </AppLayout>
 </template>
 
@@ -581,6 +651,7 @@ import { ref, computed, onMounted, onActivated, reactive } from 'vue';
 import { useHealthRecordStore } from '@/stores/healthRecord.js';
 import { useClassStore } from '@/stores/class.js';
 import { useNotificationStore } from '@/stores/notification.js';
+import axios from 'axios';
 import {
   AppLayout,
   BaseCard,
@@ -589,7 +660,8 @@ import {
   BaseSpinner,
   BaseTable,
   BaseBadge,
-  BasePagination
+  BasePagination,
+  BaseModal
 } from '@/components/index.js';
 
 // Icons
@@ -692,6 +764,7 @@ export default {
     BaseTable,
     BaseBadge,
     BasePagination,
+    BaseModal,
     PlusIcon,
     MagnifyingGlassIcon,
     HeartIcon,
@@ -717,6 +790,11 @@ export default {
     const viewMode = ref('table'); // 'table' or 'grid'
     const currentPage = ref(1);
     const itemsPerPage = ref(20);
+    
+    // Delete modal state
+    const showDeleteModal = ref(false);
+    const recordToDelete = ref(null);
+    const isDeleting = ref(false);
     
     const filters = reactive({
       academic_year: '',
@@ -771,13 +849,36 @@ export default {
     const filteredHealthRecords = computed(() => {
       let result = [...healthRecords.value];
       
+      console.log('Total health records:', result.length);
+      if (result.length > 0) {
+        console.log('First record sample:', {
+          id: result[0].id,
+          student_id: result[0].student_id,
+          student: result[0].student,
+          student_name: result[0].student?.name,
+          student_number: result[0].student?.student_number
+        });
+      }
+      
       // Search filter
       if (searchQuery.value) {
-        const query = searchQuery.value.toLowerCase();
-        result = result.filter(record =>
-          record.student?.name?.toLowerCase().includes(query) ||
-          record.student?.student_number?.toLowerCase().includes(query)
-        );
+        const query = searchQuery.value.toLowerCase().trim();
+        console.log('Searching for:', query);
+        console.log('Total records before search:', result.length);
+        result = result.filter(record => {
+          const name = record.student?.name?.toLowerCase() || '';
+          const studentNumber = String(record.student?.student_number || '').toLowerCase();
+          const matches = name.includes(query) || studentNumber.includes(query);
+          if (matches) {
+            console.log('Match found:', {
+              name: record.student?.name,
+              number: record.student?.student_number,
+              query: query
+            });
+          }
+          return matches;
+        });
+        console.log('Records after search:', result.length);
       }
       
       // Academic year filter
@@ -838,7 +939,20 @@ export default {
     const paginatedRecords = computed(() => {
       const start = (currentPage.value - 1) * itemsPerPage.value;
       const end = start + itemsPerPage.value;
-      return filteredHealthRecords.value.slice(start, end);
+      const paginated = filteredHealthRecords.value.slice(start, end);
+      console.log('Pagination:', {
+        currentPage: currentPage.value,
+        itemsPerPage: itemsPerPage.value,
+        start: start,
+        end: end,
+        filteredTotal: filteredHealthRecords.value.length,
+        paginatedCount: paginated.length
+      });
+      return paginated;
+    });
+    
+    const totalPages = computed(() => {
+      return Math.ceil(filteredHealthRecords.value.length / itemsPerPage.value);
     });
     
     const stats = computed(() => {
@@ -901,7 +1015,7 @@ export default {
       return [
         ...baseColumns,
         ...dataColumns,
-        { key: 'actions', title: '操作', label: '操作', width: '120px' }
+        { key: 'actions', title: '操作', label: '操作', width: '180px' }
       ];
     });
     
@@ -1090,6 +1204,47 @@ export default {
       });
     };
     
+    // Delete functions
+    const confirmDelete = (record) => {
+      recordToDelete.value = record;
+      showDeleteModal.value = true;
+    };
+    
+    const closeDeleteModal = () => {
+      showDeleteModal.value = false;
+      recordToDelete.value = null;
+      isDeleting.value = false;
+    };
+    
+    const deleteRecord = async () => {
+      if (!recordToDelete.value) return;
+      
+      isDeleting.value = true;
+      
+      try {
+        await axios.delete(`/api/v1/health-records/${recordToDelete.value.id}`);
+        
+        notificationStore.addNotification({
+          type: 'success',
+          title: '削除完了',
+          message: '健康記録を削除しました'
+        });
+        
+        // Refresh the health records list
+        await healthRecordStore.fetchHealthRecords();
+        
+        closeDeleteModal();
+      } catch (error) {
+        console.error('削除エラー:', error);
+        notificationStore.addNotification({
+          type: 'danger',
+          title: '削除エラー',
+          message: '健康記録の削除に失敗しました'
+        });
+        isDeleting.value = false;
+      }
+    };
+    
     // Lifecycle
     onMounted(async () => {
       try {
@@ -1128,6 +1283,7 @@ export default {
       displayColumns,
       filteredHealthRecords,
       paginatedRecords,
+      totalPages,
       stats,
       hasActiveFilters,
       tableColumns,
@@ -1146,7 +1302,13 @@ export default {
       getVisionGrade,
       formatVision,
       exportToPDF,
-      exportHealthRecords
+      exportHealthRecords,
+      showDeleteModal,
+      recordToDelete,
+      isDeleting,
+      confirmDelete,
+      closeDeleteModal,
+      deleteRecord
     };
   }
 };
