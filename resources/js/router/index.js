@@ -241,23 +241,23 @@ const routes = [
   },
   
   // Attendance Registration routes
-  // 出席記録一覧
-  {
-    path: '/attendance-registration/attendance',
-    name: 'attendance-registration.attendance.index',
-    component: () => import('@/views/attendance-registration/AttendanceRegistrationIndex.vue'),
-    meta: {
-      requiresAuth: true,
-      layout: AppLayout,
-      title: '出席記録一覧',
-      recordType: 'attendance',
-      breadcrumb: [
-        { name: 'ホーム', href: '/dashboard' },
-        { name: '出席・保健室記録', href: '/attendance-registration/attendance' },
-        { name: '出席記録一覧', href: '/attendance-registration/attendance' }
-      ]
-    }
-  },
+  // 出席記録一覧 - 削除
+  // {
+  //   path: '/attendance-registration/attendance',
+  //   name: 'attendance-registration.attendance.index',
+  //   component: () => import('@/views/attendance-registration/AttendanceRegistrationIndex.vue'),
+  //   meta: {
+  //     requiresAuth: true,
+  //     layout: AppLayout,
+  //     title: '出席記録一覧',
+  //     recordType: 'attendance',
+  //     breadcrumb: [
+  //       { name: 'ホーム', href: '/dashboard' },
+  //       { name: '出席・保健室記録', href: '/attendance-registration/attendance' },
+  //       { name: '出席記録一覧', href: '/attendance-registration/attendance' }
+  //     ]
+  //   }
+  // },
   // 保健室記録一覧
   {
     path: '/attendance-registration/nursing',
@@ -270,28 +270,28 @@ const routes = [
       recordType: 'nursing',
       breadcrumb: [
         { name: 'ホーム', href: '/dashboard' },
-        { name: '出席・保健室記録', href: '/attendance-registration/nursing' },
+        { name: '保健室記録', href: '/attendance-registration/nursing' },
         { name: '保健室記録一覧', href: '/attendance-registration/nursing' }
       ]
     }
   },
-  // 出席記録入力
-  {
-    path: '/attendance-registration/attendance/create',
-    name: 'attendance-registration.attendance.create',
-    component: () => import('@/views/attendance-registration/AttendanceRegistrationCreate.vue'),
-    meta: {
-      requiresAuth: true,
-      layout: AppLayout,
-      title: '出席記録入力',
-      recordType: 'attendance',
-      breadcrumb: [
-        { name: 'ホーム', href: '/dashboard' },
-        { name: '出席・保健室記録', href: '/attendance-registration/attendance' },
-        { name: '出席記録入力', href: '/attendance-registration/attendance/create' }
-      ]
-    }
-  },
+  // 出席記録入力 - 削除
+  // {
+  //   path: '/attendance-registration/attendance/create',
+  //   name: 'attendance-registration.attendance.create',
+  //   component: () => import('@/views/attendance-registration/AttendanceRegistrationCreate.vue'),
+  //   meta: {
+  //     requiresAuth: true,
+  //     layout: AppLayout,
+  //     title: '出席記録入力',
+  //     recordType: 'attendance',
+  //     breadcrumb: [
+  //       { name: 'ホーム', href: '/dashboard' },
+  //       { name: '出席・保健室記録', href: '/attendance-registration/attendance' },
+  //       { name: '出席記録入力', href: '/attendance-registration/attendance/create' }
+  //     ]
+  //   }
+  // },
   // 保健室記録入力
   {
     path: '/attendance-registration/nursing/create',
@@ -304,19 +304,27 @@ const routes = [
       recordType: 'nursing',
       breadcrumb: [
         { name: 'ホーム', href: '/dashboard' },
-        { name: '出席・保健室記録', href: '/attendance-registration/nursing' },
+        { name: '保健室記録', href: '/attendance-registration/nursing' },
         { name: '保健室記録入力', href: '/attendance-registration/nursing/create' }
       ]
     }
   },
-  // 旧ルートをリダイレクト（互換性のため）
+  // 旧ルートをリダイレクト（保健室記録へ）
   {
     path: '/attendance-registration',
-    redirect: '/attendance-registration/attendance'
+    redirect: '/attendance-registration/nursing'
   },
   {
     path: '/attendance-registration/create',
-    redirect: '/attendance-registration/attendance/create'
+    redirect: '/attendance-registration/nursing/create'
+  },
+  {
+    path: '/attendance-registration/attendance',
+    redirect: '/attendance-registration/nursing'
+  },
+  {
+    path: '/attendance-registration/attendance/create',
+    redirect: '/attendance-registration/nursing/create'
   },
   
   // Attendance routes

@@ -761,10 +761,49 @@ class HealthRecordController extends Controller
                 'by_class' => $classStats,
             ];
 
-            // Generate PDF
-            $pdf = app('dompdf.wrapper');
-            $pdf->loadView('pdfs.health-statistics', ['statistics' => $statistics]);
+            // Generate PDF using TCPDF
+            $pdf = app('TCPDF');
             
+            // Set document information
+            $pdf->SetCreator('Health Management System');
+            $pdf->SetAuthor('School');
+            $pdf->SetTitle('健康記録統計レポート');
+            $pdf->SetSubject('健康統計');
+            
+            // Set default header data
+            $pdf->SetHeaderData('', 0, '健康記録統計レポート', $academicYear . '年度');
+            
+            // Set header and footer fonts
+            $pdf->setHeaderFont(['kozgopromedium', '', 10]);
+            $pdf->setFooterFont(['kozgopromedium', '', 8]);
+            
+            // Set default monospaced font
+            $pdf->SetDefaultMonospacedFont('courier');
+            
+            // Set margins
+            $pdf->SetMargins(15, 27, 15);
+            $pdf->SetHeaderMargin(5);
+            $pdf->SetFooterMargin(10);
+            
+            // Set auto page breaks
+            $pdf->SetAutoPageBreak(TRUE, 25);
+            
+            // Set image scale factor
+            $pdf->setImageScale(1.25);
+            
+            // Set font
+            $pdf->SetFont('kozgopromedium', '', 10);
+            
+            // Add a page
+            $pdf->AddPage();
+            
+            // Generate HTML content
+            $html = view('pdfs.health-statistics-tcpdf', ['statistics' => $statistics])->render();
+            
+            // Output the HTML content
+            $pdf->writeHTML($html, true, false, true, false, '');
+            
+            // Close and output PDF document
             $filename = 'health_statistics_' . $academicYear;
             if ($grade) {
                 $filename .= '_grade' . $grade;
@@ -773,8 +812,10 @@ class HealthRecordController extends Controller
                 $filename .= '_class' . $classId;
             }
             $filename .= '.pdf';
-
-            return $pdf->download($filename);
+            
+            return response($pdf->Output($filename, 'S'))
+                ->header('Content-Type', 'application/pdf')
+                ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
 
         } catch (\Exception $e) {
             Log::error('Statistics PDF generation error: ' . $e->getMessage());

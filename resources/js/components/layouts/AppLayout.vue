@@ -176,26 +176,16 @@ export default {
           ]
         },
         {
-          name: '出席・保健室記録',
-          href: '/attendance-registration/attendance',
+          name: '保健室記録',
+          href: '/attendance-registration/nursing',
           routeName: 'attendance-registration',
           icon: 'ClipboardDocumentCheckIcon',
           current: route.name?.startsWith('attendance-registration'),
           children: [
             {
-              name: '出席記録一覧',
-              href: '/attendance-registration/attendance',
-              routeName: 'attendance-registration.attendance.index'
-            },
-            {
               name: '保健室記録一覧',
               href: '/attendance-registration/nursing',
               routeName: 'attendance-registration.nursing.index'
-            },
-            {
-              name: '出席記録入力',
-              href: '/attendance-registration/attendance/create',
-              routeName: 'attendance-registration.attendance.create'
             },
             {
               name: '保健室記録入力',

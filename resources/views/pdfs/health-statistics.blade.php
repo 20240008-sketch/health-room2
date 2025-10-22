@@ -10,7 +10,7 @@
         }
         
         body {
-            font-family: "ipag", sans-serif;
+            font-family: ipaexg, ipag, "DejaVu Sans", sans-serif;
             font-size: 10pt;
             line-height: 1.6;
             color: #333;
