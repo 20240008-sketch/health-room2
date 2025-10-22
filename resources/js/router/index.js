@@ -15,6 +15,7 @@ const HealthRecordIndex = () => import('@/views/health-records/HealthRecordIndex
 const HealthRecordCreate = () => import('@/views/health-records/HealthRecordCreate.vue');
 const HealthRecordShow = () => import('@/views/health-records/HealthRecordShow.vue');
 const HealthRecordEdit = () => import('@/views/health-records/HealthRecordEdit.vue');
+const HealthRecordStatistics = () => import('@/views/health-records/HealthRecordStatistics.vue');
 const AttendanceIndex = () => import('@/views/attendance/AttendanceIndex.vue');
 const ReportsHealthCheckup = () => import('@/views/Dashboard.vue'); // 一時的
 const ReportsBmiAnalysis = () => import('@/views/Dashboard.vue'); // 一時的
@@ -226,7 +227,7 @@ const routes = [
   {
     path: '/health-records/statistics',
     name: 'health-records.statistics',
-    component: HealthRecordIndex, // 統計コンポーネント実装まで一時的にIndexを使用
+    component: HealthRecordStatistics,
     meta: {
       requiresAuth: true,
       layout: AppLayout,

@@ -486,12 +486,12 @@ class HealthRecordController extends Controller
 
             // フィルタリング
             if ($request->has('academic_year') && !empty($request->academic_year)) {
-                $query->where('academic_year', $request->academic_year);
+                $query->where('year', $request->academic_year);
             }
 
             if ($request->has('grade') && !empty($request->grade)) {
-                $query->whereHas('student.schoolClass', function ($q) use ($request) {
-                    $q->where('grade', $request->grade);
+                $query->whereHas('student', function ($q) use ($request) {
+                    $q->where('grade_id', $request->grade);
                 });
             }
 
@@ -508,7 +508,35 @@ class HealthRecordController extends Controller
             if ($records->isEmpty()) {
                 return response()->json([
                     'success' => true,
-                    'data' => null,
+                    'data' => [
+                        'total_records' => 0,
+                        'averages' => [
+                            'height' => 0,
+                            'weight' => 0,
+                            'bmi' => 0,
+                            'vision_left' => 0,
+                            'vision_right' => 0,
+                        ],
+                        'ranges' => [
+                            'height' => ['min' => 0, 'max' => 0],
+                            'weight' => ['min' => 0, 'max' => 0],
+                            'bmi' => ['min' => 0, 'max' => 0]
+                        ],
+                        'bmi_distribution' => [
+                            'underweight' => 0,
+                            'normal' => 0,
+                            'overweight' => 0,
+                            'obese' => 0
+                        ],
+                        'bmi_percentages' => [
+                            'underweight' => 0,
+                            'normal' => 0,
+                            'overweight' => 0,
+                            'obese' => 0
+                        ],
+                        'by_grade' => [],
+                        'by_class' => [],
+                    ],
                     'message' => '統計データが見つかりません'
                 ]);
             }
@@ -533,12 +561,55 @@ class HealthRecordController extends Controller
                 }
             }
 
+            // 学年別統計
+            $gradeStats = $records->groupBy(function($record) {
+                return $record->student->grade_id ?? 'unknown';
+            })->map(function($gradeRecords, $gradeId) {
+                return [
+                    'grade' => $gradeId,
+                    'grade_name' => $gradeId . '年生',
+                    'count' => $gradeRecords->count(),
+                    'avg_height' => round($gradeRecords->avg('height'), 1),
+                    'avg_weight' => round($gradeRecords->avg('weight'), 1),
+                    'avg_bmi' => round($gradeRecords->avg(function($record) {
+                        return $record->bmi;
+                    }), 1),
+                    'avg_vision_left' => round($gradeRecords->whereNotNull('vision_left')->avg('vision_left'), 2),
+                    'avg_vision_right' => round($gradeRecords->whereNotNull('vision_right')->avg('vision_right'), 2),
+                ];
+            })->sortBy('grade')->values();
+
+            // クラス別統計
+            $classStats = $records->groupBy(function($record) {
+                return $record->student->class_id ?? 'unknown';
+            })->map(function($classRecords, $classId) {
+                $firstRecord = $classRecords->first();
+                $className = $firstRecord->student->schoolClass->class_name ?? $classId;
+                $grade = $firstRecord->student->grade_id ?? 'unknown';
+                
+                return [
+                    'class_id' => $classId,
+                    'class_name' => $className,
+                    'grade' => $grade,
+                    'count' => $classRecords->count(),
+                    'avg_height' => round($classRecords->avg('height'), 1),
+                    'avg_weight' => round($classRecords->avg('weight'), 1),
+                    'avg_bmi' => round($classRecords->avg(function($record) {
+                        return $record->bmi;
+                    }), 1),
+                    'avg_vision_left' => round($classRecords->whereNotNull('vision_left')->avg('vision_left'), 2),
+                    'avg_vision_right' => round($classRecords->whereNotNull('vision_right')->avg('vision_right'), 2),
+                ];
+            })->sortBy('grade')->values();
+
             $statistics = [
                 'total_records' => $records->count(),
                 'averages' => [
                     'height' => round($records->avg('height'), 1),
                     'weight' => round($records->avg('weight'), 1),
-                    'bmi' => round($records->avg('bmi'), 1)
+                    'bmi' => round($records->avg('bmi'), 1),
+                    'vision_left' => round($records->whereNotNull('vision_left')->avg('vision_left'), 2),
+                    'vision_right' => round($records->whereNotNull('vision_right')->avg('vision_right'), 2),
                 ],
                 'ranges' => [
                     'height' => [
@@ -560,7 +631,9 @@ class HealthRecordController extends Controller
                     'normal' => round(($bmiCategories['normal'] / $records->count()) * 100, 1),
                     'overweight' => round(($bmiCategories['overweight'] / $records->count()) * 100, 1),
                     'obese' => round(($bmiCategories['obese'] / $records->count()) * 100, 1)
-                ]
+                ],
+                'by_grade' => $gradeStats,
+                'by_class' => $classStats,
             ];
 
             return response()->json([
