@@ -681,7 +681,12 @@
                         <td class="sticky z-10 bg-white px-2 py-2 text-xs text-gray-900 border-r border-gray-300 w-28" style="left: 4rem;">
                           <div>
                             <div class="font-medium leading-tight">{{ student.name }}</div>
-                            <div class="text-[10px] text-gray-500 leading-tight">{{ getStudentClassDisplay(student) }}</div>
+                            <div class="text-[10px] text-gray-500 leading-tight">
+                              {{ getStudentClassDisplay(student) }}
+                            </div>
+                            <div class="text-[10px] text-gray-400 leading-tight font-mono">
+                              {{ student.student_id }}
+                            </div>
                           </div>
                         </td>
                         

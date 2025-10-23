@@ -237,6 +237,10 @@
               :data="filteredStudents"
               @row-click="(item) => $router.push(`/students/${item.id}`)"
             >
+              <template #cell(student_id)="{ item }">
+                <span class="font-mono text-sm">{{ item.student_id || '-' }}</span>
+              </template>
+              
               <template #cell(student_number)="{ item }">
                 <span class="font-mono text-sm">{{ item.student_number }}</span>
               </template>
@@ -647,7 +651,8 @@ export default {
     });
     
     const studentsTableColumns = [
-      { key: 'student_number', title: '学生番号', sortable: true, width: '120px' },
+      { key: 'student_id', title: '学籍番号', sortable: true, width: '120px' },
+      { key: 'student_number', title: '出席番号', sortable: true, width: '100px' },
       { key: 'name', title: '氏名', sortable: true },
       { key: 'gender', title: '性別', sortable: true, width: '80px' },
       { key: 'age', title: '年齢', sortable: true, width: '80px' },

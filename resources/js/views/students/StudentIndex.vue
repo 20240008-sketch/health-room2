@@ -154,6 +154,13 @@
             @sort="handleSort"
             @row-click="handleRowClick"
           >
+            <!-- Student ID Column -->
+            <template #cell(student_id)="{ item }">
+              <div class="text-sm font-mono text-gray-900">
+                {{ item.student_id || '-' }}
+              </div>
+            </template>
+            
             <!-- Student Info Column -->
             <template #cell(student_info)="{ item }">
               <div class="space-y-1">
@@ -456,6 +463,13 @@ export default {
     
     // Table columns
     const tableColumns = [
+      {
+        key: 'student_id',
+        title: '学籍番号',
+        label: '学籍番号',
+        sortable: true,
+        width: '120px'
+      },
       {
         key: 'student_info',
         title: '学生名・出席番号',

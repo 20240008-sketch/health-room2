@@ -31,9 +31,10 @@
               {{ student.school_class.name }}
             </BaseBadge>
           </div>
-          <p class="mt-1 text-sm text-gray-500">
-            学生番号: {{ student?.student_number }}
-          </p>
+          <div class="mt-1 flex items-center space-x-4 text-sm text-gray-500">
+            <span>学籍番号: <span class="font-mono">{{ student?.student_id || '-' }}</span></span>
+            <span>出席番号: {{ student?.student_number }}</span>
+          </div>
         </div>
         <div class="mt-4 flex space-x-3 md:mt-0 md:ml-4">
           <BaseButton
@@ -87,7 +88,12 @@
               </div>
               
               <div>
-                <dt class="text-sm font-medium text-gray-500">学生番号</dt>
+                <dt class="text-sm font-medium text-gray-500">学籍番号</dt>
+                <dd class="mt-1 text-sm text-gray-900 font-mono">{{ student.student_id || '-' }}</dd>
+              </div>
+              
+              <div>
+                <dt class="text-sm font-medium text-gray-500">出席番号</dt>
                 <dd class="mt-1 text-sm text-gray-900">{{ student.student_number }}</dd>
               </div>
               
