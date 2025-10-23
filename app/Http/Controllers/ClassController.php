@@ -77,7 +77,9 @@ class ClassController extends Controller
     {
         try {
             $class = SchoolClass::with(['students' => function ($query) {
-                $query->orderBy('student_number');
+                $query->with(['latestHealthRecord'])
+                    ->withCount('healthRecords')
+                    ->orderBy('student_number');
             }])->findOrFail($id);
 
             return response()->json([

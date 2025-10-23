@@ -155,7 +155,7 @@
               <div>
                 <dt class="text-sm font-medium text-gray-500">健康記録数</dt>
                 <dd class="mt-1 text-sm text-gray-900">
-                  {{ student.health_records_count || 0 }}件
+                  {{ healthRecords.length }}件
                 </dd>
               </div>
             </div>

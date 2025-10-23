@@ -235,57 +235,57 @@
             <BaseTable
               :columns="studentsTableColumns"
               :data="filteredStudents"
-              @row-click="(row) => $router.push(`/students/${row.id}`)"
+              @row-click="(item) => $router.push(`/students/${item.id}`)"
             >
-              <template #student_number="{ row }">
-                <span class="font-mono text-sm">{{ row.student_number }}</span>
+              <template #cell(student_number)="{ item }">
+                <span class="font-mono text-sm">{{ item.student_number }}</span>
               </template>
 
-              <template #name="{ row }">
+              <template #cell(name)="{ item }">
                 <div class="flex items-center">
                   <div class="flex-shrink-0 h-8 w-8">
                     <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
                       <span class="text-sm font-medium text-blue-700">
-                        {{ row.name.charAt(0) }}
+                        {{ item.name.charAt(0) }}
                       </span>
                     </div>
                   </div>
                   <div class="ml-3">
-                    <div class="font-medium text-gray-900">{{ row.name }}</div>
-                    <div v-if="row.name_kana" class="text-sm text-gray-500">{{ row.name_kana }}</div>
+                    <div class="font-medium text-gray-900">{{ item.name }}</div>
+                    <div v-if="item.name_kana" class="text-sm text-gray-500">{{ item.name_kana }}</div>
                   </div>
                 </div>
               </template>
 
-              <template #gender="{ row }">
-                <BaseBadge :variant="row.gender === 'male' ? 'blue' : 'pink'">
-                  {{ row.gender === 'male' ? '男' : '女' }}
+              <template #cell(gender)="{ item }">
+                <BaseBadge :variant="(item.gender === '男' || item.gender === 'male') ? 'blue' : 'pink'">
+                  {{ item.gender === '男' || item.gender === 'male' ? '男' : '女' }}
                 </BaseBadge>
               </template>
 
-              <template #age="{ row }">
-                <span class="text-sm text-gray-900">{{ calculateAge(row.birth_date) }}歳</span>
+              <template #cell(age)="{ item }">
+                <span class="text-sm text-gray-900">{{ calculateAge(item.birth_date) }}歳</span>
               </template>
 
-              <template #status="{ row }">
+              <template #cell(status)="{ item }">
                 <BaseBadge
                   :variant="
-                    row.status === 'active' ? 'success' :
-                    row.status === 'inactive' ? 'warning' : 'secondary'
+                    item.status === 'active' ? 'success' :
+                    item.status === 'inactive' ? 'warning' : 'secondary'
                   "
                 >
-                  {{ getStatusLabel(row.status) }}
+                  {{ getStatusLabel(item.status) }}
                 </BaseBadge>
               </template>
 
-              <template #latest_health_record="{ row }">
-                <div v-if="row.latest_health_record" class="text-sm">
+              <template #cell(latest_health_record)="{ item }">
+                <div v-if="item.latest_health_record" class="text-sm">
                   <div class="text-gray-900">
-                    {{ formatDate(row.latest_health_record.measured_date) }}
+                    {{ formatDate(item.latest_health_record.measured_date) }}
                   </div>
                   <div class="text-gray-500">
-                    身長 {{ row.latest_health_record.height }}cm / 
-                    体重 {{ row.latest_health_record.weight }}kg
+                    身長 {{ item.latest_health_record.height }}cm / 
+                    体重 {{ item.latest_health_record.weight }}kg
                   </div>
                 </div>
                 <div v-else class="text-sm text-gray-400">
@@ -293,19 +293,19 @@
                 </div>
               </template>
 
-              <template #actions="{ row }">
+              <template #actions="{ item }">
                 <div class="flex space-x-2">
                   <BaseButton
                     size="sm"
                     variant="secondary"
-                    @click.stop="$router.push(`/students/${row.id}/edit`)"
+                    @click.stop="$router.push(`/students/${item.id}/edit`)"
                   >
                     編集
                   </BaseButton>
                   <BaseButton
                     size="sm"
                     variant="primary"
-                    @click.stop="$router.push(`/students/${row.id}`)"
+                    @click.stop="$router.push(`/students/${item.id}`)"
                   >
                     詳細
                   </BaseButton>
@@ -617,10 +617,11 @@ export default {
         };
       }
       
-      const maleCount = students.filter(s => s.gender === 'male').length;
-      const femaleCount = students.filter(s => s.gender === 'female').length;
-      const malePercentage = Math.round((maleCount / totalStudents) * 100);
-      const femalePercentage = Math.round((femaleCount / totalStudents) * 100);
+      // 日本語の性別表記に対応
+      const maleCount = students.filter(s => s.gender === '男' || s.gender === 'male').length;
+      const femaleCount = students.filter(s => s.gender === '女' || s.gender === 'female').length;
+      const malePercentage = totalStudents > 0 ? Math.round((maleCount / totalStudents) * 100) : 0;
+      const femalePercentage = totalStudents > 0 ? Math.round((femaleCount / totalStudents) * 100) : 0;
       
       const ages = students.map(s => calculateAge(s.birth_date)).filter(age => age > 0);
       const averageAge = ages.length > 0 ? Math.round(ages.reduce((sum, age) => sum + age, 0) / ages.length) : 0;
@@ -646,13 +647,12 @@ export default {
     });
     
     const studentsTableColumns = [
-      { key: 'student_number', label: '学生番号', sortable: true, width: '120px' },
-      { key: 'name', label: '氏名', sortable: true },
-      { key: 'gender', label: '性別', sortable: true, width: '80px' },
-      { key: 'age', label: '年齢', sortable: true, width: '80px' },
-      { key: 'status', label: '状態', sortable: true, width: '100px' },
-      { key: 'latest_health_record', label: '最新測定', width: '160px' },
-      { key: 'actions', label: '', width: '120px' }
+      { key: 'student_number', title: '学生番号', sortable: true, width: '120px' },
+      { key: 'name', title: '氏名', sortable: true },
+      { key: 'gender', title: '性別', sortable: true, width: '80px' },
+      { key: 'age', title: '年齢', sortable: true, width: '80px' },
+      { key: 'status', title: '状態', sortable: true, width: '100px' },
+      { key: 'latest_health_record', title: '最新測定', width: '160px' }
     ];
     
     // Methods
@@ -697,7 +697,7 @@ export default {
           student.student_number,
           student.name,
           student.name_kana || '',
-          student.gender === 'male' ? '男' : '女',
+          (student.gender === '男' || student.gender === 'male') ? '男' : '女',
           student.birth_date,
           calculateAge(student.birth_date),
           getStatusLabel(student.status)
