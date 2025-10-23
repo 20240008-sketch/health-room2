@@ -632,123 +632,149 @@
                   </div>
                 </div>
                 
-                <!-- Individual measurement inputs for each selected student -->
-                <div class="space-y-4">
-                  <div
-                    v-for="student in selectedStudents"
-                    :key="student.id"
-                    class="bg-white border border-gray-200 rounded-lg p-4"
-                  >
-                    <div class="flex items-center justify-between mb-4">
-                      <div class="flex items-center">
-                        <span class="font-medium text-gray-900">{{ student.name }}</span>
-                        <BaseBadge variant="info" class="ml-2">
-                          {{ getStudentClassDisplay(student) }}
-                        </BaseBadge>
-                        <span class="ml-2 text-sm text-gray-500">
-                          出席番号: {{ student.student_number }}
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      <!-- Height -->
-                      <div v-if="measurementItems.height">
-                        <BaseInput
-                          :ref="el => setBulkInputRef(el, student.id, 'height')"
-                          type="number"
-                          step="0.1"
-                          v-model="bulkMeasurements[student.id].height"
-                          label="身長 (cm)"
-                          placeholder="150.5"
-                          @input="calculateBulkBMI(student.id)"
-                          @keydown.enter.prevent="focusBulkNextField(student.id, 'height')"
-                        />
-                      </div>
-
-                      <!-- Weight -->
-                      <div v-if="measurementItems.weight">
-                        <BaseInput
-                          :ref="el => setBulkInputRef(el, student.id, 'weight')"
-                          type="number"
-                          step="0.1"
-                          v-model="bulkMeasurements[student.id].weight"
-                          label="体重 (kg)"
-                          placeholder="45.5"
-                          @input="calculateBulkBMI(student.id)"
-                          @keydown.enter.prevent="focusBulkNextField(student.id, 'weight')"
-                        />
-                      </div>
-
-                      <!-- Vision - Naked -->
-                      <div v-if="measurementItems.vision" class="sm:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">裸眼視力</label>
-                        <div class="grid grid-cols-2 gap-4">
-                          <BaseInput
+                <!-- Table Format for Bulk Measurement -->
+                <div class="overflow-x-auto border border-gray-300 rounded-lg">
+                  <table class="min-w-full divide-y divide-gray-300">
+                    <thead class="bg-gray-50">
+                      <tr>
+                        <th scope="col" class="sticky left-0 z-10 bg-gray-50 px-2 py-2 text-left text-xs font-semibold text-gray-900 border-r border-gray-300 w-16">
+                          出席<br/>番号
+                        </th>
+                        <th scope="col" class="sticky z-10 bg-gray-50 px-2 py-2 text-left text-xs font-semibold text-gray-900 border-r border-gray-300 w-28" style="left: 4rem;">
+                          名前
+                        </th>
+                        <th v-if="measurementItems.height" scope="col" class="px-2 py-2 text-center text-xs font-semibold text-gray-900 min-w-[90px]">
+                          身長<br/>(cm)
+                        </th>
+                        <th v-if="measurementItems.weight" scope="col" class="px-2 py-2 text-center text-xs font-semibold text-gray-900 min-w-[90px]">
+                          体重<br/>(kg)
+                        </th>
+                        <th v-if="measurementItems.vision" scope="col" class="px-2 py-2 text-center text-xs font-semibold text-gray-900 min-w-[90px]">
+                          裸眼視力<br/>左
+                        </th>
+                        <th v-if="measurementItems.vision" scope="col" class="px-2 py-2 text-center text-xs font-semibold text-gray-900 min-w-[90px]">
+                          裸眼視力<br/>右
+                        </th>
+                        <th v-if="measurementItems.vision" scope="col" class="px-2 py-2 text-center text-xs font-semibold text-gray-900 min-w-[90px]">
+                          矯正視力<br/>左
+                        </th>
+                        <th v-if="measurementItems.vision" scope="col" class="px-2 py-2 text-center text-xs font-semibold text-gray-900 min-w-[90px]">
+                          矯正視力<br/>右
+                        </th>
+                        <th v-if="measurementItems.height && measurementItems.weight" scope="col" class="px-2 py-2 text-center text-xs font-semibold text-gray-900 min-w-[80px]">
+                          BMI
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 bg-white">
+                      <tr
+                        v-for="student in selectedStudents"
+                        :key="student.id"
+                        class="hover:bg-gray-50"
+                      >
+                        <!-- Student Number (Sticky) -->
+                        <td class="sticky left-0 z-10 bg-white whitespace-nowrap px-2 py-2 text-xs font-medium text-gray-900 border-r border-gray-300 w-16 text-center">
+                          {{ student.student_number }}
+                        </td>
+                        
+                        <!-- Student Name (Sticky) -->
+                        <td class="sticky z-10 bg-white px-2 py-2 text-xs text-gray-900 border-r border-gray-300 w-28" style="left: 4rem;">
+                          <div>
+                            <div class="font-medium leading-tight">{{ student.name }}</div>
+                            <div class="text-[10px] text-gray-500 leading-tight">{{ getStudentClassDisplay(student) }}</div>
+                          </div>
+                        </td>
+                        
+                        <!-- Height -->
+                        <td v-if="measurementItems.height" class="whitespace-nowrap px-1 py-2 text-xs text-gray-900">
+                          <input
+                            :ref="el => setBulkInputRef(el, student.id, 'height')"
+                            type="number"
+                            step="0.1"
+                            v-model="bulkMeasurements[student.id].height"
+                            placeholder="150.5"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-xs text-center py-1.5"
+                            @input="calculateBulkBMI(student.id)"
+                            @keydown.enter.prevent="focusBulkNextField(student.id, 'height')"
+                          />
+                        </td>
+                        
+                        <!-- Weight -->
+                        <td v-if="measurementItems.weight" class="whitespace-nowrap px-1 py-2 text-xs text-gray-900">
+                          <input
+                            :ref="el => setBulkInputRef(el, student.id, 'weight')"
+                            type="number"
+                            step="0.1"
+                            v-model="bulkMeasurements[student.id].weight"
+                            placeholder="45.5"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-xs text-center py-1.5"
+                            @input="calculateBulkBMI(student.id)"
+                            @keydown.enter.prevent="focusBulkNextField(student.id, 'weight')"
+                          />
+                        </td>
+                        
+                        <!-- Vision Left -->
+                        <td v-if="measurementItems.vision" class="whitespace-nowrap px-1 py-2 text-xs text-gray-900">
+                          <input
                             :ref="el => setBulkInputRef(el, student.id, 'vision_left')"
                             type="number"
                             step="0.1"
                             v-model="bulkMeasurements[student.id].vision_left"
-                            label="左"
                             placeholder="1.0"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-xs text-center py-1.5"
                             @keydown.enter.prevent="focusBulkNextField(student.id, 'vision_left')"
                           />
-                          <BaseInput
+                        </td>
+                        
+                        <!-- Vision Right -->
+                        <td v-if="measurementItems.vision" class="whitespace-nowrap px-1 py-2 text-xs text-gray-900">
+                          <input
                             :ref="el => setBulkInputRef(el, student.id, 'vision_right')"
                             type="number"
                             step="0.1"
                             v-model="bulkMeasurements[student.id].vision_right"
-                            label="右"
                             placeholder="1.0"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-xs text-center py-1.5"
                             @keydown.enter.prevent="focusBulkNextField(student.id, 'vision_right')"
                           />
-                        </div>
-                      </div>
-
-                      <!-- Vision - Corrected -->
-                      <div v-if="measurementItems.vision" class="sm:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">矯正視力（必要な場合のみ）</label>
-                        <div class="grid grid-cols-2 gap-4">
-                          <BaseInput
+                        </td>
+                        
+                        <!-- Vision Left Corrected -->
+                        <td v-if="measurementItems.vision" class="whitespace-nowrap px-1 py-2 text-xs text-gray-900">
+                          <input
                             :ref="el => setBulkInputRef(el, student.id, 'vision_left_corrected')"
                             type="number"
                             step="0.1"
                             v-model="bulkMeasurements[student.id].vision_left_corrected"
-                            label="左"
                             placeholder="1.0"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-xs text-center py-1.5"
                             @keydown.enter.prevent="focusBulkNextField(student.id, 'vision_left_corrected')"
                           />
-                          <BaseInput
+                        </td>
+                        
+                        <!-- Vision Right Corrected -->
+                        <td v-if="measurementItems.vision" class="whitespace-nowrap px-1 py-2 text-xs text-gray-900">
+                          <input
                             :ref="el => setBulkInputRef(el, student.id, 'vision_right_corrected')"
                             type="number"
                             step="0.1"
                             v-model="bulkMeasurements[student.id].vision_right_corrected"
-                            label="右"
                             placeholder="1.0"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-xs text-center py-1.5"
                             @keydown.enter.prevent="focusBulkNextField(student.id, 'vision_right_corrected')"
                           />
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <!-- BMI Display for this student -->
-                    <div v-if="measurementItems.height && measurementItems.weight && bulkMeasurements[student.id].height && bulkMeasurements[student.id].weight" class="mt-3 bg-gray-50 rounded-lg p-3">
-                      <div class="flex items-center justify-between">
-                        <div>
-                          <span class="text-sm font-medium text-gray-700">BMI: </span>
-                          <span class="text-xl font-bold" :class="getBMIColor(bulkMeasurements[student.id].bmi)">
+                        </td>
+                        
+                        <!-- BMI -->
+                        <td v-if="measurementItems.height && measurementItems.weight" class="whitespace-nowrap px-2 py-2 text-xs text-center">
+                          <span v-if="bulkMeasurements[student.id].bmi" :class="getBMIColor(bulkMeasurements[student.id].bmi)" class="font-semibold">
                             {{ bulkMeasurements[student.id].bmi }}
                           </span>
-                          <BaseBadge :variant="getBMIVariant(bulkMeasurements[student.id].bmi)" class="ml-2">
-                            {{ getBMICategory(bulkMeasurements[student.id].bmi) }}
-                          </BaseBadge>
-                        </div>
-                        <div v-if="student.latest_health_record" class="text-sm text-gray-500">
-                          前回BMI: {{ student.latest_health_record.bmi }}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                          <span v-else class="text-gray-400">-</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
 
@@ -1403,7 +1429,8 @@ export default {
         // Try to focus this field
         const nextFieldRef = bulkInputRefs[currentStudentId]?.[nextFieldName];
         if (nextFieldRef) {
-          nextFieldRef.$el.querySelector('input').focus();
+          // Direct input element (table format)
+          nextFieldRef.focus();
           return;
         }
       }
@@ -1435,11 +1462,9 @@ export default {
         const nextFieldRef = bulkInputRefs[nextStudentId]?.[fieldName];
         if (nextFieldRef) {
           try {
-            const input = nextFieldRef.$el.querySelector('input');
-            if (input) {
-              input.focus();
-              return;
-            }
+            // Direct input element (table format)
+            nextFieldRef.focus();
+            return;
           } catch (e) {
             console.error('Error focusing field:', e);
           }
@@ -1787,3 +1812,54 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+/* Sticky columns styling */
+.sticky {
+  position: sticky;
+  background-color: white;
+}
+
+.sticky.left-0 {
+  left: 0;
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Header sticky background */
+thead .sticky.bg-gray-50 {
+  background-color: rgb(249 250 251);
+}
+
+/* Row hover effect with sticky columns */
+tbody tr:hover .sticky {
+  background-color: rgb(249 250 251);
+}
+
+/* Second sticky column with dynamic left position */
+.sticky[style*="left: 4rem"] {
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Table input styling */
+table input[type="number"] {
+  min-width: 70px;
+}
+
+/* Remove number input arrows for cleaner look */
+table input[type="number"]::-webkit-inner-spin-button,
+table input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+table input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Compact table cells */
+table td,
+table th {
+  line-height: 1.2;
+}
+</style>
