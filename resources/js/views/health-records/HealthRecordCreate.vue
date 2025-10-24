@@ -1620,7 +1620,7 @@ export default {
         if (selectionMethod.value === 'individual') {
           // Individual record creation
           const recordData = {
-            student_id: selectedStudent.value.id,
+            student_id: selectedStudent.value.student_id,
             year: parseInt(form.academic_year), // academic_year → year
             measured_date: form.measured_date || null,
             height: measurementItems.height && form.height ? parseFloat(form.height) : null,
@@ -1652,9 +1652,10 @@ export default {
         } else {
           // Bulk record creation with measurements
           const recordsData = selectedStudentIds.value.map(studentId => {
+            const student = bulkStudents.value.find(s => s.id === studentId);
             const measurement = bulkMeasurements[studentId] || {};
             return {
-              student_id: studentId,
+              student_id: student.student_id,
               year: parseInt(form.academic_year), // academic_year → year
               measured_date: form.measured_date || null,
               height: measurementItems.height && measurement.height ? parseFloat(measurement.height) : null,

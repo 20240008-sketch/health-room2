@@ -328,7 +328,7 @@ class HealthRecordController extends Controller
         try {
             $request->validate([
                 'records' => 'required|array',
-                'records.*.student_id' => 'required|exists:students,id',
+                'records.*.student_id' => 'required|string|exists:students,student_id',
                 'records.*.year' => 'required|integer|min:2020|max:2030',
                 'records.*.height' => 'nullable|numeric|min:50|max:250',
                 'records.*.weight' => 'nullable|numeric|min:10|max:200',

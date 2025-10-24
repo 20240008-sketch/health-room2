@@ -120,8 +120,8 @@ class HealthRecordRequest extends FormRequest
         if ($this->isMethod('POST')) {
             $rules['student_id'] = [
                 'required',
-                'integer',
-                'exists:students,id',
+                'string',
+                'exists:students,student_id',
             ];
         }
 
@@ -137,7 +137,7 @@ class HealthRecordRequest extends FormRequest
     {
         return [
             'student_id.required' => '生徒は必須です。',
-            'student_id.integer' => '生徒IDは数値で入力してください。',
+            'student_id.string' => '生徒IDは文字列で入力してください。',
             'student_id.exists' => '指定された生徒は存在しません。',
             
             'year.required' => '年度は必須です。',
