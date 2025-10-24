@@ -808,13 +808,16 @@ export default {
       saving.value = true;
       try {
         // Prepare records for API
-        const records = Object.entries(attendanceData.value).map(([studentId, data]) => ({
-          student_id: parseInt(studentId),
-          status: data.status,
-          arrival_time: data.arrival_time || null,
-          departure_time: data.departure_time || null,
-          notes: data.notes || null
-        }));
+        const records = Object.entries(attendanceData.value).map(([studentId, data]) => {
+          const student = filteredStudents.value.find(s => s.id === parseInt(studentId));
+          return {
+            student_id: student ? student.student_id : studentId,
+            status: data.status,
+            arrival_time: data.arrival_time || null,
+            departure_time: data.departure_time || null,
+            notes: data.notes || null
+          };
+        });
         
         // Call API to save attendance records
         const response = await fetch('/api/v1/attendance-records/bulk', {

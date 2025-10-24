@@ -88,7 +88,7 @@ class AttendanceController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'student_id' => 'required|exists:students,id',
+            'student_id' => 'required|string|exists:students,student_id',
             'date' => 'required|date',
             'status' => 'required|in:present,absent,late,early_leave',
             'arrival_time' => 'nullable|date_format:H:i',
@@ -137,7 +137,7 @@ class AttendanceController extends Controller
         $validator = Validator::make($request->all(), [
             'date' => 'required|date',
             'records' => 'required|array',
-            'records.*.student_id' => 'required|exists:students,id',
+            'records.*.student_id' => 'required|string|exists:students,student_id',
             'records.*.status' => 'required|in:present,absent,late,early_leave',
             'records.*.arrival_time' => 'nullable|date_format:H:i',
             'records.*.departure_time' => 'nullable|date_format:H:i',
