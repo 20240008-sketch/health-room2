@@ -445,24 +445,32 @@
                         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                           <BaseInput
                             ref="visionLeftInput"
-                            type="number"
-                            step="0.1"
+                            type="select"
                             v-model="form.vision_left"
                             label="左"
-                            placeholder="1.0"
                             :error="errors.vision_left"
-                            @keydown.enter.prevent="focusNextField('visionLeftInput')"
-                          />
+                            @change="focusNextField('visionLeftInput')"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                          </BaseInput>
                           <BaseInput
                             ref="visionRightInput"
-                            type="number"
-                            step="0.1"
+                            type="select"
                             v-model="form.vision_right"
                             label="右"
-                            placeholder="1.0"
                             :error="errors.vision_right"
-                            @keydown.enter.prevent="focusNextField('visionRightInput')"
-                          />
+                            @change="focusNextField('visionRightInput')"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                          </BaseInput>
                         </div>
                       </div>
                       
@@ -472,24 +480,32 @@
                         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                           <BaseInput
                             ref="visionLeftCorrectedInput"
-                            type="number"
-                            step="0.1"
+                            type="select"
                             v-model="form.vision_left_corrected"
                             label="左"
-                            placeholder="1.0"
                             :error="errors.vision_left_corrected"
-                            @keydown.enter.prevent="focusNextField('visionLeftCorrectedInput')"
-                          />
+                            @change="focusNextField('visionLeftCorrectedInput')"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                          </BaseInput>
                           <BaseInput
                             ref="visionRightCorrectedInput"
-                            type="number"
-                            step="0.1"
+                            type="select"
                             v-model="form.vision_right_corrected"
                             label="右"
-                            placeholder="1.0"
                             :error="errors.vision_right_corrected"
-                            @keydown.enter.prevent="focusNextField('visionRightCorrectedInput')"
-                          />
+                            @change="focusNextField('visionRightCorrectedInput')"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                          </BaseInput>
                         </div>
                       </div>
                     </div>
@@ -720,54 +736,66 @@
                         
                         <!-- Vision Left -->
                         <td v-if="measurementItems.vision" class="whitespace-nowrap px-1 py-2 text-xs text-gray-900">
-                          <input
+                          <select
                             :ref="el => setBulkInputRef(el, student.id, 'vision_left')"
-                            type="number"
-                            step="0.1"
                             v-model="bulkMeasurements[student.id].vision_left"
-                            placeholder="1.0"
                             class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-xs text-center py-1.5"
-                            @keydown.enter.prevent="focusBulkNextField(student.id, 'vision_left')"
-                          />
+                            @change="focusBulkNextField(student.id, 'vision_left')"
+                          >
+                            <option value="">-</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                          </select>
                         </td>
                         
                         <!-- Vision Right -->
                         <td v-if="measurementItems.vision" class="whitespace-nowrap px-1 py-2 text-xs text-gray-900">
-                          <input
+                          <select
                             :ref="el => setBulkInputRef(el, student.id, 'vision_right')"
-                            type="number"
-                            step="0.1"
                             v-model="bulkMeasurements[student.id].vision_right"
-                            placeholder="1.0"
                             class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-xs text-center py-1.5"
-                            @keydown.enter.prevent="focusBulkNextField(student.id, 'vision_right')"
-                          />
+                            @change="focusBulkNextField(student.id, 'vision_right')"
+                          >
+                            <option value="">-</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                          </select>
                         </td>
                         
                         <!-- Vision Left Corrected -->
                         <td v-if="measurementItems.vision" class="whitespace-nowrap px-1 py-2 text-xs text-gray-900">
-                          <input
+                          <select
                             :ref="el => setBulkInputRef(el, student.id, 'vision_left_corrected')"
-                            type="number"
-                            step="0.1"
                             v-model="bulkMeasurements[student.id].vision_left_corrected"
-                            placeholder="1.0"
                             class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-xs text-center py-1.5"
-                            @keydown.enter.prevent="focusBulkNextField(student.id, 'vision_left_corrected')"
-                          />
+                            @change="focusBulkNextField(student.id, 'vision_left_corrected')"
+                          >
+                            <option value="">-</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                          </select>
                         </td>
                         
                         <!-- Vision Right Corrected -->
                         <td v-if="measurementItems.vision" class="whitespace-nowrap px-1 py-2 text-xs text-gray-900">
-                          <input
+                          <select
                             :ref="el => setBulkInputRef(el, student.id, 'vision_right_corrected')"
-                            type="number"
-                            step="0.1"
                             v-model="bulkMeasurements[student.id].vision_right_corrected"
-                            placeholder="1.0"
                             class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-xs text-center py-1.5"
-                            @keydown.enter.prevent="focusBulkNextField(student.id, 'vision_right_corrected')"
-                          />
+                            @change="focusBulkNextField(student.id, 'vision_right_corrected')"
+                          >
+                            <option value="">-</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                          </select>
                         </td>
                         
                         <!-- BMI -->
@@ -1557,17 +1585,17 @@ export default {
         }
         
         if (measurementItems.vision) {
-          if (form.vision_left && (parseFloat(form.vision_left) < 0 || parseFloat(form.vision_left) > 3)) {
-            errors.value.vision_left = '視力は0-3.0の範囲で入力してください';
+          if (form.vision_left && !['A', 'B', 'C', 'D'].includes(form.vision_left)) {
+            errors.value.vision_left = '視力はA, B, C, Dのいずれかを選択してください';
           }
-          if (form.vision_right && (parseFloat(form.vision_right) < 0 || parseFloat(form.vision_right) > 3)) {
-            errors.value.vision_right = '視力は0-3.0の範囲で入力してください';
+          if (form.vision_right && !['A', 'B', 'C', 'D'].includes(form.vision_right)) {
+            errors.value.vision_right = '視力はA, B, C, Dのいずれかを選択してください';
           }
-          if (form.vision_left_corrected && (parseFloat(form.vision_left_corrected) < 0 || parseFloat(form.vision_left_corrected) > 3)) {
-            errors.value.vision_left_corrected = '矯正視力は0-3.0の範囲で入力してください';
+          if (form.vision_left_corrected && !['A', 'B', 'C', 'D'].includes(form.vision_left_corrected)) {
+            errors.value.vision_left_corrected = '矯正視力はA, B, C, Dのいずれかを選択してください';
           }
-          if (form.vision_right_corrected && (parseFloat(form.vision_right_corrected) < 0 || parseFloat(form.vision_right_corrected) > 3)) {
-            errors.value.vision_right_corrected = '矯正視力は0-3.0の範囲で入力してください';
+          if (form.vision_right_corrected && !['A', 'B', 'C', 'D'].includes(form.vision_right_corrected)) {
+            errors.value.vision_right_corrected = '矯正視力はA, B, C, Dのいずれかを選択してください';
           }
         }
       } else {
@@ -1625,10 +1653,10 @@ export default {
             measured_date: form.measured_date || null,
             height: measurementItems.height && form.height ? parseFloat(form.height) : null,
             weight: measurementItems.weight && form.weight ? parseFloat(form.weight) : null,
-            vision_left: measurementItems.vision && form.vision_left ? parseFloat(form.vision_left) : null,
-            vision_right: measurementItems.vision && form.vision_right ? parseFloat(form.vision_right) : null,
-            vision_left_corrected: measurementItems.vision && form.vision_left_corrected ? parseFloat(form.vision_left_corrected) : null,
-            vision_right_corrected: measurementItems.vision && form.vision_right_corrected ? parseFloat(form.vision_right_corrected) : null,
+            vision_left: measurementItems.vision && form.vision_left ? form.vision_left : null,
+            vision_right: measurementItems.vision && form.vision_right ? form.vision_right : null,
+            vision_left_corrected: measurementItems.vision && form.vision_left_corrected ? form.vision_left_corrected : null,
+            vision_right_corrected: measurementItems.vision && form.vision_right_corrected ? form.vision_right_corrected : null,
             ophthalmology_result: measurementItems.ophthalmology && form.ophthalmology_result ? form.ophthalmology_result : null,
             otolaryngology_result: measurementItems.otolaryngology && form.otolaryngology_result ? form.otolaryngology_result : null,
             internal_medicine_result: measurementItems.internal_medicine && form.internal_medicine_result ? form.internal_medicine_result : null,
@@ -1667,10 +1695,10 @@ export default {
               measured_date: form.measured_date || null,
               height: measurementItems.height && measurement.height ? parseFloat(measurement.height) : null,
               weight: measurementItems.weight && measurement.weight ? parseFloat(measurement.weight) : null,
-              vision_left: measurementItems.vision && measurement.vision_left ? parseFloat(measurement.vision_left) : null,
-              vision_right: measurementItems.vision && measurement.vision_right ? parseFloat(measurement.vision_right) : null,
-              vision_left_corrected: measurementItems.vision && measurement.vision_left_corrected ? parseFloat(measurement.vision_left_corrected) : null,
-              vision_right_corrected: measurementItems.vision && measurement.vision_right_corrected ? parseFloat(measurement.vision_right_corrected) : null,
+              vision_left: measurementItems.vision && measurement.vision_left ? measurement.vision_left : null,
+              vision_right: measurementItems.vision && measurement.vision_right ? measurement.vision_right : null,
+              vision_left_corrected: measurementItems.vision && measurement.vision_left_corrected ? measurement.vision_left_corrected : null,
+              vision_right_corrected: measurementItems.vision && measurement.vision_right_corrected ? measurement.vision_right_corrected : null,
               ophthalmology_result: measurementItems.ophthalmology && form.ophthalmology_result ? form.ophthalmology_result : null,
               otolaryngology_result: measurementItems.otolaryngology && form.otolaryngology_result ? form.otolaryngology_result : null,
               internal_medicine_result: measurementItems.internal_medicine && form.internal_medicine_result ? form.internal_medicine_result : null,

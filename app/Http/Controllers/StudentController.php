@@ -28,9 +28,9 @@ class StudentController extends Controller
             // シンプルな検索実装
             $query = Student::query();
             
-            // 健康記録数をカウント、最新の健康記録をロード
+            // 健康記録数をカウント、最新の健康記録をロード、クラス情報もロード
             $query->withCount('healthRecords')
-                  ->with('latestHealthRecord');
+                  ->with(['latestHealthRecord', 'schoolClass']);
             
             // 名前検索
             if ($request->filled('search')) {

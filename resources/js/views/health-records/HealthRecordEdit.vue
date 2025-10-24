@@ -197,26 +197,34 @@
                   <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                       <BaseInput
-                        type="number"
-                        step="0.1"
+                        type="select"
                         v-model="form.vision_left"
                         label="左"
-                        placeholder="1.0"
                         :error="errors.vision_left"
-                      />
+                      >
+                        <option value="">選択してください</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                      </BaseInput>
                       <div v-if="form.vision_left != originalRecord.vision_left" class="mt-1 text-sm text-blue-600">
                         変更前: {{ originalRecord.vision_left || '未入力' }}
                       </div>
                     </div>
                     <div>
                       <BaseInput
-                        type="number"
-                        step="0.1"
+                        type="select"
                         v-model="form.vision_right"
                         label="右"
-                        placeholder="1.0"
                         :error="errors.vision_right"
-                      />
+                      >
+                        <option value="">選択してください</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                      </BaseInput>
                       <div v-if="form.vision_right != originalRecord.vision_right" class="mt-1 text-sm text-blue-600">
                         変更前: {{ originalRecord.vision_right || '未入力' }}
                       </div>
@@ -230,26 +238,34 @@
                   <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                       <BaseInput
-                        type="number"
-                        step="0.1"
+                        type="select"
                         v-model="form.vision_left_corrected"
                         label="左"
-                        placeholder="1.0"
                         :error="errors.vision_left_corrected"
-                      />
+                      >
+                        <option value="">選択してください</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                      </BaseInput>
                       <div v-if="form.vision_left_corrected != originalRecord.vision_left_corrected" class="mt-1 text-sm text-blue-600">
                         変更前: {{ originalRecord.vision_left_corrected || '未入力' }}
                       </div>
                     </div>
                     <div>
                       <BaseInput
-                        type="number"
-                        step="0.1"
+                        type="select"
                         v-model="form.vision_right_corrected"
                         label="右"
-                        placeholder="1.0"
                         :error="errors.vision_right_corrected"
-                      />
+                      >
+                        <option value="">選択してください</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                      </BaseInput>
                       <div v-if="form.vision_right_corrected != originalRecord.vision_right_corrected" class="mt-1 text-sm text-blue-600">
                         変更前: {{ originalRecord.vision_right_corrected || '未入力' }}
                       </div>
@@ -873,10 +889,10 @@ export default {
           year: parseInt(form.academic_year),
           height: parseFloat(form.height),
           weight: parseFloat(form.weight),
-          vision_left: form.vision_left ? parseFloat(form.vision_left) : null,
-          vision_right: form.vision_right ? parseFloat(form.vision_right) : null,
-          vision_left_corrected: form.vision_left_corrected ? parseFloat(form.vision_left_corrected) : null,
-          vision_right_corrected: form.vision_right_corrected ? parseFloat(form.vision_right_corrected) : null,
+          vision_left: form.vision_left || null,
+          vision_right: form.vision_right || null,
+          vision_left_corrected: form.vision_left_corrected || null,
+          vision_right_corrected: form.vision_right_corrected || null,
           notes: form.notes || null,
           edit_reason: form.edit_reason || null
         };

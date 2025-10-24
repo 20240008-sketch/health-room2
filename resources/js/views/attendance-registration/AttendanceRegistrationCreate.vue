@@ -960,7 +960,7 @@ export default {
     };
     
     const getStudentById = (studentId) => {
-      return nursingStudents.value.find(s => s.id === studentId);
+      return nursingStudents.value.find(s => s.student_id === studentId);
     };
     
     const getGenderLabel = (gender) => {
