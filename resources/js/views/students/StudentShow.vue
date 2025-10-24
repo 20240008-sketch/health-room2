@@ -528,14 +528,14 @@ export default {
       const studentId = route.params.id;
       
       try {
-        // 学生情報と健康記録を並行取得
-        const [studentData, healthRecordsData] = await Promise.all([
-          studentStore.fetchStudent(studentId),
-          healthRecordStore.getHealthRecordsByStudent(studentId)
-        ]);
+        // まず学生情報を取得
+        await studentStore.fetchStudent(studentId);
         
-        // 健康記録をstateに設定
-        healthRecords.value = healthRecordsData || [];
+        // 学生のstudent_id（学籍番号）を使って健康記録を取得
+        if (student.value && student.value.student_id) {
+          const healthRecordsData = await healthRecordStore.getHealthRecordsByStudent(student.value.student_id);
+          healthRecords.value = healthRecordsData || [];
+        }
         
       } catch (error) {
         console.error('データ取得エラー:', error);
