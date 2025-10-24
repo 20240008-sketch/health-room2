@@ -950,7 +950,7 @@ export default {
       );
       
       if (student) {
-        visit.student_id = student.id;
+        visit.student_id = student.student_id;
       } else {
         visit.student_id = '';
       }

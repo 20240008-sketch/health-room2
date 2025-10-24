@@ -114,6 +114,48 @@ class HealthRecordRequest extends FormRequest
                 'nullable',
                 'boolean',
             ],
+            'ophthalmology_result' => [
+                'sometimes',
+                'nullable',
+                'string',
+                'max:1000',
+            ],
+            'otolaryngology_result' => [
+                'sometimes',
+                'nullable',
+                'string',
+                'max:1000',
+            ],
+            'internal_medicine_result' => [
+                'sometimes',
+                'nullable',
+                'string',
+                'max:1000',
+            ],
+            'hearing_test_result' => [
+                'sometimes',
+                'nullable',
+                'string',
+                'max:1000',
+            ],
+            'tuberculosis_test_result' => [
+                'sometimes',
+                'nullable',
+                'string',
+                'max:1000',
+            ],
+            'urine_test_result' => [
+                'sometimes',
+                'nullable',
+                'string',
+                'max:1000',
+            ],
+            'ecg_result' => [
+                'sometimes',
+                'nullable',
+                'string',
+                'max:1000',
+            ],
         ];
 
         // 新規作成時のみstudent_idを必須とする

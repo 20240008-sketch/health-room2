@@ -332,6 +332,17 @@ class HealthRecordController extends Controller
                 'records.*.year' => 'required|integer|min:2020|max:2030',
                 'records.*.height' => 'nullable|numeric|min:50|max:250',
                 'records.*.weight' => 'nullable|numeric|min:10|max:200',
+                'records.*.vision_left' => 'nullable|numeric|min:0|max:2',
+                'records.*.vision_right' => 'nullable|numeric|min:0|max:2',
+                'records.*.vision_left_corrected' => 'nullable|numeric|min:0|max:3',
+                'records.*.vision_right_corrected' => 'nullable|numeric|min:0|max:3',
+                'records.*.ophthalmology_result' => 'nullable|string|max:1000',
+                'records.*.otolaryngology_result' => 'nullable|string|max:1000',
+                'records.*.internal_medicine_result' => 'nullable|string|max:1000',
+                'records.*.hearing_test_result' => 'nullable|string|max:1000',
+                'records.*.tuberculosis_test_result' => 'nullable|string|max:1000',
+                'records.*.urine_test_result' => 'nullable|string|max:1000',
+                'records.*.ecg_result' => 'nullable|string|max:1000',
                 'records.*.notes' => 'nullable|string|max:500'
             ]);
 

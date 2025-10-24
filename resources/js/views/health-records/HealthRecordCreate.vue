@@ -1629,6 +1629,13 @@ export default {
             vision_right: measurementItems.vision && form.vision_right ? parseFloat(form.vision_right) : null,
             vision_left_corrected: measurementItems.vision && form.vision_left_corrected ? parseFloat(form.vision_left_corrected) : null,
             vision_right_corrected: measurementItems.vision && form.vision_right_corrected ? parseFloat(form.vision_right_corrected) : null,
+            ophthalmology_result: measurementItems.ophthalmology && form.ophthalmology_result ? form.ophthalmology_result : null,
+            otolaryngology_result: measurementItems.otolaryngology && form.otolaryngology_result ? form.otolaryngology_result : null,
+            internal_medicine_result: measurementItems.internal_medicine && form.internal_medicine_result ? form.internal_medicine_result : null,
+            hearing_test_result: measurementItems.hearing_test && form.hearing_test_result ? form.hearing_test_result : null,
+            tuberculosis_test_result: measurementItems.tuberculosis_test && form.tuberculosis_test_result ? form.tuberculosis_test_result : null,
+            urine_test_result: measurementItems.urine_test && form.urine_test_result ? form.urine_test_result : null,
+            ecg_result: measurementItems.ecg && form.ecg_result ? form.ecg_result : null,
             notes: form.notes || null
           };
           
@@ -1664,6 +1671,13 @@ export default {
               vision_right: measurementItems.vision && measurement.vision_right ? parseFloat(measurement.vision_right) : null,
               vision_left_corrected: measurementItems.vision && measurement.vision_left_corrected ? parseFloat(measurement.vision_left_corrected) : null,
               vision_right_corrected: measurementItems.vision && measurement.vision_right_corrected ? parseFloat(measurement.vision_right_corrected) : null,
+              ophthalmology_result: measurementItems.ophthalmology && form.ophthalmology_result ? form.ophthalmology_result : null,
+              otolaryngology_result: measurementItems.otolaryngology && form.otolaryngology_result ? form.otolaryngology_result : null,
+              internal_medicine_result: measurementItems.internal_medicine && form.internal_medicine_result ? form.internal_medicine_result : null,
+              hearing_test_result: measurementItems.hearing_test && form.hearing_test_result ? form.hearing_test_result : null,
+              tuberculosis_test_result: measurementItems.tuberculosis_test && form.tuberculosis_test_result ? form.tuberculosis_test_result : null,
+              urine_test_result: measurementItems.urine_test && form.urine_test_result ? form.urine_test_result : null,
+              ecg_result: measurementItems.ecg && form.ecg_result ? form.ecg_result : null,
               notes: form.notes || null
             };
           });

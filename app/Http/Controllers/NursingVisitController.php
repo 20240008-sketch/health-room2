@@ -81,7 +81,7 @@ class NursingVisitController extends Controller
         $validator = Validator::make($request->all(), [
             'date' => 'required|date',
             'time' => 'required',
-            'student_id' => 'required|exists:students,id',
+            'student_id' => 'required|string|exists:students,student_id',
             'category' => 'nullable|string|max:20',
             'type' => 'nullable|string|max:50',
             'type_detail' => 'nullable|string|max:50',
@@ -113,7 +113,7 @@ class NursingVisitController extends Controller
             'visits' => 'required|array',
             'visits.*.date' => 'required|date',
             'visits.*.time' => 'required',
-            'visits.*.student_id' => 'required|exists:students,id',
+            'visits.*.student_id' => 'required|string|exists:students,student_id',
             'visits.*.category' => 'nullable|string|max:20',
             'visits.*.type' => 'nullable|string|max:50',
             'visits.*.type_detail' => 'nullable|string|max:50',
@@ -163,7 +163,7 @@ class NursingVisitController extends Controller
         $validator = Validator::make($request->all(), [
             'date' => 'sometimes|required|date',
             'time' => 'sometimes|required',
-            'student_id' => 'sometimes|required|exists:students,id',
+            'student_id' => 'sometimes|required|string|exists:students,student_id',
             'type' => 'sometimes|required|in:injury,illness,other',
             'occurrence_time' => 'nullable|string|max:255',
             'treatment_notes' => 'nullable|string',
