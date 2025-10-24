@@ -116,6 +116,24 @@ class HealthRecordRequest extends FormRequest
                 'string',
                 'max:1000',
             ],
+            'ophthalmology_exam_result' => [
+                'sometimes',
+                'nullable',
+                'string',
+                'max:50',
+            ],
+            'ophthalmology_diagnosis' => [
+                'sometimes',
+                'nullable',
+                'string',
+                'max:50',
+            ],
+            'ophthalmology_treatment' => [
+                'sometimes',
+                'nullable',
+                'string',
+                'max:50',
+            ],
             'otolaryngology_result' => [
                 'sometimes',
                 'nullable',

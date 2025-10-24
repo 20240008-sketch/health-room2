@@ -512,15 +512,87 @@
                   </div>
 
                   <!-- Ophthalmology -->
-                  <div v-if="measurementItems.ophthalmology" class="sm:col-span-2">
-                    <BaseInput
-                      type="textarea"
-                      v-model="form.ophthalmology_result"
-                      label="眼科検診結果"
-                      placeholder="検診結果を入力してください"
-                      :error="errors.ophthalmology_result"
-                      rows="2"
-                    />
+                  <div v-if="measurementItems.ophthalmology" class="sm:col-span-2 space-y-4">
+                    <h4 class="text-sm font-medium text-gray-700 border-b pb-2">眼科検診</h4>
+                    
+                    <!-- 学生情報表示 -->
+                    <div v-if="selectedStudent" class="bg-gray-50 p-3 rounded-md">
+                      <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                          <span class="text-gray-600">出席番号:</span>
+                          <span class="ml-2 font-medium">{{ selectedStudent.student_number }}</span>
+                        </div>
+                        <div>
+                          <span class="text-gray-600">氏名:</span>
+                          <span class="ml-2 font-medium">{{ selectedStudent.name }}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- 検診結果 -->
+                    <div>
+                      <BaseInput
+                        type="select"
+                        v-model="form.ophthalmology_exam_result"
+                        label="検診結果"
+                        :error="errors.ophthalmology_exam_result"
+                      >
+                        <option value="">選択してください</option>
+                        <option value="異常なし">異常なし</option>
+                        <option value="要観察">要観察</option>
+                        <option value="要精密検査">要精密検査</option>
+                        <option value="治療中">治療中</option>
+                      </BaseInput>
+                    </div>
+
+                    <!-- 診断結果 -->
+                    <div>
+                      <BaseInput
+                        type="select"
+                        v-model="form.ophthalmology_diagnosis"
+                        label="診断結果"
+                        :error="errors.ophthalmology_diagnosis"
+                      >
+                        <option value="">選択してください</option>
+                        <option value="正常">正常</option>
+                        <option value="近視">近視</option>
+                        <option value="遠視">遠視</option>
+                        <option value="乱視">乱視</option>
+                        <option value="弱視">弱視</option>
+                        <option value="斜視">斜視</option>
+                        <option value="結膜炎">結膜炎</option>
+                        <option value="その他">その他</option>
+                      </BaseInput>
+                    </div>
+
+                    <!-- 処置 -->
+                    <div>
+                      <BaseInput
+                        type="select"
+                        v-model="form.ophthalmology_treatment"
+                        label="処置"
+                        :error="errors.ophthalmology_treatment"
+                      >
+                        <option value="">選択してください</option>
+                        <option value="なし">なし</option>
+                        <option value="経過観察">経過観察</option>
+                        <option value="眼鏡処方">眼鏡処方</option>
+                        <option value="医療機関受診勧奨">医療機関受診勧奨</option>
+                        <option value="治療継続">治療継続</option>
+                      </BaseInput>
+                    </div>
+
+                    <!-- 備考欄（既存のフィールド） -->
+                    <div>
+                      <BaseInput
+                        type="textarea"
+                        v-model="form.ophthalmology_result"
+                        label="備考"
+                        placeholder="その他の所見や特記事項を入力してください"
+                        :error="errors.ophthalmology_result"
+                        rows="2"
+                      />
+                    </div>
                   </div>
 
                   <!-- Otolaryngology -->
@@ -648,8 +720,88 @@
                   </div>
                 </div>
                 
-                <!-- Table Format for Bulk Measurement -->
-                <div class="overflow-x-auto border border-gray-300 rounded-lg">
+                <!-- Card Format for Ophthalmology Exam -->
+                <div v-if="measurementItems.ophthalmology" class="space-y-4">
+                  <h4 class="text-sm font-semibold text-gray-900">眼科検診 - 学生ごとの入力</h4>
+                  <div 
+                    v-for="student in selectedStudents" 
+                    :key="student.id"
+                    class="border border-gray-300 rounded-lg p-4 bg-white space-y-4"
+                  >
+                    <!-- Student Info Header -->
+                    <div class="bg-gray-50 p-3 rounded-md border-l-4 border-blue-500">
+                      <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                          <span class="text-gray-600">出席番号:</span>
+                          <span class="ml-2 font-semibold">{{ student.student_number }}</span>
+                        </div>
+                        <div>
+                          <span class="text-gray-600">氏名:</span>
+                          <span class="ml-2 font-semibold">{{ student.name }}</span>
+                        </div>
+                        <div class="col-span-2 text-xs text-gray-500">
+                          {{ getStudentClassDisplay(student) }} | {{ student.student_id }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Ophthalmology Fields -->
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                      <!-- 検診結果 -->
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">検診結果</label>
+                        <select
+                          v-model="bulkMeasurements[student.id].ophthalmology_exam_result"
+                          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                        >
+                          <option value="">選択してください</option>
+                          <option value="異常なし">異常なし</option>
+                          <option value="要観察">要観察</option>
+                          <option value="要精密検査">要精密検査</option>
+                          <option value="治療中">治療中</option>
+                        </select>
+                      </div>
+
+                      <!-- 診断結果 -->
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">診断結果</label>
+                        <select
+                          v-model="bulkMeasurements[student.id].ophthalmology_diagnosis"
+                          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                        >
+                          <option value="">選択してください</option>
+                          <option value="正常">正常</option>
+                          <option value="近視">近視</option>
+                          <option value="遠視">遠視</option>
+                          <option value="乱視">乱視</option>
+                          <option value="弱視">弱視</option>
+                          <option value="斜視">斜視</option>
+                          <option value="結膜炎">結膜炎</option>
+                          <option value="その他">その他</option>
+                        </select>
+                      </div>
+
+                      <!-- 処置 -->
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">処置</label>
+                        <select
+                          v-model="bulkMeasurements[student.id].ophthalmology_treatment"
+                          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                        >
+                          <option value="">選択してください</option>
+                          <option value="なし">なし</option>
+                          <option value="経過観察">経過観察</option>
+                          <option value="眼鏡処方">眼鏡処方</option>
+                          <option value="医療機関受診勧奨">医療機関受診勧奨</option>
+                          <option value="治療継続">治療継続</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Table Format for Other Measurements -->
+                <div v-if="!measurementItems.ophthalmology" class="overflow-x-auto border border-gray-300 rounded-lg">
                   <table class="min-w-full divide-y divide-gray-300">
                     <thead class="bg-gray-50">
                       <tr>
@@ -1122,6 +1274,9 @@ export default {
       vision_left_corrected: '',
       vision_right_corrected: '',
       ophthalmology_result: '',
+      ophthalmology_exam_result: '',
+      ophthalmology_diagnosis: '',
+      ophthalmology_treatment: '',
       otolaryngology_result: '',
       internal_medicine_result: '',
       hearing_test_result: '',
@@ -1333,6 +1488,9 @@ export default {
           vision_right: '',
           vision_left_corrected: '',
           vision_right_corrected: '',
+          ophthalmology_exam_result: '',
+          ophthalmology_diagnosis: '',
+          ophthalmology_treatment: '',
           bmi: null
         };
       }
@@ -1658,6 +1816,9 @@ export default {
             vision_left_corrected: measurementItems.vision && form.vision_left_corrected ? form.vision_left_corrected : null,
             vision_right_corrected: measurementItems.vision && form.vision_right_corrected ? form.vision_right_corrected : null,
             ophthalmology_result: measurementItems.ophthalmology && form.ophthalmology_result ? form.ophthalmology_result : null,
+            ophthalmology_exam_result: measurementItems.ophthalmology && form.ophthalmology_exam_result ? form.ophthalmology_exam_result : null,
+            ophthalmology_diagnosis: measurementItems.ophthalmology && form.ophthalmology_diagnosis ? form.ophthalmology_diagnosis : null,
+            ophthalmology_treatment: measurementItems.ophthalmology && form.ophthalmology_treatment ? form.ophthalmology_treatment : null,
             otolaryngology_result: measurementItems.otolaryngology && form.otolaryngology_result ? form.otolaryngology_result : null,
             internal_medicine_result: measurementItems.internal_medicine && form.internal_medicine_result ? form.internal_medicine_result : null,
             hearing_test_result: measurementItems.hearing_test && form.hearing_test_result ? form.hearing_test_result : null,
@@ -1700,6 +1861,9 @@ export default {
               vision_left_corrected: measurementItems.vision && measurement.vision_left_corrected ? measurement.vision_left_corrected : null,
               vision_right_corrected: measurementItems.vision && measurement.vision_right_corrected ? measurement.vision_right_corrected : null,
               ophthalmology_result: measurementItems.ophthalmology && form.ophthalmology_result ? form.ophthalmology_result : null,
+              ophthalmology_exam_result: measurementItems.ophthalmology && measurement.ophthalmology_exam_result ? measurement.ophthalmology_exam_result : null,
+              ophthalmology_diagnosis: measurementItems.ophthalmology && measurement.ophthalmology_diagnosis ? measurement.ophthalmology_diagnosis : null,
+              ophthalmology_treatment: measurementItems.ophthalmology && measurement.ophthalmology_treatment ? measurement.ophthalmology_treatment : null,
               otolaryngology_result: measurementItems.otolaryngology && form.otolaryngology_result ? form.otolaryngology_result : null,
               internal_medicine_result: measurementItems.internal_medicine && form.internal_medicine_result ? form.internal_medicine_result : null,
               hearing_test_result: measurementItems.hearing_test && form.hearing_test_result ? form.hearing_test_result : null,
@@ -1767,6 +1931,12 @@ export default {
           });
         }
       }
+    });
+    
+    // Watch measurementItems for debugging
+    watch(() => measurementItems.ophthalmology, (newVal) => {
+      console.log('Ophthalmology checkbox changed:', newVal);
+      console.log('measurementItems:', measurementItems);
     });
     
     // Lifecycle
