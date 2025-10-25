@@ -787,14 +787,89 @@
 
                   <!-- Internal Medicine -->
                   <div v-if="measurementItems.internal_medicine" class="sm:col-span-2">
-                    <BaseInput
-                      type="textarea"
-                      v-model="form.internal_medicine_result"
-                      label="内科検診結果"
-                      placeholder="検診結果を入力してください"
-                      :error="errors.internal_medicine_result"
-                      rows="2"
-                    />
+                    <h4 class="text-sm font-semibold text-gray-900 mb-3">内科検診</h4>
+                    
+                    <div 
+                      v-for="(item, index) in form.internal_medicine_items" 
+                      :key="index"
+                      class="border border-gray-300 rounded-lg p-4 mb-3 bg-white"
+                    >
+                      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <!-- 検診結果 -->
+                        <div>
+                          <label class="block text-xs font-medium text-gray-700 mb-1">検診結果</label>
+                          <select
+                            v-model="item.exam_result"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="異常なし">異常なし</option>
+                            <option value="未検診">未検診</option>
+                            <option value="心雑音の疑い">心雑音の疑い</option>
+                            <option value="肥満">肥満</option>
+                            <option value="やせ">やせ</option>
+                            <option value="アトピー性皮膚炎">アトピー性皮膚炎</option>
+                            <option value="貧血の疑い">貧血の疑い</option>
+                            <option value="喘息">喘息</option>
+                            <option value="低身長の疑い">低身長の疑い</option>
+                            <option value="要精検">要精検</option>
+                            <option value="不整脈">不整脈</option>
+                            <option value="徐脈">徐脈</option>
+                            <option value="その他">その他</option>
+                          </select>
+                        </div>
+
+                        <!-- 診断結果 -->
+                        <div>
+                          <label class="block text-xs font-medium text-gray-700 mb-1">診断結果</label>
+                          <select
+                            v-model="item.diagnosis"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="異常なし">異常なし</option>
+                            <option value="心雑音">心雑音</option>
+                            <option value="肥満">肥満</option>
+                            <option value="思春期やせ症">思春期やせ症</option>
+                            <option value="脊柱側わん症">脊柱側わん症</option>
+                            <option value="胸郭変形">胸郭変形</option>
+                            <option value="アトピー性皮膚炎">アトピー性皮膚炎</option>
+                            <option value="貧血">貧血</option>
+                            <option value="喘息">喘息</option>
+                            <option value="低身長">低身長</option>
+                            <option value="機能性雑音">機能性雑音</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <!-- 削除ボタン -->
+                      <div v-if="form.internal_medicine_items.length > 1" class="mt-3 flex justify-end">
+                        <button
+                          @click="removeInternalMedicineItem(index)"
+                          type="button"
+                          class="text-sm text-red-600 hover:text-red-800"
+                        >
+                          削除
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- 追加ボタン -->
+                    <div 
+                      v-if="shouldShowAddInternalMedicineButton"
+                      class="mt-3"
+                    >
+                      <button
+                        @click="addInternalMedicineItem"
+                        type="button"
+                        class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        検診項目を追加
+                      </button>
+                    </div>
                   </div>
 
                   <!-- Hearing Test -->
@@ -835,14 +910,100 @@
 
                   <!-- ECG -->
                   <div v-if="measurementItems.ecg" class="sm:col-span-2">
-                    <BaseInput
-                      type="textarea"
-                      v-model="form.ecg_result"
-                      label="心電図検査結果"
-                      placeholder="検査結果を入力してください"
-                      :error="errors.ecg_result"
-                      rows="2"
-                    />
+                    <h4 class="text-sm font-semibold text-gray-900 mb-3">心電図</h4>
+                    
+                    <div 
+                      v-for="(item, index) in form.ecg_items" 
+                      :key="index"
+                      class="border border-gray-300 rounded-lg p-4 mb-3 bg-white"
+                    >
+                      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <!-- 検診結果 -->
+                        <div>
+                          <label class="block text-xs font-medium text-gray-700 mb-1">検診結果</label>
+                          <select
+                            v-model="item.exam_result"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="異常なし">異常なし</option>
+                            <option value="未検診">未検診</option>
+                            <option value="心室性期外収縮">心室性期外収縮</option>
+                            <option value="不完全右脚ブロック">不完全右脚ブロック</option>
+                            <option value="不整脈">不整脈</option>
+                            <option value="左軸偏位">左軸偏位</option>
+                            <option value="ＳＴ−Ｔ異常">ＳＴ−Ｔ異常</option>
+                            <option value="ＷＰＷ症候群">ＷＰＷ症候群</option>
+                            <option value="先天性心疾患">先天性心疾患</option>
+                            <option value="川崎病既往">川崎病既往</option>
+                            <option value="心雑音">心雑音</option>
+                            <option value="問診より">問診より</option>
+                            <option value="ＱＴ延長症候群">ＱＴ延長症候群</option>
+                            <option value="完全房室ブロック">完全房室ブロック</option>
+                            <option value="第2度房室ブロック">第2度房室ブロック</option>
+                            <option value="洞性除脈">洞性除脈</option>
+                            <option value="上室性期外収縮">上室性期外収縮</option>
+                            <option value="洞性頻脈">洞性頻脈</option>
+                            <option value="第1度房室ブロック">第1度房室ブロック</option>
+                            <option value="ST低下">ST低下</option>
+                            <option value="経過観察">経過観察</option>
+                            <option value="班時計回転">班時計回転</option>
+                          </select>
+                        </div>
+
+                        <!-- 診断結果 -->
+                        <div>
+                          <label class="block text-xs font-medium text-gray-700 mb-1">診断結果</label>
+                          <select
+                            v-model="item.diagnosis"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="異常なし">異常なし</option>
+                            <option value="心室性期外収縮">心室性期外収縮</option>
+                            <option value="不完全右脚ブロック">不完全右脚ブロック</option>
+                            <option value="不整脈">不整脈</option>
+                            <option value="左軸偏位">左軸偏位</option>
+                            <option value="ＳＴ−Ｔ異常">ＳＴ−Ｔ異常</option>
+                            <option value="ＷＰＷ症候群">ＷＰＷ症候群</option>
+                            <option value="先天性心疾患">先天性心疾患</option>
+                            <option value="川崎病既往">川崎病既往</option>
+                            <option value="機能性雑音">機能性雑音</option>
+                            <option value="洞性除脈">洞性除脈</option>
+                            <option value="上室性期外収縮">上室性期外収縮</option>
+                            <option value="洞性頻脈">洞性頻脈</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <!-- 削除ボタン -->
+                      <div v-if="form.ecg_items.length > 1" class="mt-3 flex justify-end">
+                        <button
+                          @click="removeEcgItem(index)"
+                          type="button"
+                          class="text-sm text-red-600 hover:text-red-800"
+                        >
+                          削除
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- 追加ボタン -->
+                    <div 
+                      v-if="shouldShowAddEcgButton"
+                      class="mt-3"
+                    >
+                      <button
+                        @click="addEcgItem"
+                        type="button"
+                        class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        検診項目を追加
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -1195,8 +1356,252 @@
                   </div>
                 </div>
                 
+                <!-- Card Format for Internal Medicine Exam -->
+                <!-- Card Format for Internal Medicine -->
+                <div v-if="measurementItems.internal_medicine" class="space-y-4">
+                  <h4 class="text-sm font-semibold text-gray-900">内科検診 - 学生ごとの入力</h4>
+                  <div 
+                    v-for="student in selectedStudents" 
+                    :key="student.id"
+                    class="border border-gray-300 rounded-lg p-4 bg-white space-y-4"
+                  >
+                    <!-- Student Info Header -->
+                    <div class="bg-gray-50 p-3 rounded-md border-l-4 border-purple-500">
+                      <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                          <span class="text-gray-600">出席番号:</span>
+                          <span class="ml-2 font-semibold">{{ student.student_number }}</span>
+                        </div>
+                        <div>
+                          <span class="text-gray-600">氏名:</span>
+                          <span class="ml-2 font-semibold">{{ student.name }}</span>
+                        </div>
+                        <div class="col-span-2 text-xs text-gray-500">
+                          {{ getStudentClassDisplay(student) }} | {{ student.student_id }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Initialize data if needed -->
+                    <div v-if="!bulkMeasurements[student.id].internal_medicine_items">
+                      {{ initializeInternalMedicineData(student.id) }}
+                    </div>
+
+                    <!-- 内科検診項目（追加形式） -->
+                    <div
+                      v-for="(item, index) in bulkMeasurements[student.id].internal_medicine_items"
+                      :key="index"
+                      class="border border-gray-200 rounded-md p-3 bg-gray-50 relative"
+                    >
+                      <!-- 削除ボタン -->
+                      <button
+                        v-if="bulkMeasurements[student.id].internal_medicine_items.length > 1"
+                        @click="removeBulkInternalMedicineItem(student.id, index)"
+                        type="button"
+                        class="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                      >
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+
+                      <div class="space-y-3 pr-8">
+                        <!-- 検診結果 -->
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 mb-1">検診結果</label>
+                          <select
+                            v-model="item.exam_result"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="異常なし">異常なし</option>
+                            <option value="未検診">未検診</option>
+                            <option value="心雑音の疑い">心雑音の疑い</option>
+                            <option value="肥満">肥満</option>
+                            <option value="やせ">やせ</option>
+                            <option value="アトピー性皮膚炎">アトピー性皮膚炎</option>
+                            <option value="貧血の疑い">貧血の疑い</option>
+                            <option value="喘息">喘息</option>
+                            <option value="低身長の疑い">低身長の疑い</option>
+                            <option value="要精検">要精検</option>
+                            <option value="不整脈">不整脈</option>
+                            <option value="徐脈">徐脈</option>
+                            <option value="その他">その他</option>
+                          </select>
+                        </div>
+
+                        <!-- 診断結果 -->
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 mb-1">診断結果</label>
+                          <select
+                            v-model="item.diagnosis"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="異常なし">異常なし</option>
+                            <option value="心雑音">心雑音</option>
+                            <option value="肥満">肥満</option>
+                            <option value="思春期やせ症">思春期やせ症</option>
+                            <option value="脊柱側わん症">脊柱側わん症</option>
+                            <option value="胸郭変形">胸郭変形</option>
+                            <option value="アトピー性皮膚炎">アトピー性皮膚炎</option>
+                            <option value="貧血">貧血</option>
+                            <option value="喘息">喘息</option>
+                            <option value="低身長">低身長</option>
+                            <option value="機能性雑音">機能性雑音</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- 追加ボタン -->
+                    <div
+                      v-if="shouldShowAddBulkInternalMedicineButton(student.id)"
+                      class="mt-3"
+                    >
+                      <button
+                        @click="addBulkInternalMedicineItem(student.id)"
+                        type="button"
+                        class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                      >
+                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        検診項目を追加
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Card Format for ECG Exam -->
+                <div v-if="measurementItems.ecg" class="space-y-4">
+                  <h4 class="text-sm font-semibold text-gray-900">心電図 - 学生ごとの入力</h4>
+                  <div 
+                    v-for="student in selectedStudents" 
+                    :key="student.id"
+                    class="border border-gray-300 rounded-lg p-4 bg-white space-y-4"
+                  >
+                    <!-- Student Info Header -->
+                    <div class="bg-gray-50 p-3 rounded-md border-l-4 border-red-500">
+                      <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                          <span class="text-gray-600">出席番号:</span>
+                          <span class="ml-2 font-semibold">{{ student.student_number }}</span>
+                        </div>
+                        <div>
+                          <span class="text-gray-600">氏名:</span>
+                          <span class="ml-2 font-semibold">{{ student.name }}</span>
+                        </div>
+                        <div class="col-span-2 text-xs text-gray-500">
+                          {{ getStudentClassDisplay(student) }} | {{ student.student_id }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Initialize data if needed -->
+                    <div v-if="!bulkMeasurements[student.id].ecg_items">
+                      {{ initializeEcgData(student.id) }}
+                    </div>
+
+                    <!-- ECG項目（追加形式） -->
+                    <div
+                      v-for="(item, index) in bulkMeasurements[student.id].ecg_items"
+                      :key="index"
+                      class="border border-gray-200 rounded-md p-3 bg-gray-50 relative"
+                    >
+                      <!-- 削除ボタン -->
+                      <button
+                        v-if="bulkMeasurements[student.id].ecg_items.length > 1"
+                        @click="removeBulkEcgItem(student.id, index)"
+                        type="button"
+                        class="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                      >
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+
+                      <div class="space-y-3 pr-8">
+                        <!-- 検診結果 -->
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 mb-1">検診結果</label>
+                          <select
+                            v-model="item.exam_result"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="異常なし">異常なし</option>
+                            <option value="未検診">未検診</option>
+                            <option value="心室性期外収縮">心室性期外収縮</option>
+                            <option value="不完全右脚ブロック">不完全右脚ブロック</option>
+                            <option value="不整脈">不整脈</option>
+                            <option value="左軸偏位">左軸偏位</option>
+                            <option value="ＳＴ−Ｔ異常">ＳＴ−Ｔ異常</option>
+                            <option value="ＷＰＷ症候群">ＷＰＷ症候群</option>
+                            <option value="先天性心疾患">先天性心疾患</option>
+                            <option value="川崎病既往">川崎病既往</option>
+                            <option value="心雑音">心雑音</option>
+                            <option value="問診より">問診より</option>
+                            <option value="ＱＴ延長症候群">ＱＴ延長症候群</option>
+                            <option value="完全房室ブロック">完全房室ブロック</option>
+                            <option value="第2度房室ブロック">第2度房室ブロック</option>
+                            <option value="洞性除脈">洞性除脈</option>
+                            <option value="上室性期外収縮">上室性期外収縮</option>
+                            <option value="洞性頻脈">洞性頻脈</option>
+                            <option value="第1度房室ブロック">第1度房室ブロック</option>
+                            <option value="ST低下">ST低下</option>
+                            <option value="経過観察">経過観察</option>
+                            <option value="班時計回転">班時計回転</option>
+                          </select>
+                        </div>
+
+                        <!-- 診断結果 -->
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 mb-1">診断結果</label>
+                          <select
+                            v-model="item.diagnosis"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="異常なし">異常なし</option>
+                            <option value="心室性期外収縮">心室性期外収縮</option>
+                            <option value="不完全右脚ブロック">不完全右脚ブロック</option>
+                            <option value="不整脈">不整脈</option>
+                            <option value="左軸偏位">左軸偏位</option>
+                            <option value="ＳＴ−Ｔ異常">ＳＴ−Ｔ異常</option>
+                            <option value="ＷＰＷ症候群">ＷＰＷ症候群</option>
+                            <option value="先天性心疾患">先天性心疾患</option>
+                            <option value="川崎病既往">川崎病既往</option>
+                            <option value="機能性雑音">機能性雑音</option>
+                            <option value="洞性除脈">洞性除脈</option>
+                            <option value="上室性期外収縮">上室性期外収縮</option>
+                            <option value="洞性頻脈">洞性頻脈</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- 追加ボタン -->
+                    <div
+                      v-if="shouldShowAddBulkEcgButton(student.id)"
+                      class="mt-3"
+                    >
+                      <button
+                        @click="addBulkEcgItem(student.id)"
+                        type="button"
+                        class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                      >
+                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        検診項目を追加
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
                 <!-- Table Format for Other Measurements -->
-                <div v-if="!measurementItems.ophthalmology && !measurementItems.otolaryngology" class="overflow-x-auto border border-gray-300 rounded-lg">
+                <div v-if="!measurementItems.ophthalmology && !measurementItems.otolaryngology && !measurementItems.internal_medicine && !measurementItems.ecg" class="overflow-x-auto border border-gray-300 rounded-lg">
                   <table class="min-w-full divide-y divide-gray-300">
                     <thead class="bg-gray-50">
                       <tr>
@@ -1683,10 +2088,26 @@ export default {
         }
       ],
       internal_medicine_result: '',
+      internal_medicine_exam_results: [],
+      internal_medicine_diagnosis: '',
+      internal_medicine_items: [
+        {
+          exam_result: '',
+          diagnosis: ''
+        }
+      ],
       hearing_test_result: '',
       tuberculosis_test_result: '',
       urine_test_result: '',
       ecg_result: '',
+      ecg_exam_result: '',
+      ecg_diagnosis: '',
+      ecg_items: [
+        {
+          exam_result: '',
+          diagnosis: ''
+        }
+      ],
       notes: ''
     });
     
@@ -1830,6 +2251,24 @@ export default {
       return lastItem.category && lastItem.category !== '異常なし' && lastItem.category !== '未検診';
     });
     
+    // 内科検診の追加ボタン表示判定
+    const shouldShowAddInternalMedicineButton = computed(() => {
+      if (!form.internal_medicine_items || form.internal_medicine_items.length === 0) {
+        return false;
+      }
+      const lastItem = form.internal_medicine_items[form.internal_medicine_items.length - 1];
+      return lastItem.exam_result && lastItem.exam_result !== '異常なし' && lastItem.exam_result !== '未検診';
+    });
+    
+    // 心電図の追加ボタン表示判定
+    const shouldShowAddEcgButton = computed(() => {
+      if (!form.ecg_items || form.ecg_items.length === 0) {
+        return false;
+      }
+      const lastItem = form.ecg_items[form.ecg_items.length - 1];
+      return lastItem.exam_result && lastItem.exam_result !== '異常なし' && lastItem.exam_result !== '未検診';
+    });
+    
     // Methods
     const searchStudents = () => {
       if (!studentSearch.value.trim()) {
@@ -1878,6 +2317,36 @@ export default {
       }
     };
     
+    // 内科検診項目を追加
+    const addInternalMedicineItem = () => {
+      form.internal_medicine_items.push({
+        exam_result: '',
+        diagnosis: ''
+      });
+    };
+    
+    // 内科検診項目を削除
+    const removeInternalMedicineItem = (index) => {
+      if (form.internal_medicine_items.length > 1) {
+        form.internal_medicine_items.splice(index, 1);
+      }
+    };
+    
+    // 心電図項目を追加
+    const addEcgItem = () => {
+      form.ecg_items.push({
+        exam_result: '',
+        diagnosis: ''
+      });
+    };
+    
+    // 心電図項目を削除
+    const removeEcgItem = (index) => {
+      if (form.ecg_items.length > 1) {
+        form.ecg_items.splice(index, 1);
+      }
+    };
+    
     // 一括測定用：耳鼻科検診項目を初期化
     const initializeOtolaryngologyItems = (studentId) => {
       if (!bulkMeasurements[studentId].otolaryngology_items) {
@@ -1923,6 +2392,84 @@ export default {
       }
       const lastItem = items[items.length - 1];
       return lastItem.category && lastItem.category !== '異常なし' && lastItem.category !== '未検診';
+    };
+    
+    // 一括測定用：内科検診項目を追加
+    const addBulkInternalMedicineItem = (studentId) => {
+      if (!bulkMeasurements[studentId].internal_medicine_items) {
+        initializeInternalMedicineData(studentId);
+      }
+      bulkMeasurements[studentId].internal_medicine_items.push({
+        exam_result: '',
+        diagnosis: ''
+      });
+    };
+    
+    // 一括測定用：内科検診項目を削除
+    const removeBulkInternalMedicineItem = (studentId, index) => {
+      if (bulkMeasurements[studentId].internal_medicine_items.length > 1) {
+        bulkMeasurements[studentId].internal_medicine_items.splice(index, 1);
+      }
+    };
+    
+    // 一括測定用：内科検診追加ボタン表示判定
+    const shouldShowAddBulkInternalMedicineButton = (studentId) => {
+      const items = bulkMeasurements[studentId]?.internal_medicine_items;
+      if (!items || items.length === 0) {
+        return false;
+      }
+      const lastItem = items[items.length - 1];
+      return lastItem.exam_result && lastItem.exam_result !== '異常なし' && lastItem.exam_result !== '未検診';
+    };
+    
+    // 一括測定用：心電図項目を追加
+    const addBulkEcgItem = (studentId) => {
+      if (!bulkMeasurements[studentId].ecg_items) {
+        initializeEcgData(studentId);
+      }
+      bulkMeasurements[studentId].ecg_items.push({
+        exam_result: '',
+        diagnosis: ''
+      });
+    };
+    
+    // 一括測定用：心電図項目を削除
+    const removeBulkEcgItem = (studentId, index) => {
+      if (bulkMeasurements[studentId].ecg_items.length > 1) {
+        bulkMeasurements[studentId].ecg_items.splice(index, 1);
+      }
+    };
+    
+    // 一括測定用：心電図追加ボタン表示判定
+    const shouldShowAddBulkEcgButton = (studentId) => {
+      const items = bulkMeasurements[studentId]?.ecg_items;
+      if (!items || items.length === 0) {
+        return false;
+      }
+      const lastItem = items[items.length - 1];
+      return lastItem.exam_result && lastItem.exam_result !== '異常なし' && lastItem.exam_result !== '未検診';
+    };
+    
+    // 一括測定用：内科検診データを初期化
+    const initializeInternalMedicineData = (studentId) => {
+      if (!bulkMeasurements[studentId].internal_medicine_items) {
+        bulkMeasurements[studentId].internal_medicine_items = [{
+          exam_result: '',
+          diagnosis: ''
+        }];
+      }
+      return '';
+    };
+    
+    // 一括測定用：心電図データを初期化
+    const initializeEcgData = (studentId) => {
+      if (!bulkMeasurements[studentId].ecg_items) {
+        bulkMeasurements[studentId].ecg_items = [{
+          exam_result: '',
+          diagnosis: ''
+        }];
+      }
+      return '';
     };
     
     const updateBulkSelection = () => {
@@ -2299,11 +2846,11 @@ export default {
             ophthalmology_diagnosis: measurementItems.ophthalmology && form.ophthalmology_diagnosis ? form.ophthalmology_diagnosis : null,
             ophthalmology_treatment: measurementItems.ophthalmology && form.ophthalmology_treatment ? form.ophthalmology_treatment : null,
             otolaryngology_result: measurementItems.otolaryngology ? JSON.stringify(form.otolaryngology_items) : null,
-            internal_medicine_result: measurementItems.internal_medicine && form.internal_medicine_result ? form.internal_medicine_result : null,
+            internal_medicine_result: measurementItems.internal_medicine ? JSON.stringify(form.internal_medicine_items) : null,
             hearing_test_result: measurementItems.hearing_test && form.hearing_test_result ? form.hearing_test_result : null,
             tuberculosis_test_result: measurementItems.tuberculosis_test && form.tuberculosis_test_result ? form.tuberculosis_test_result : null,
             urine_test_result: measurementItems.urine_test && form.urine_test_result ? form.urine_test_result : null,
-            ecg_result: measurementItems.ecg && form.ecg_result ? form.ecg_result : null,
+            ecg_result: measurementItems.ecg ? JSON.stringify(form.ecg_items) : null,
             notes: form.notes || null
           };
           
@@ -2344,11 +2891,11 @@ export default {
               ophthalmology_diagnosis: measurementItems.ophthalmology && measurement.ophthalmology_diagnosis ? measurement.ophthalmology_diagnosis : null,
               ophthalmology_treatment: measurementItems.ophthalmology && measurement.ophthalmology_treatment ? measurement.ophthalmology_treatment : null,
               otolaryngology_result: measurementItems.otolaryngology && measurement.otolaryngology_items ? JSON.stringify(measurement.otolaryngology_items) : null,
-              internal_medicine_result: measurementItems.internal_medicine && form.internal_medicine_result ? form.internal_medicine_result : null,
+              internal_medicine_result: measurementItems.internal_medicine && measurement.internal_medicine_items ? JSON.stringify(measurement.internal_medicine_items) : null,
               hearing_test_result: measurementItems.hearing_test && form.hearing_test_result ? form.hearing_test_result : null,
               tuberculosis_test_result: measurementItems.tuberculosis_test && form.tuberculosis_test_result ? form.tuberculosis_test_result : null,
               urine_test_result: measurementItems.urine_test && form.urine_test_result ? form.urine_test_result : null,
-              ecg_result: measurementItems.ecg && form.ecg_result ? form.ecg_result : null,
+              ecg_result: measurementItems.ecg && measurement.ecg_items ? JSON.stringify(measurement.ecg_items) : null,
               notes: form.notes || null
             };
           });
@@ -2488,10 +3035,24 @@ export default {
       clearSelectedStudent,
       addOtolaryngologyItem,
       removeOtolaryngologyItem,
+      addInternalMedicineItem,
+      removeInternalMedicineItem,
+      addEcgItem,
+      removeEcgItem,
       initializeOtolaryngologyItems,
       addBulkOtolaryngologyItem,
       removeBulkOtolaryngologyItem,
       shouldShowAddBulkOtolaryngologyButton,
+      addBulkInternalMedicineItem,
+      removeBulkInternalMedicineItem,
+      shouldShowAddBulkInternalMedicineButton,
+      addBulkEcgItem,
+      removeBulkEcgItem,
+      shouldShowAddBulkEcgButton,
+      shouldShowAddInternalMedicineButton,
+      shouldShowAddEcgButton,
+      initializeInternalMedicineData,
+      initializeEcgData,
       updateBulkSelection,
       toggleAllStudents,
       toggleStudentSelection,
