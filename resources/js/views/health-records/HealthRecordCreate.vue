@@ -539,9 +539,23 @@
                       >
                         <option value="">選択してください</option>
                         <option value="異常なし">異常なし</option>
-                        <option value="要観察">要観察</option>
-                        <option value="要精密検査">要精密検査</option>
-                        <option value="治療中">治療中</option>
+                        <option value="未検診">未検診</option>
+                        <option value="アレルギー性結膜炎">アレルギー性結膜炎</option>
+                        <option value="結膜炎">結膜炎</option>
+                        <option value="外斜位の疑い">外斜位の疑い</option>
+                        <option value="内斜位の疑い">内斜位の疑い</option>
+                        <option value="眼瞼炎">眼瞼炎</option>
+                        <option value="眼瞼膜炎">眼瞼膜炎</option>
+                        <option value="睫毛内反">睫毛内反</option>
+                        <option value="麦粒腫">麦粒腫</option>
+                        <option value="霰粒腫">霰粒腫</option>
+                        <option value="その他">その他</option>
+                        <option value="眼瞼脂肪腫">眼瞼脂肪腫</option>
+                        <option value="コンタクト検診">コンタクト検診</option>
+                        <option value="眼瞼皮膚炎">眼瞼皮膚炎</option>
+                        <option value="マイボーム腺梗塞">マイボーム腺梗塞</option>
+                        <option value="眼窩脂肪腫">眼窩脂肪腫</option>
+                        <option value="眼瞼内反症">眼瞼内反症</option>
                       </BaseInput>
                     </div>
 
@@ -550,18 +564,24 @@
                       <BaseInput
                         type="select"
                         v-model="form.ophthalmology_diagnosis"
-                        label="診断結果"
+                        label="眼科診断"
                         :error="errors.ophthalmology_diagnosis"
                       >
                         <option value="">選択してください</option>
-                        <option value="正常">正常</option>
-                        <option value="近視">近視</option>
-                        <option value="遠視">遠視</option>
-                        <option value="乱視">乱視</option>
-                        <option value="弱視">弱視</option>
-                        <option value="斜視">斜視</option>
+                        <option value="異常なし">異常なし</option>
+                        <option value="アレルギー性結膜炎">アレルギー性結膜炎</option>
                         <option value="結膜炎">結膜炎</option>
+                        <option value="外斜位">外斜位</option>
+                        <option value="内斜位">内斜位</option>
+                        <option value="眼瞼炎">眼瞼炎</option>
+                        <option value="眼瞼膜炎">眼瞼膜炎</option>
+                        <option value="睫毛内反">睫毛内反</option>
+                        <option value="麦粒瞳">麦粒瞳</option>
+                        <option value="霰粒瞳">霰粒瞳</option>
                         <option value="その他">その他</option>
+                        <option value="コンタクト検診">コンタクト検診</option>
+                        <option value="眼瞼脂肪腫">眼瞼脂肪腫</option>
+                        <option value="マイボーム腺梗塞">マイボーム腺梗塞</option>
                       </BaseInput>
                     </div>
 
@@ -574,11 +594,15 @@
                         :error="errors.ophthalmology_treatment"
                       >
                         <option value="">選択してください</option>
-                        <option value="なし">なし</option>
                         <option value="経過観察">経過観察</option>
+                        <option value="点眼治療">点眼治療</option>
                         <option value="眼鏡処方">眼鏡処方</option>
-                        <option value="医療機関受診勧奨">医療機関受診勧奨</option>
-                        <option value="治療継続">治療継続</option>
+                        <option value="眼鏡適合">眼鏡適合</option>
+                        <option value="眼鏡更新">眼鏡更新</option>
+                        <option value="コンタクトレンズ処方">コンタクトレンズ処方</option>
+                        <option value="その他">その他</option>
+                        <option value="治療中">治療中</option>
+                        <option value="治療済み">治療済み</option>
                       </BaseInput>
                     </div>
 
@@ -597,14 +621,168 @@
 
                   <!-- Otolaryngology -->
                   <div v-if="measurementItems.otolaryngology" class="sm:col-span-2">
-                    <BaseInput
-                      type="textarea"
-                      v-model="form.otolaryngology_result"
-                      label="耳鼻科検診結果"
-                      placeholder="検診結果を入力してください"
-                      :error="errors.otolaryngology_result"
-                      rows="2"
-                    />
+                    <h4 class="text-sm font-semibold text-gray-900 mb-3">耳鼻科検診</h4>
+                    
+                    <div 
+                      v-for="(item, index) in form.otolaryngology_items" 
+                      :key="index"
+                      class="border border-gray-300 rounded-lg p-4 mb-3 bg-white"
+                    >
+                      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <!-- 分類 -->
+                        <div>
+                          <label class="block text-xs font-medium text-gray-700 mb-1">分類</label>
+                          <select
+                            v-model="item.category"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="異常なし">異常なし</option>
+                            <option value="未検診">未検診</option>
+                            <option value="耳">耳</option>
+                            <option value="鼻">鼻</option>
+                            <option value="喉">喉</option>
+                          </select>
+                        </div>
+
+                        <!-- 検診結果 -->
+                        <div>
+                          <label class="block text-xs font-medium text-gray-700 mb-1">検診結果</label>
+                          <select
+                            v-model="item.exam_result"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                            :disabled="!item.category || item.category === '異常なし' || item.category === '未検診'"
+                          >
+                            <option value="">選択してください</option>
+                            <template v-if="item.category === '耳'">
+                              <option value="耳垢">耳垢</option>
+                              <option value="外耳炎">外耳炎</option>
+                              <option value="滲出性中耳炎">滲出性中耳炎</option>
+                              <option value="慢性中耳炎">慢性中耳炎</option>
+                              <option value="難聴の疑い">難聴の疑い</option>
+                              <option value="外耳道異物">外耳道異物</option>
+                              <option value="中耳炎">中耳炎</option>
+                            </template>
+                            <template v-else-if="item.category === '鼻'">
+                              <option value="アレルギー性鼻炎">アレルギー性鼻炎</option>
+                              <option value="慢性鼻炎">慢性鼻炎</option>
+                              <option value="副鼻腔炎">副鼻腔炎</option>
+                              <option value="鼻中隔わん曲症">鼻中隔わん曲症</option>
+                              <option value="扁桃肥大">扁桃肥大</option>
+                            </template>
+                            <template v-else-if="item.category === '喉'">
+                              <option value="慢性扁桃炎">慢性扁桃炎</option>
+                              <option value="アデノイド">アデノイド</option>
+                              <option value="言語異常">言語異常</option>
+                              <option value="口内炎">口内炎</option>
+                              <option value="舌小帯異常">舌小帯異常</option>
+                              <option value="舌異常">舌異常</option>
+                              <option value="さ声">さ声</option>
+                            </template>
+                          </select>
+                        </div>
+
+                        <!-- 所見 -->
+                        <div>
+                          <label class="block text-xs font-medium text-gray-700 mb-1">所見</label>
+                          <select
+                            v-model="item.findings"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                          </select>
+                        </div>
+
+                        <!-- 診断結果 -->
+                        <div>
+                          <label class="block text-xs font-medium text-gray-700 mb-1">診断結果</label>
+                          <select
+                            v-model="item.diagnosis"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                            :disabled="!item.category || item.category === '異常なし' || item.category === '未検診'"
+                          >
+                            <option value="">選択してください</option>
+                            <template v-if="item.category === '耳'">
+                              <option value="異常なし">異常なし</option>
+                              <option value="耳垢栓塞">耳垢栓塞</option>
+                              <option value="滲出性中耳炎">滲出性中耳炎</option>
+                              <option value="慢性中耳炎鼓膜穿孔">慢性中耳炎鼓膜穿孔</option>
+                              <option value="伝音性難聴">伝音性難聴</option>
+                              <option value="感音性難聴">感音性難聴</option>
+                            </template>
+                            <template v-else-if="item.category === '鼻'">
+                              <option value="異常なし">異常なし</option>
+                              <option value="慢性鼻炎">慢性鼻炎</option>
+                              <option value="アレルギー性鼻炎">アレルギー性鼻炎</option>
+                              <option value="副鼻腔炎">副鼻腔炎</option>
+                              <option value="鼻中隔わん曲症">鼻中隔わん曲症</option>
+                              <option value="急性鼻炎">急性鼻炎</option>
+                              <option value="鼻カタル">鼻カタル</option>
+                              <option value="鼻炎">鼻炎</option>
+                              <option value="併合性鼻副鼻腔炎">併合性鼻副鼻腔炎</option>
+                              <option value="鼻出血">鼻出血</option>
+                              <option value="肥厚性鼻炎">肥厚性鼻炎</option>
+                            </template>
+                            <template v-else-if="item.category === '喉'">
+                              <option value="異常なし">異常なし</option>
+                              <option value="扁桃肥大">扁桃肥大</option>
+                              <option value="扁桃炎">扁桃炎</option>
+                              <option value="アデノイド">アデノイド</option>
+                              <option value="音声言語異常">音声言語異常</option>
+                              <option value="口内炎">口内炎</option>
+                              <option value="舌小帯異常">舌小帯異常</option>
+                              <option value="舌異常">舌異常</option>
+                            </template>
+                          </select>
+                        </div>
+
+                        <!-- 処置 -->
+                        <div class="sm:col-span-2">
+                          <label class="block text-xs font-medium text-gray-700 mb-1">処置</label>
+                          <select
+                            v-model="item.treatment"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                            :disabled="!item.category || item.category === '異常なし' || item.category === '未検診'"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="必要なし">必要なし</option>
+                            <option value="治療中">治療中</option>
+                            <option value="経過観察">経過観察</option>
+                            <option value="治療完了">治療完了</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <!-- 削除ボタン -->
+                      <div v-if="form.otolaryngology_items.length > 1" class="mt-3 flex justify-end">
+                        <button
+                          @click="removeOtolaryngologyItem(index)"
+                          type="button"
+                          class="text-sm text-red-600 hover:text-red-800"
+                        >
+                          削除
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- 追加ボタン -->
+                    <div 
+                      v-if="shouldShowAddOtolaryngologyButton"
+                      class="mt-3"
+                    >
+                      <button
+                        @click="addOtolaryngologyItem"
+                        type="button"
+                        class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        検診項目を追加
+                      </button>
+                    </div>
                   </div>
 
                   <!-- Internal Medicine -->
@@ -756,9 +934,23 @@
                         >
                           <option value="">選択してください</option>
                           <option value="異常なし">異常なし</option>
-                          <option value="要観察">要観察</option>
-                          <option value="要精密検査">要精密検査</option>
-                          <option value="治療中">治療中</option>
+                          <option value="未検診">未検診</option>
+                          <option value="アレルギー性結膜炎">アレルギー性結膜炎</option>
+                          <option value="結膜炎">結膜炎</option>
+                          <option value="外斜位の疑い">外斜位の疑い</option>
+                          <option value="内斜位の疑い">内斜位の疑い</option>
+                          <option value="眼瞼炎">眼瞼炎</option>
+                          <option value="眼瞼膜炎">眼瞼膜炎</option>
+                          <option value="睫毛内反">睫毛内反</option>
+                          <option value="麦粒腫">麦粒腫</option>
+                          <option value="霰粒腫">霰粒腫</option>
+                          <option value="その他">その他</option>
+                          <option value="眼瞼脂肪腫">眼瞼脂肪腫</option>
+                          <option value="コンタクト検診">コンタクト検診</option>
+                          <option value="眼瞼皮膚炎">眼瞼皮膚炎</option>
+                          <option value="マイボーム腺梗塞">マイボーム腺梗塞</option>
+                          <option value="眼窩脂肪腫">眼窩脂肪腫</option>
+                          <option value="眼瞼内反症">眼瞼内反症</option>
                         </select>
                       </div>
 
@@ -770,14 +962,20 @@
                           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
                         >
                           <option value="">選択してください</option>
-                          <option value="正常">正常</option>
-                          <option value="近視">近視</option>
-                          <option value="遠視">遠視</option>
-                          <option value="乱視">乱視</option>
-                          <option value="弱視">弱視</option>
-                          <option value="斜視">斜視</option>
+                          <option value="異常なし">異常なし</option>
+                          <option value="アレルギー性結膜炎">アレルギー性結膜炎</option>
                           <option value="結膜炎">結膜炎</option>
+                          <option value="外斜位">外斜位</option>
+                          <option value="内斜位">内斜位</option>
+                          <option value="眼瞼炎">眼瞼炎</option>
+                          <option value="眼瞼膜炎">眼瞼膜炎</option>
+                          <option value="睫毛内反">睫毛内反</option>
+                          <option value="麦粒瞳">麦粒瞳</option>
+                          <option value="霰粒瞳">霰粒瞳</option>
                           <option value="その他">その他</option>
+                          <option value="コンタクト検診">コンタクト検診</option>
+                          <option value="眼瞼脂肪腫">眼瞼脂肪腫</option>
+                          <option value="マイボーム腺梗塞">マイボーム腺梗塞</option>
                         </select>
                       </div>
 
@@ -789,19 +987,216 @@
                           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
                         >
                           <option value="">選択してください</option>
-                          <option value="なし">なし</option>
                           <option value="経過観察">経過観察</option>
+                          <option value="点眼治療">点眼治療</option>
                           <option value="眼鏡処方">眼鏡処方</option>
-                          <option value="医療機関受診勧奨">医療機関受診勧奨</option>
-                          <option value="治療継続">治療継続</option>
+                          <option value="眼鏡適合">眼鏡適合</option>
+                          <option value="眼鏡更新">眼鏡更新</option>
+                          <option value="コンタクトレンズ処方">コンタクトレンズ処方</option>
+                          <option value="その他">その他</option>
+                          <option value="治療中">治療中</option>
+                          <option value="治療済み">治療済み</option>
                         </select>
                       </div>
                     </div>
                   </div>
                 </div>
                 
+                <!-- Card Format for Otolaryngology Exam -->
+                <div v-if="measurementItems.otolaryngology" class="space-y-4">
+                  <h4 class="text-sm font-semibold text-gray-900">耳鼻科検診 - 学生ごとの入力</h4>
+                  <div 
+                    v-for="student in selectedStudents" 
+                    :key="student.id"
+                    class="border border-gray-300 rounded-lg p-4 bg-white space-y-4"
+                  >
+                    <!-- Student Info Header -->
+                    <div class="bg-gray-50 p-3 rounded-md border-l-4 border-green-500">
+                      <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                          <span class="text-gray-600">出席番号:</span>
+                          <span class="ml-2 font-semibold">{{ student.student_number }}</span>
+                        </div>
+                        <div>
+                          <span class="text-gray-600">氏名:</span>
+                          <span class="ml-2 font-semibold">{{ student.name }}</span>
+                        </div>
+                        <div class="col-span-2 text-xs text-gray-500">
+                          {{ getStudentClassDisplay(student) }} | {{ student.student_id }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Otolaryngology Items for this student -->
+                    <div v-if="!bulkMeasurements[student.id].otolaryngology_items">
+                      {{ initializeOtolaryngologyItems(student.id) }}
+                    </div>
+                    
+                    <div 
+                      v-for="(item, index) in bulkMeasurements[student.id].otolaryngology_items" 
+                      :key="index"
+                      class="border border-gray-200 rounded-lg p-3 bg-gray-50 space-y-3"
+                    >
+                      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <!-- 分類 -->
+                        <div>
+                          <label class="block text-xs font-medium text-gray-700 mb-1">分類</label>
+                          <select
+                            v-model="item.category"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="異常なし">異常なし</option>
+                            <option value="未検診">未検診</option>
+                            <option value="耳">耳</option>
+                            <option value="鼻">鼻</option>
+                            <option value="喉">喉</option>
+                          </select>
+                        </div>
+
+                        <!-- 検診結果 -->
+                        <div>
+                          <label class="block text-xs font-medium text-gray-700 mb-1">検診結果</label>
+                          <select
+                            v-model="item.exam_result"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                            :disabled="!item.category || item.category === '異常なし' || item.category === '未検診'"
+                          >
+                            <option value="">選択してください</option>
+                            <template v-if="item.category === '耳'">
+                              <option value="耳垢">耳垢</option>
+                              <option value="外耳炎">外耳炎</option>
+                              <option value="滲出性中耳炎">滲出性中耳炎</option>
+                              <option value="慢性中耳炎">慢性中耳炎</option>
+                              <option value="難聴の疑い">難聴の疑い</option>
+                              <option value="外耳道異物">外耳道異物</option>
+                              <option value="中耳炎">中耳炎</option>
+                            </template>
+                            <template v-else-if="item.category === '鼻'">
+                              <option value="アレルギー性鼻炎">アレルギー性鼻炎</option>
+                              <option value="慢性鼻炎">慢性鼻炎</option>
+                              <option value="副鼻腔炎">副鼻腔炎</option>
+                              <option value="鼻中隔わん曲症">鼻中隔わん曲症</option>
+                              <option value="扁桃肥大">扁桃肥大</option>
+                            </template>
+                            <template v-else-if="item.category === '喉'">
+                              <option value="慢性扁桃炎">慢性扁桃炎</option>
+                              <option value="アデノイド">アデノイド</option>
+                              <option value="言語異常">言語異常</option>
+                              <option value="口内炎">口内炎</option>
+                              <option value="舌小帯異常">舌小帯異常</option>
+                              <option value="舌異常">舌異常</option>
+                              <option value="さ声">さ声</option>
+                            </template>
+                          </select>
+                        </div>
+
+                        <!-- 所見 -->
+                        <div>
+                          <label class="block text-xs font-medium text-gray-700 mb-1">所見</label>
+                          <select
+                            v-model="item.findings"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                          </select>
+                        </div>
+
+                        <!-- 診断結果 -->
+                        <div>
+                          <label class="block text-xs font-medium text-gray-700 mb-1">診断結果</label>
+                          <select
+                            v-model="item.diagnosis"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                            :disabled="!item.category || item.category === '異常なし' || item.category === '未検診'"
+                          >
+                            <option value="">選択してください</option>
+                            <template v-if="item.category === '耳'">
+                              <option value="異常なし">異常なし</option>
+                              <option value="耳垢栓塞">耳垢栓塞</option>
+                              <option value="滲出性中耳炎">滲出性中耳炎</option>
+                              <option value="慢性中耳炎鼓膜穿孔">慢性中耳炎鼓膜穿孔</option>
+                              <option value="伝音性難聴">伝音性難聴</option>
+                              <option value="感音性難聴">感音性難聴</option>
+                            </template>
+                            <template v-else-if="item.category === '鼻'">
+                              <option value="異常なし">異常なし</option>
+                              <option value="慢性鼻炎">慢性鼻炎</option>
+                              <option value="アレルギー性鼻炎">アレルギー性鼻炎</option>
+                              <option value="副鼻腔炎">副鼻腔炎</option>
+                              <option value="鼻中隔わん曲症">鼻中隔わん曲症</option>
+                              <option value="急性鼻炎">急性鼻炎</option>
+                              <option value="鼻カタル">鼻カタル</option>
+                              <option value="鼻炎">鼻炎</option>
+                              <option value="併合性鼻副鼻腔炎">併合性鼻副鼻腔炎</option>
+                              <option value="鼻出血">鼻出血</option>
+                              <option value="肥厚性鼻炎">肥厚性鼻炎</option>
+                            </template>
+                            <template v-else-if="item.category === '喉'">
+                              <option value="異常なし">異常なし</option>
+                              <option value="扁桃肥大">扁桃肥大</option>
+                              <option value="扁桃炎">扁桃炎</option>
+                              <option value="アデノイド">アデノイド</option>
+                              <option value="音声言語異常">音声言語異常</option>
+                              <option value="口内炎">口内炎</option>
+                              <option value="舌小帯異常">舌小帯異常</option>
+                              <option value="舌異常">舌異常</option>
+                            </template>
+                          </select>
+                        </div>
+
+                        <!-- 処置 -->
+                        <div class="sm:col-span-2">
+                          <label class="block text-xs font-medium text-gray-700 mb-1">処置</label>
+                          <select
+                            v-model="item.treatment"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                            :disabled="!item.category || item.category === '異常なし' || item.category === '未検診'"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="必要なし">必要なし</option>
+                            <option value="治療中">治療中</option>
+                            <option value="経過観察">経過観察</option>
+                            <option value="治療完了">治療完了</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <!-- 削除ボタン -->
+                      <div v-if="bulkMeasurements[student.id].otolaryngology_items.length > 1" class="flex justify-end">
+                        <button
+                          @click="removeBulkOtolaryngologyItem(student.id, index)"
+                          type="button"
+                          class="text-sm text-red-600 hover:text-red-800"
+                        >
+                          削除
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- 追加ボタン -->
+                    <div 
+                      v-if="shouldShowAddBulkOtolaryngologyButton(student.id)"
+                      class="mt-3"
+                    >
+                      <button
+                        @click="addBulkOtolaryngologyItem(student.id)"
+                        type="button"
+                        class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        検診項目を追加
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
                 <!-- Table Format for Other Measurements -->
-                <div v-if="!measurementItems.ophthalmology" class="overflow-x-auto border border-gray-300 rounded-lg">
+                <div v-if="!measurementItems.ophthalmology && !measurementItems.otolaryngology" class="overflow-x-auto border border-gray-300 rounded-lg">
                   <table class="min-w-full divide-y divide-gray-300">
                     <thead class="bg-gray-50">
                       <tr>
@@ -1278,6 +1673,15 @@ export default {
       ophthalmology_diagnosis: '',
       ophthalmology_treatment: '',
       otolaryngology_result: '',
+      otolaryngology_items: [
+        {
+          category: '',
+          exam_result: '',
+          findings: '',
+          diagnosis: '',
+          treatment: ''
+        }
+      ],
       internal_medicine_result: '',
       hearing_test_result: '',
       tuberculosis_test_result: '',
@@ -1416,6 +1820,16 @@ export default {
         .slice(0, 5);
     });
     
+    // 耳鼻科検診の追加ボタン表示判定
+    const shouldShowAddOtolaryngologyButton = computed(() => {
+      if (!form.otolaryngology_items || form.otolaryngology_items.length === 0) {
+        return false;
+      }
+      // 最後の項目の分類が「異常なし」「未検診」以外の場合に追加ボタンを表示
+      const lastItem = form.otolaryngology_items[form.otolaryngology_items.length - 1];
+      return lastItem.category && lastItem.category !== '異常なし' && lastItem.category !== '未検診';
+    });
+    
     // Methods
     const searchStudents = () => {
       if (!studentSearch.value.trim()) {
@@ -1444,6 +1858,71 @@ export default {
       selectedStudent.value = null;
       form.height = '';
       form.weight = '';
+    };
+    
+    // 耳鼻科検診項目を追加
+    const addOtolaryngologyItem = () => {
+      form.otolaryngology_items.push({
+        category: '',
+        exam_result: '',
+        findings: '',
+        diagnosis: '',
+        treatment: ''
+      });
+    };
+    
+    // 耳鼻科検診項目を削除
+    const removeOtolaryngologyItem = (index) => {
+      if (form.otolaryngology_items.length > 1) {
+        form.otolaryngology_items.splice(index, 1);
+      }
+    };
+    
+    // 一括測定用：耳鼻科検診項目を初期化
+    const initializeOtolaryngologyItems = (studentId) => {
+      if (!bulkMeasurements[studentId].otolaryngology_items) {
+        bulkMeasurements[studentId].otolaryngology_items = [
+          {
+            category: '',
+            exam_result: '',
+            findings: '',
+            diagnosis: '',
+            treatment: ''
+          }
+        ];
+      }
+      return '';
+    };
+    
+    // 一括測定用：耳鼻科検診項目を追加
+    const addBulkOtolaryngologyItem = (studentId) => {
+      if (!bulkMeasurements[studentId].otolaryngology_items) {
+        initializeOtolaryngologyItems(studentId);
+      }
+      bulkMeasurements[studentId].otolaryngology_items.push({
+        category: '',
+        exam_result: '',
+        findings: '',
+        diagnosis: '',
+        treatment: ''
+      });
+    };
+    
+    // 一括測定用：耳鼻科検診項目を削除
+    const removeBulkOtolaryngologyItem = (studentId, index) => {
+      if (bulkMeasurements[studentId].otolaryngology_items.length > 1) {
+        bulkMeasurements[studentId].otolaryngology_items.splice(index, 1);
+      }
+    };
+    
+    // 一括測定用：追加ボタン表示判定
+    const shouldShowAddBulkOtolaryngologyButton = (studentId) => {
+      const items = bulkMeasurements[studentId]?.otolaryngology_items;
+      if (!items || items.length === 0) {
+        return false;
+      }
+      const lastItem = items[items.length - 1];
+      return lastItem.category && lastItem.category !== '異常なし' && lastItem.category !== '未検診';
     };
     
     const updateBulkSelection = () => {
@@ -1819,7 +2298,7 @@ export default {
             ophthalmology_exam_result: measurementItems.ophthalmology && form.ophthalmology_exam_result ? form.ophthalmology_exam_result : null,
             ophthalmology_diagnosis: measurementItems.ophthalmology && form.ophthalmology_diagnosis ? form.ophthalmology_diagnosis : null,
             ophthalmology_treatment: measurementItems.ophthalmology && form.ophthalmology_treatment ? form.ophthalmology_treatment : null,
-            otolaryngology_result: measurementItems.otolaryngology && form.otolaryngology_result ? form.otolaryngology_result : null,
+            otolaryngology_result: measurementItems.otolaryngology ? JSON.stringify(form.otolaryngology_items) : null,
             internal_medicine_result: measurementItems.internal_medicine && form.internal_medicine_result ? form.internal_medicine_result : null,
             hearing_test_result: measurementItems.hearing_test && form.hearing_test_result ? form.hearing_test_result : null,
             tuberculosis_test_result: measurementItems.tuberculosis_test && form.tuberculosis_test_result ? form.tuberculosis_test_result : null,
@@ -1864,7 +2343,7 @@ export default {
               ophthalmology_exam_result: measurementItems.ophthalmology && measurement.ophthalmology_exam_result ? measurement.ophthalmology_exam_result : null,
               ophthalmology_diagnosis: measurementItems.ophthalmology && measurement.ophthalmology_diagnosis ? measurement.ophthalmology_diagnosis : null,
               ophthalmology_treatment: measurementItems.ophthalmology && measurement.ophthalmology_treatment ? measurement.ophthalmology_treatment : null,
-              otolaryngology_result: measurementItems.otolaryngology && form.otolaryngology_result ? form.otolaryngology_result : null,
+              otolaryngology_result: measurementItems.otolaryngology && measurement.otolaryngology_items ? JSON.stringify(measurement.otolaryngology_items) : null,
               internal_medicine_result: measurementItems.internal_medicine && form.internal_medicine_result ? form.internal_medicine_result : null,
               hearing_test_result: measurementItems.hearing_test && form.hearing_test_result ? form.hearing_test_result : null,
               tuberculosis_test_result: measurementItems.tuberculosis_test && form.tuberculosis_test_result ? form.tuberculosis_test_result : null,
@@ -1996,6 +2475,7 @@ export default {
       heightGrowth,
       weightGrowth,
       recentRecords,
+      shouldShowAddOtolaryngologyButton,
       heightInput,
       weightInput,
       visionLeftInput,
@@ -2006,6 +2486,12 @@ export default {
       searchStudents,
       selectStudent,
       clearSelectedStudent,
+      addOtolaryngologyItem,
+      removeOtolaryngologyItem,
+      initializeOtolaryngologyItems,
+      addBulkOtolaryngologyItem,
+      removeBulkOtolaryngologyItem,
+      shouldShowAddBulkOtolaryngologyButton,
       updateBulkSelection,
       toggleAllStudents,
       toggleStudentSelection,
