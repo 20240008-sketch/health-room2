@@ -305,11 +305,11 @@
                 <span class="text-gray-600">分類:</span>
                 <span class="ml-2 font-medium">{{ getCategoryLabel(selectedRecord.category) }}</span>
               </div>
-              <div v-if="selectedRecord.type_detail">
+              <div v-if="selectedRecord.category !== 'absence' && selectedRecord.category !== 'late' && selectedRecord.type_detail">
                 <span class="text-gray-600">種別:</span>
                 <span class="ml-2 font-medium">{{ getTypeDetailLabel(selectedRecord.type_detail) }}</span>
               </div>
-              <div v-if="selectedRecord.absence_reason">
+              <div v-if="(selectedRecord.category === 'absence' || selectedRecord.category === 'late') && selectedRecord.absence_reason">
                 <span class="text-gray-600">原因・理由:</span>
                 <span class="ml-2 font-medium">{{ getAbsenceReasonLabel(selectedRecord.absence_reason) }}</span>
               </div>
@@ -1009,7 +1009,17 @@ export default {
             grade: record.grade || '',
             category: record.category || '',
             type_detail: record.type_detail || '',
+            absence_reason: record.absence_reason || '',
             occurrence_time: record.occurrence_time || '',
+            subject: record.subject || '',
+            club: record.club || '',
+            event: record.event || '',
+            breakfast: record.breakfast || '',
+            bowel_movement: record.bowel_movement || '',
+            treatment: record.treatment || '',
+            injury_location: record.injury_location || '',
+            injury_place: record.injury_place || '',
+            surgical_treatment: record.surgical_treatment || '',
             treatment_notes: record.treatment_notes || ''
           }));
         }

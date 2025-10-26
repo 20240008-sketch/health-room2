@@ -62,7 +62,17 @@ class NursingVisitController extends Controller
                 'category' => $visit->category ?? '',
                 'type' => $visit->type ?? '',
                 'type_detail' => $visit->type_detail ?? '',
+                'absence_reason' => $visit->absence_reason ?? '',
                 'occurrence_time' => $visit->occurrence_time ?? '',
+                'subject' => $visit->subject ?? '',
+                'club' => $visit->club ?? '',
+                'event' => $visit->event ?? '',
+                'breakfast' => $visit->breakfast ?? '',
+                'bowel_movement' => $visit->bowel_movement ?? '',
+                'treatment' => $visit->treatment ?? '',
+                'injury_location' => $visit->injury_location ?? '',
+                'injury_place' => $visit->injury_place ?? '',
+                'surgical_treatment' => $visit->surgical_treatment ?? '',
                 'treatment_notes' => $visit->treatment_notes ?? '',
                 'created_at' => $visit->created_at->toISOString(),
             ];
@@ -85,7 +95,17 @@ class NursingVisitController extends Controller
             'category' => 'nullable|string|max:20',
             'type' => 'nullable|string|max:50',
             'type_detail' => 'nullable|string|max:50',
+            'absence_reason' => 'nullable|string|max:50',
             'occurrence_time' => 'nullable|string|max:255',
+            'subject' => 'nullable|string|max:50',
+            'club' => 'nullable|string|max:50',
+            'event' => 'nullable|string|max:50',
+            'breakfast' => 'nullable|string|max:50',
+            'bowel_movement' => 'nullable|string|max:50',
+            'treatment' => 'nullable|string|max:100',
+            'injury_location' => 'nullable|string|max:50',
+            'injury_place' => 'nullable|string|max:50',
+            'surgical_treatment' => 'nullable|string|max:100',
             'treatment_notes' => 'nullable|string',
         ]);
 
@@ -117,7 +137,17 @@ class NursingVisitController extends Controller
             'visits.*.category' => 'nullable|string|max:20',
             'visits.*.type' => 'nullable|string|max:50',
             'visits.*.type_detail' => 'nullable|string|max:50',
+            'visits.*.absence_reason' => 'nullable|string|max:50',
             'visits.*.occurrence_time' => 'nullable|string|max:255',
+            'visits.*.subject' => 'nullable|string|max:50',
+            'visits.*.club' => 'nullable|string|max:50',
+            'visits.*.event' => 'nullable|string|max:50',
+            'visits.*.breakfast' => 'nullable|string|max:50',
+            'visits.*.bowel_movement' => 'nullable|string|max:50',
+            'visits.*.treatment' => 'nullable|string|max:100',
+            'visits.*.injury_location' => 'nullable|string|max:50',
+            'visits.*.injury_place' => 'nullable|string|max:50',
+            'visits.*.surgical_treatment' => 'nullable|string|max:100',
             'visits.*.treatment_notes' => 'nullable|string',
         ]);
 
@@ -146,10 +176,37 @@ class NursingVisitController extends Controller
      */
     public function show($id)
     {
-        $visit = NursingVisit::with('student')->findOrFail($id);
+        $visit = NursingVisit::with(['student.schoolClass'])->findOrFail($id);
 
         return response()->json([
-            'data' => $visit
+            'data' => [
+                'id' => $visit->id,
+                'date' => $visit->date->format('Y-m-d'),
+                'time' => $visit->time->format('H:i'),
+                'student_id' => $visit->student_id,
+                'student_name' => $visit->student->name ?? '',
+                'student_number' => $visit->student->student_number ?? '',
+                'class_name' => $visit->student->schoolClass->name ?? '',
+                'grade' => $visit->student->schoolClass->grade ?? '',
+                'gender' => $visit->student->gender ?? '',
+                'category' => $visit->category ?? '',
+                'type' => $visit->type ?? '',
+                'type_detail' => $visit->type_detail ?? '',
+                'absence_reason' => $visit->absence_reason ?? '',
+                'occurrence_time' => $visit->occurrence_time ?? '',
+                'subject' => $visit->subject ?? '',
+                'club' => $visit->club ?? '',
+                'event' => $visit->event ?? '',
+                'breakfast' => $visit->breakfast ?? '',
+                'bowel_movement' => $visit->bowel_movement ?? '',
+                'treatment' => $visit->treatment ?? '',
+                'injury_location' => $visit->injury_location ?? '',
+                'injury_place' => $visit->injury_place ?? '',
+                'surgical_treatment' => $visit->surgical_treatment ?? '',
+                'treatment_notes' => $visit->treatment_notes ?? '',
+                'created_at' => $visit->created_at->toISOString(),
+                'updated_at' => $visit->updated_at->toISOString(),
+            ]
         ]);
     }
 
@@ -164,8 +221,20 @@ class NursingVisitController extends Controller
             'date' => 'sometimes|required|date',
             'time' => 'sometimes|required',
             'student_id' => 'sometimes|required|string|exists:students,student_id',
-            'type' => 'sometimes|required|in:injury,illness,other',
+            'category' => 'nullable|string|max:20',
+            'type' => 'nullable|string|max:50',
+            'type_detail' => 'nullable|string|max:50',
+            'absence_reason' => 'nullable|string|max:50',
             'occurrence_time' => 'nullable|string|max:255',
+            'subject' => 'nullable|string|max:50',
+            'club' => 'nullable|string|max:50',
+            'event' => 'nullable|string|max:50',
+            'breakfast' => 'nullable|string|max:50',
+            'bowel_movement' => 'nullable|string|max:50',
+            'treatment' => 'nullable|string|max:100',
+            'injury_location' => 'nullable|string|max:50',
+            'injury_place' => 'nullable|string|max:50',
+            'surgical_treatment' => 'nullable|string|max:100',
             'treatment_notes' => 'nullable|string',
         ]);
 

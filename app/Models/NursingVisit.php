@@ -14,7 +14,17 @@ class NursingVisit extends Model
         'category',
         'type',
         'type_detail',
+        'absence_reason',
         'occurrence_time',
+        'subject',
+        'club',
+        'event',
+        'breakfast',
+        'bowel_movement',
+        'treatment',
+        'injury_location',
+        'injury_place',
+        'surgical_treatment',
         'treatment_notes',
     ];
 

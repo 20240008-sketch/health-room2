@@ -403,31 +403,138 @@ export default {
 
     const getTypeLabel = (typeDetail) => {
       const typeLabels = {
-        // Internal (内科)
-        'stomachache': '腹痛',
+        // 内科
         'headache': '頭痛',
+        'stomachache': '腹痛',
+        'stomach_pain': '胃痛',
+        'cold': 'かぜ症状',
+        'diarrhea': '下痢',
+        'nausea': '吐き気・嘔吐',
+        'constipation': '便秘',
+        'menstrual_pain': '月経痛',
+        'toothache': '歯痛',
+        'sleep_deprivation': '睡眠不足',
+        'feeling_sick': '気分が悪い',
+        'asthma': '喘息',
+        'poor_health': '体調不良',
+        'hyperventilation': '過呼吸',
+        'fatigue': '倦怠感',
+        'dizziness': 'めまい・貧血',
+        'seizure': '発作',
         'fever': '発熱',
         'cough': '咳',
-        // Surgical (外科)
-        'cut': '切り傷',
-        'bruise': '打撲',
+        // 外科
+        'scrape': 'すり傷',
+        'cut': '切傷',
+        'stab': '刺傷',
+        'bruise': '打撲・打ち身',
         'sprain': '捻挫',
-        'fracture': '骨折',
-        // Other (その他)
+        'finger_jam': '突き指',
+        'muscle_pain': '筋肉痛',
+        'nosebleed': '鼻出血',
+        'eye_pain': '眼痛',
+        'back_pain': '腰痛',
+        'fracture': '骨折・脱臼',
+        'hives': 'じんましん',
+        'suppuration': '化膿',
+        'ear_pain': '耳痛',
+        'burn': '火傷',
+        'insect_bite': '虫さされ',
+        'nail_detachment': '爪剥離',
+        'skin_condition': '皮むけ・皮膚疾患',
+        'foot_pain': '足痛',
+        'pain': '痛み',
+        'concussion': '脳震盪',
+        'wound_disinfection': '傷口消毒',
+        'tooth_extraction': '抜歯・歯が欠ける',
+        // その他
+        'mental_counseling': 'こころ(相談)',
+        'physical_counseling': 'からだ(相談)',
+        'somehow': '何となく',
+        'psychogenic': '心因性',
+        'call_waiting': '呼び出し・待機',
+        'measurement': '計測等',
+        'infirmary_attendance': '保健室登校',
+        'other_counseling': 'その他の相談',
+        'safe_place': '居場所',
+        'observation': '経過観察',
+        'infirmary_exam': '保健室受験',
         'counseling': '相談',
         'rest': '休養',
         'other': 'その他',
-        // Absence (欠席)
+        // 欠席（旧）
         'sick': '病欠',
         'accident': '事故欠',
         'suspension': '出停',
         'mourning': '忌引',
-        // Categories
-        'internal': '内科',
-        'surgical': '外科',
-        'absence': '欠席'
+        'injury': '怪我',
+        'family': '家庭の事情'
       };
       return typeLabels[typeDetail] || typeDetail;
+    };
+
+    const getAbsenceReasonLabel = (reason) => {
+      const labels = {
+        // 欠席
+        'headache': '頭痛',
+        'cold': 'かぜ症状',
+        'stomachache': '腹痛',
+        'diarrhea': '下痢',
+        'fever': '発熱',
+        'sleep_deprivation': '睡眠不足',
+        'asthma': '喘息',
+        'nausea': '吐き気・嘔吐',
+        'nephritis': '腎炎',
+        'injury': '外傷',
+        'ent_disease': '耳鼻疾患',
+        'influenza': 'インフルエンザ',
+        'chickenpox': '水痘',
+        'mumps': '耳下腺炎',
+        'epidemic_keratitis': 'はやり目',
+        'other_infectious': 'その他の伝染病',
+        'accident': '事故欠',
+        'unknown': '理由不明',
+        'mourning': '忌引',
+        'housework': '家事',
+        'poor_health': '体調不良',
+        'hospitalization': '入院',
+        'truancy': '不登校',
+        'hospital_visit': '通院',
+        'psychogenic': '心因性',
+        'laziness': '怠惰',
+        'appendicitis': '虫垂炎',
+        'covid19': 'コロナウイルス感染症',
+        'orthostatic': '起立性調節障害',
+        // 遅刻他
+        'carelessness': '不注意',
+        'truancy_tendency': '不登校傾向',
+        'counseling_room': '相談室登校',
+        'other': 'その他'
+      };
+      return labels[reason] || reason;
+    };
+
+    const getOccurrenceLabel = (occurrenceTime) => {
+      const labels = {
+        'break': '休み時間',
+        'lunch': '昼休み',
+        'cleaning': '掃除',
+        'before_school': '始業前',
+        'after_school': '放課後',
+        'class_1': '1時間目',
+        'class_2': '2時間目',
+        'class_3': '3時間目',
+        'class_4': '4時間目',
+        'class_5': '5時間目',
+        'class_6': '6時間目',
+        'club': '部活',
+        'event': '行事',
+        'exam': '試験中',
+        'supplementary': '補習',
+        'extracurricular': '課外授業',
+        'other': 'その他'
+      };
+      return labels[occurrenceTime] || occurrenceTime;
     };
 
     const getCategoryLabel = (category) => {
@@ -435,7 +542,8 @@ export default {
         'internal': '内科',
         'surgical': '外科',
         'other': 'その他',
-        'absence': '欠席'
+        'absence': '欠席',
+        'late': '遅刻他'
       };
       return categoryLabels[category] || category;
     };
@@ -506,21 +614,56 @@ export default {
               if (record.category === 'absence' && grade >= 1 && grade <= 6) {
                 const gradeKey = `grade${grade}`;
                 
-                // Map type_detail to absence categories
-                // type_detail values could be: sick, accident, suspension, mourning, etc.
-                if (record.type_detail === 'sick' || record.type_detail === '病欠') {
+                // Count total absences
+                absence.value.absent[gradeKey]++;
+                
+                // Map absence_reason to absence categories
+                const reason = record.absence_reason;
+                
+                // 病欠に該当する原因
+                const sickReasons = ['headache', 'cold', 'stomachache', 'diarrhea', 'fever', 'sleep_deprivation', 
+                                    'asthma', 'nausea', 'nephritis', 'ent_disease', 'poor_health', 
+                                    'hospitalization', 'appendicitis', 'orthostatic'];
+                
+                // 伝染病（出停に該当）
+                const suspensionReasons = ['influenza', 'chickenpox', 'mumps', 'epidemic_keratitis', 
+                                          'other_infectious', 'covid19'];
+                
+                if (sickReasons.includes(reason)) {
                   absence.value.sick[gradeKey]++;
-                } else if (record.type_detail === 'accident' || record.type_detail === '事故欠') {
+                } else if (reason === 'accident' || reason === 'injury') {
                   absence.value.accident[gradeKey]++;
-                } else if (record.type_detail === 'suspension' || record.type_detail === '出停') {
+                } else if (suspensionReasons.includes(reason)) {
                   absence.value.suspension[gradeKey]++;
-                } else if (record.type_detail === 'mourning' || record.type_detail === '忌引') {
+                } else if (reason === 'mourning') {
                   absence.value.mourning[gradeKey]++;
                 }
               }
               
               // Extract class name without grade prefix (e.g., "3進学" -> "進学")
               const className = record.class_name ? record.class_name.replace(/^[0-9]/, '') : '';
+              
+              // Determine type label based on category
+              let typeLabel = '';
+              let treatmentText = record.treatment_notes || '';
+              
+              if (record.category === 'absence' || record.category === 'late') {
+                // For absence/late, use absence_reason
+                typeLabel = getAbsenceReasonLabel(record.absence_reason) || '';
+                
+                // Add absence_reason to treatment notes if present
+                if (record.absence_reason) {
+                  const reasonLabel = getAbsenceReasonLabel(record.absence_reason);
+                  if (treatmentText) {
+                    treatmentText = reasonLabel + '、' + treatmentText;
+                  } else {
+                    treatmentText = reasonLabel;
+                  }
+                }
+              } else {
+                // For other categories, use type_detail
+                typeLabel = getTypeLabel(record.type_detail) || '';
+              }
               
               // Add to visits list
               visits.value.push({
@@ -531,9 +674,9 @@ export default {
                 name: record.student_name || '',
                 gender: record.gender === '男' ? '男' : record.gender === '女' ? '女' : '',
                 category: getCategoryLabel(record.category) || '',
-                type: getTypeLabel(record.type_detail) || getTypeLabel(record.category) || record.type || '',
-                occurrence: record.occurrence_time || '',
-                treatment: record.treatment_notes || ''
+                type: typeLabel,
+                occurrence: getOccurrenceLabel(record.occurrence_time) || '',
+                treatment: treatmentText
               });
             });
           }
@@ -718,6 +861,8 @@ export default {
       absenceTotal,
       getCategoryLabel,
       getTypeLabel,
+      getAbsenceReasonLabel,
+      getOccurrenceLabel,
       addVisit,
       loadDiary,
       saveDiary,
