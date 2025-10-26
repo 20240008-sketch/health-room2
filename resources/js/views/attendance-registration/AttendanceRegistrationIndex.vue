@@ -226,8 +226,18 @@
             <template #cell(type_detail)="{ item }">
               <span>{{ getTypeDetailLabel(item.type_detail) }}</span>
             </template>
+            <template #cell(occurrence_time)="{ item }">
+              <span>{{ getOccurrenceTimeLabel(item.occurrence_time) }}</span>
+            </template>
             <template #actions="{ item }">
               <div class="flex space-x-2">
+                <BaseButton
+                  size="sm"
+                  variant="secondary"
+                  @click.stop="viewDetails(item)"
+                >
+                  詳細
+                </BaseButton>
                 <BaseButton
                   size="sm"
                   variant="secondary"
@@ -247,6 +257,150 @@
           </BaseTable>
         </div>
       </BaseCard>
+
+      <!-- Detail Modal -->
+      <BaseModal
+        :show="showDetailModal"
+        @close="closeDetailModal"
+        title="来室記録詳細"
+        size="lg"
+      >
+        <div v-if="selectedRecord" class="space-y-4">
+          <!-- Time and Student Info -->
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <h3 class="text-sm font-semibold text-gray-900 mb-3">基本情報</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+              <div>
+                <span class="text-gray-600">来室時間:</span>
+                <span class="ml-2 font-medium">{{ selectedRecord.time || '-' }}</span>
+              </div>
+              <div>
+                <span class="text-gray-600">日付:</span>
+                <span class="ml-2 font-medium">{{ selectedRecord.date || '-' }}</span>
+              </div>
+              <div>
+                <span class="text-gray-600">学年:</span>
+                <span class="ml-2 font-medium">{{ selectedRecord.grade || '-' }}年</span>
+              </div>
+              <div>
+                <span class="text-gray-600">クラス:</span>
+                <span class="ml-2 font-medium">{{ selectedRecord.class_name || '-' }}</span>
+              </div>
+              <div>
+                <span class="text-gray-600">出席番号:</span>
+                <span class="ml-2 font-medium">{{ selectedRecord.student_number || '-' }}番</span>
+              </div>
+              <div>
+                <span class="text-gray-600">氏名:</span>
+                <span class="ml-2 font-medium">{{ selectedRecord.student_name || '-' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Category and Type -->
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <h3 class="text-sm font-semibold text-gray-900 mb-3">分類・種別</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+              <div>
+                <span class="text-gray-600">分類:</span>
+                <span class="ml-2 font-medium">{{ getCategoryLabel(selectedRecord.category) }}</span>
+              </div>
+              <div v-if="selectedRecord.type_detail">
+                <span class="text-gray-600">種別:</span>
+                <span class="ml-2 font-medium">{{ getTypeDetailLabel(selectedRecord.type_detail) }}</span>
+              </div>
+              <div v-if="selectedRecord.absence_reason">
+                <span class="text-gray-600">原因・理由:</span>
+                <span class="ml-2 font-medium">{{ getAbsenceReasonLabel(selectedRecord.absence_reason) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Occurrence Details -->
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <h3 class="text-sm font-semibold text-gray-900 mb-3">発生状況</h3>
+            <div class="space-y-2 text-sm">
+              <div>
+                <span class="text-gray-600">発生時:</span>
+                <span class="ml-2 font-medium">{{ getOccurrenceTimeLabel(selectedRecord.occurrence_time) }}</span>
+              </div>
+              <div v-if="selectedRecord.subject">
+                <span class="text-gray-600">教科:</span>
+                <span class="ml-2 font-medium">{{ getSubjectLabel(selectedRecord.subject) }}</span>
+              </div>
+              <div v-if="selectedRecord.club">
+                <span class="text-gray-600">部活:</span>
+                <span class="ml-2 font-medium">{{ getClubLabel(selectedRecord.club) }}</span>
+              </div>
+              <div v-if="selectedRecord.event">
+                <span class="text-gray-600">行事:</span>
+                <span class="ml-2 font-medium">{{ getEventLabel(selectedRecord.event) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Internal Medicine Details (if category is internal) -->
+          <div v-if="selectedRecord.category === 'internal'" class="bg-blue-50 p-4 rounded-lg">
+            <h3 class="text-sm font-semibold text-gray-900 mb-3">内科関連情報</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+              <div v-if="selectedRecord.breakfast">
+                <span class="text-gray-600">朝食:</span>
+                <span class="ml-2 font-medium">{{ selectedRecord.breakfast || '-' }}</span>
+              </div>
+              <div v-if="selectedRecord.bowel_movement">
+                <span class="text-gray-600">便通:</span>
+                <span class="ml-2 font-medium">{{ selectedRecord.bowel_movement || '-' }}</span>
+              </div>
+              <div v-if="selectedRecord.treatment" class="col-span-2">
+                <span class="text-gray-600">処置:</span>
+                <span class="ml-2 font-medium">{{ selectedRecord.treatment || '-' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Surgical Details (if category is surgical) -->
+          <div v-if="selectedRecord.category === 'surgical'" class="bg-red-50 p-4 rounded-lg">
+            <h3 class="text-sm font-semibold text-gray-900 mb-3">外科関連情報</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+              <div v-if="selectedRecord.injury_location">
+                <span class="text-gray-600">怪我の部位:</span>
+                <span class="ml-2 font-medium">{{ getInjuryLocationLabel(selectedRecord.injury_location) }}</span>
+              </div>
+              <div v-if="selectedRecord.injury_place">
+                <span class="text-gray-600">発生場所:</span>
+                <span class="ml-2 font-medium">{{ getInjuryPlaceLabel(selectedRecord.injury_place) }}</span>
+              </div>
+              <div v-if="selectedRecord.surgical_treatment" class="col-span-2">
+                <span class="text-gray-600">処置:</span>
+                <span class="ml-2 font-medium">{{ getSurgicalTreatmentLabel(selectedRecord.surgical_treatment) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notes -->
+          <div v-if="selectedRecord.treatment_notes" class="bg-gray-50 p-4 rounded-lg">
+            <h3 class="text-sm font-semibold text-gray-900 mb-2">備考・原因・その他</h3>
+            <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ selectedRecord.treatment_notes }}</p>
+          </div>
+        </div>
+
+        <template #footer>
+          <div class="flex justify-end space-x-3">
+            <BaseButton
+              variant="secondary"
+              @click="closeDetailModal"
+            >
+              閉じる
+            </BaseButton>
+            <BaseButton
+              variant="primary"
+              @click="router.push({ name: 'attendance-registration.edit', params: { id: selectedRecord.id } }); closeDetailModal();"
+            >
+              編集
+            </BaseButton>
+          </div>
+        </template>
+      </BaseModal>
     </div>
   </AppLayout>
 </template>
@@ -262,7 +416,8 @@ import {
   BaseCard,
   BaseInput,
   BaseButton,
-  BaseTable
+  BaseTable,
+  BaseModal
 } from '@/components/index.js';
 
 // Icons
@@ -330,6 +485,7 @@ export default {
     BaseInput,
     BaseButton,
     BaseTable,
+    BaseModal,
     PlusIcon,
     ArrowDownTrayIcon,
     CheckCircleIcon,
@@ -350,6 +506,8 @@ export default {
     // State
     const loading = ref(false);
     const attendanceRecords = ref([]);
+    const showDetailModal = ref(false);
+    const selectedRecord = ref(null);
     const today = new Date();
     const dateComponents = ref({
       year: today.getFullYear(),
@@ -447,6 +605,16 @@ export default {
     });
     
     // Methods
+    const viewDetails = (record) => {
+      selectedRecord.value = record;
+      showDetailModal.value = true;
+    };
+
+    const closeDetailModal = () => {
+      showDetailModal.value = false;
+      selectedRecord.value = null;
+    };
+
     const handleDelete = async (record) => {
       if (confirm('この記録を削除してもよろしいですか？削除した記録は元に戻せません。')) {
         try {
@@ -509,7 +677,8 @@ export default {
         'internal': '内科',
         'surgical': '外科',
         'other': 'その他',
-        'absence': '欠席'
+        'absence': '欠席',
+        'late': '遅刻他'
       };
       return labels[category] || category || '-';
     };
@@ -517,25 +686,275 @@ export default {
     const getTypeDetailLabel = (typeDetail) => {
       const labels = {
         // 内科
-        'stomachache': '腹痛',
         'headache': '頭痛',
+        'stomachache': '腹痛',
+        'stomach_pain': '胃痛',
+        'cold': 'かぜ症状',
+        'diarrhea': '下痢',
+        'nausea': '吐き気・嘔吐',
+        'constipation': '便秘',
+        'menstrual_pain': '月経痛',
+        'toothache': '歯痛',
+        'sleep_deprivation': '睡眠不足',
+        'feeling_sick': '気分が悪い',
+        'asthma': '喘息',
+        'poor_health': '体調不良',
+        'hyperventilation': '過呼吸',
+        'fatigue': '倦怠感',
+        'dizziness': 'めまい・貧血',
+        'seizure': '発作',
         'fever': '発熱',
         'cough': '咳',
         // 外科
-        'cut': '切り傷',
-        'bruise': '打撲',
+        'scrape': 'すり傷',
+        'cut': '切傷',
+        'stab': '刺傷',
+        'bruise': '打撲・打ち身',
         'sprain': '捻挫',
-        'fracture': '骨折',
+        'finger_jam': '突き指',
+        'muscle_pain': '筋肉痛',
+        'nosebleed': '鼻出血',
+        'eye_pain': '眼痛',
+        'back_pain': '腰痛',
+        'fracture': '骨折・脱臼',
+        'hives': 'じんましん',
+        'suppuration': '化膿',
+        'ear_pain': '耳痛',
+        'burn': '火傷',
+        'insect_bite': '虫さされ',
+        'nail_detachment': '爪剥離',
+        'skin_condition': '皮むけ・皮膚疾患',
+        'foot_pain': '足痛',
+        'pain': '痛み',
+        'concussion': '脳震盪',
+        'wound_disinfection': '傷口消毒',
+        'tooth_extraction': '抜歯・歯が欠ける',
         // その他
+        'mental_counseling': 'こころ(相談)',
+        'physical_counseling': 'からだ(相談)',
+        'somehow': '何となく',
+        'psychogenic': '心因性',
+        'call_waiting': '呼び出し・待機',
+        'measurement': '計測等',
+        'infirmary_attendance': '保健室登校',
+        'other_counseling': 'その他の相談',
+        'safe_place': '居場所',
+        'observation': '経過観察',
+        'infirmary_exam': '保健室受験',
         'counseling': '相談',
         'rest': '休養',
         'other': 'その他',
-        // 欠席
+        // 欠席（旧）
         'sick': '病欠',
+        'accident': '事故欠',
+        'suspension': '出停',
+        'mourning': '忌引',
         'injury': '怪我',
         'family': '家庭の事情'
       };
       return labels[typeDetail] || typeDetail || '-';
+    };
+
+    const getAbsenceReasonLabel = (reason) => {
+      const labels = {
+        // 欠席
+        'headache': '頭痛',
+        'cold': 'かぜ症状',
+        'stomachache': '腹痛',
+        'diarrhea': '下痢',
+        'fever': '発熱',
+        'sleep_deprivation': '睡眠不足',
+        'asthma': '喘息',
+        'nausea': '吐き気・嘔吐',
+        'nephritis': '腎炎',
+        'injury': '外傷',
+        'ent_disease': '耳鼻疾患',
+        'influenza': 'インフルエンザ',
+        'chickenpox': '水痘',
+        'mumps': '耳下腺炎',
+        'epidemic_keratitis': 'はやり目',
+        'other_infectious': 'その他の伝染病',
+        'accident': '事故欠',
+        'unknown': '理由不明',
+        'mourning': '忌引',
+        'housework': '家事',
+        'poor_health': '体調不良',
+        'hospitalization': '入院',
+        'truancy': '不登校',
+        'hospital_visit': '通院',
+        'psychogenic': '心因性',
+        'laziness': '怠惰',
+        'appendicitis': '虫垂炎',
+        'covid19': 'コロナウイルス感染症',
+        'orthostatic': '起立性調節障害',
+        // 遅刻他
+        'carelessness': '不注意',
+        'truancy_tendency': '不登校傾向',
+        'counseling_room': '相談室登校',
+        'other': 'その他'
+      };
+      return labels[reason] || reason || '-';
+    };
+
+    const getInjuryLocationLabel = (location) => {
+      const labels = {
+        'hand_wrist': '手・手首',
+        'arm': '腕',
+        'finger_hand': '指（手）',
+        'finger_foot': '指（足）',
+        'foot_ankle': '足・足首',
+        'leg': '脚',
+        'knee': '膝',
+        'head': '頭',
+        'face': '顔',
+        'abdomen': '腹',
+        'chest': '胸',
+        'waist': '腰',
+        'back_shoulder_neck': '背中・肩・首',
+        'tooth': '歯',
+        'eye': '眼',
+        'ear': '耳',
+        'nose': '鼻',
+        'other': 'その他'
+      };
+      return labels[location] || location || '';
+    };
+
+    const getInjuryPlaceLabel = (place) => {
+      const labels = {
+        'classroom': '教室',
+        'hallway': '廊下',
+        'stairs': '階段',
+        'gymnasium': '体育館',
+        'ground': 'グランド',
+        'schoolyard': '校庭',
+        'music_room': '音楽室',
+        'art_room': '美術室',
+        'science_room': '理科室',
+        'auditorium': '講堂',
+        'home_economics': '家庭科室',
+        'cooking_room': '調理室',
+        'computer_room': 'コンピュータ室',
+        'commute_route': '通学路',
+        'toilet': 'トイレ',
+        'unknown': '不明',
+        'bicycle_parking': '自転車置き場',
+        'martial_arts': '格技室',
+        'practice_room': '実習室',
+        'cafeteria': '食堂',
+        'other': 'その他'
+      };
+      return labels[place] || place || '';
+    };
+
+    const getSurgicalTreatmentLabel = (treatment) => {
+      const labels = {
+        'disinfection': '処置（消毒）',
+        'icing': '処置（アイシング・湿布）',
+        'warm_compress': '温罨法',
+        'foreign_removal': '異物除去',
+        'parent_contact': '保護者連絡',
+        'hospital_instruction': '病院受診を指示',
+        'hospital_transport': '病院へ搬送',
+        'observation': '経過観察',
+        'rest_observation': '経過観察（安静）',
+        'teacher_contact': '担任・部活顧問連絡',
+        'bandaid': 'カットバン貼付',
+        'ointment': '塗り薬',
+        'other': 'その他'
+      };
+      return labels[treatment] || treatment || '';
+    };
+
+    const getOccurrenceTimeLabel = (occurrenceTime) => {
+      const labels = {
+        'during_class': '授業中',
+        'self_study': '自習中',
+        'before_school': '始業前',
+        'break': '休憩時間',
+        'lunch': '昼休み',
+        'cleaning': '掃除中',
+        'after_school': '放課後',
+        'club': '部活動',
+        'commute': '登下校中',
+        'event': '行事',
+        'exam': '試験中',
+        'supplementary': '補習',
+        'extracurricular': '課外授業',
+        'other': 'その他'
+      };
+      return labels[occurrenceTime] || occurrenceTime || '-';
+    };
+
+    const getSubjectLabel = (subject) => {
+      const labels = {
+        'japanese': '国語',
+        'social_studies': '社会',
+        'mathematics': '数学',
+        'science': '理科',
+        'english': '英語',
+        'music': '音楽',
+        'art': '美術',
+        'technology': '技術',
+        'home_economics': '家庭科',
+        'health_pe': '保健体育',
+        'lhr': 'LHR',
+        'integrated': '総合',
+        'commerce': '商業',
+        'welfare': '福祉',
+        'industrial': '工業',
+        'information': '情報',
+        'research': '課題研究',
+        'life_culture': '生活教養',
+        'calligraphy': '書道',
+        'elective': '選択',
+        'childcare': '保育',
+        'other': 'その他'
+      };
+      return labels[subject] || subject || '';
+    };
+
+    const getClubLabel = (club) => {
+      const labels = {
+        'volleyball': 'バレー',
+        'basketball': 'バスケット',
+        'tennis': 'テニス',
+        'soccer': 'サッカー',
+        'baseball': '野球',
+        'track_field': '陸上',
+        'art': '美術',
+        'brass_band': '吹奏楽',
+        'judo': '柔道',
+        'cycling': '自転車競技',
+        'golf': 'ゴルフ',
+        'table_tennis': '卓球',
+        'archery': '弓道',
+        'other': 'その他'
+      };
+      return labels[club] || club || '';
+    };
+
+    const getEventLabel = (event) => {
+      const labels = {
+        'school_trip': '修学旅行',
+        'class_match': 'クラスマッチ',
+        'monthly_address': '月頭訓話',
+        'sports_day': '運動会',
+        'field_training': '郊外研修・実習',
+        'culture_festival': '文化祭',
+        'lecture': '講演会',
+        'assembly': '全校・学年別集会',
+        'entrance_ceremony': '入学式',
+        'graduation_ceremony': '卒業式',
+        'student_assembly': '生徒総会',
+        'opening_ceremony': '始業式',
+        'closing_ceremony': '終業式',
+        'graduation_rehearsal': '卒業式予行',
+        'clean_operation': 'クリーン作戦',
+        'open_school': 'オープンスクール',
+        'other': 'その他'
+      };
+      return labels[event] || event || '';
     };
     
     const loadAttendanceRecords = async () => {
@@ -648,13 +1067,25 @@ export default {
       emptyMessage,
       columns,
       router,
+      showDetailModal,
+      selectedRecord,
+      viewDetails,
+      closeDetailModal,
       handleDelete,
       updateDateFilter,
       applyFilters,
       goToCreate,
       exportData,
       getCategoryLabel,
-      getTypeDetailLabel
+      getTypeDetailLabel,
+      getAbsenceReasonLabel,
+      getInjuryLocationLabel,
+      getInjuryPlaceLabel,
+      getSurgicalTreatmentLabel,
+      getOccurrenceTimeLabel,
+      getSubjectLabel,
+      getClubLabel,
+      getEventLabel
     };
   }
 };

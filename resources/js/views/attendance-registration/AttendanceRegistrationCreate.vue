@@ -477,7 +477,8 @@
                   </select>
                 </div>
                 
-                <div>
+                <!-- 種別 (内科・外科・その他の場合のみ) -->
+                <div v-if="visit.category && visit.category !== 'absence' && visit.category !== 'late'">
                   <label class="block text-sm font-medium text-gray-700 mb-1">
                     種別
                   </label>
@@ -509,23 +510,196 @@
                       <option value="other">その他</option>
                     </template>
                     <template v-else-if="visit.category === 'surgical'">
-                      <option value="cut">切り傷</option>
-                      <option value="bruise">打撲</option>
+                      <option value="scrape">すり傷</option>
+                      <option value="cut">切傷</option>
+                      <option value="stab">刺傷</option>
+                      <option value="bruise">打撲・打ち身</option>
                       <option value="sprain">捻挫</option>
-                      <option value="fracture">骨折</option>
+                      <option value="finger_jam">突き指</option>
+                      <option value="muscle_pain">筋肉痛</option>
+                      <option value="nosebleed">鼻出血</option>
+                      <option value="eye_pain">眼痛</option>
+                      <option value="back_pain">腰痛</option>
+                      <option value="fracture">骨折・脱臼</option>
+                      <option value="hives">じんましん</option>
+                      <option value="suppuration">化膿</option>
+                      <option value="ear_pain">耳痛</option>
+                      <option value="burn">火傷</option>
+                      <option value="insect_bite">虫さされ</option>
+                      <option value="nail_detachment">爪剥離</option>
+                      <option value="skin_condition">皮むけ・皮膚疾患</option>
+                      <option value="foot_pain">足痛</option>
+                      <option value="pain">痛み</option>
+                      <option value="concussion">脳震盪</option>
+                      <option value="wound_disinfection">傷口消毒</option>
+                      <option value="tooth_extraction">抜歯・歯が欠ける</option>
+                      <option value="other">その他</option>
                     </template>
                     <template v-else-if="visit.category === 'other'">
-                      <option value="counseling">相談</option>
-                      <option value="rest">休養</option>
+                      <option value="mental_counseling">こころ(相談)</option>
+                      <option value="physical_counseling">からだ(相談)</option>
+                      <option value="somehow">何となく</option>
+                      <option value="psychogenic">心因性</option>
+                      <option value="call_waiting">呼び出し・待機</option>
+                      <option value="measurement">計測等</option>
+                      <option value="infirmary_attendance">保健室登校</option>
+                      <option value="other_counseling">その他の相談</option>
+                      <option value="safe_place">居場所</option>
+                      <option value="observation">経過観察</option>
+                      <option value="infirmary_exam">保健室受験</option>
                       <option value="other">その他</option>
                     </template>
-                    <template v-else-if="visit.category === 'absence'">
-                      <option value="sick">病欠</option>
+                  </select>
+                </div>
+
+                <!-- 原因・理由 (欠席・遅刻他の場合) -->
+                <div v-if="visit.category === 'absence' || visit.category === 'late'">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    原因・理由
+                  </label>
+                  <select
+                    v-model="visit.absence_reason"
+                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  >
+                    <option value="">選択してください</option>
+                    <template v-if="visit.category === 'absence'">
+                      <option value="headache">頭痛</option>
+                      <option value="cold">かぜ症状</option>
+                      <option value="stomachache">腹痛</option>
+                      <option value="diarrhea">下痢</option>
+                      <option value="fever">発熱</option>
+                      <option value="sleep_deprivation">睡眠不足</option>
+                      <option value="asthma">喘息</option>
+                      <option value="nausea">吐き気・嘔吐</option>
+                      <option value="nephritis">腎炎</option>
+                      <option value="injury">外傷</option>
+                      <option value="ent_disease">耳鼻疾患</option>
+                      <option value="influenza">インフルエンザ</option>
+                      <option value="chickenpox">水痘</option>
+                      <option value="mumps">耳下腺炎</option>
+                      <option value="epidemic_keratitis">はやり目</option>
+                      <option value="other_infectious">その他の伝染病</option>
                       <option value="accident">事故欠</option>
-                      <option value="suspension">出停</option>
+                      <option value="unknown">理由不明</option>
                       <option value="mourning">忌引</option>
+                      <option value="housework">家事</option>
+                      <option value="poor_health">体調不良</option>
+                      <option value="hospitalization">入院</option>
+                      <option value="truancy">不登校</option>
+                      <option value="hospital_visit">通院</option>
+                      <option value="psychogenic">心因性</option>
+                      <option value="laziness">怠惰</option>
+                      <option value="appendicitis">虫垂炎</option>
+                      <option value="covid19">コロナウイルス感染症</option>
+                      <option value="orthostatic">起立性調節障害</option>
                       <option value="other">その他</option>
                     </template>
+                    <template v-else-if="visit.category === 'late'">
+                      <option value="hospital_visit">通院</option>
+                      <option value="poor_health">体調不良</option>
+                      <option value="carelessness">不注意</option>
+                      <option value="truancy_tendency">不登校傾向</option>
+                      <option value="counseling_room">相談室登校</option>
+                      <option value="other">その他</option>
+                    </template>
+                  </select>
+                </div>
+              </div>
+
+              <!-- 外科専用フィールド -->
+              <div v-if="visit.category === 'surgical'" class="space-y-4 bg-red-50 p-3 rounded-md">
+                <h4 class="text-sm font-medium text-gray-700">外科関連情報</h4>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <!-- 怪我の部位 -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                      怪我の部位
+                    </label>
+                    <select
+                      v-model="visit.injury_location"
+                      class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    >
+                      <option value="">選択してください</option>
+                      <option value="hand_wrist">手・手首</option>
+                      <option value="arm">腕</option>
+                      <option value="finger_hand">指（手）</option>
+                      <option value="finger_foot">指（足）</option>
+                      <option value="foot_ankle">足・足首</option>
+                      <option value="leg">脚</option>
+                      <option value="knee">膝</option>
+                      <option value="head">頭</option>
+                      <option value="face">顔</option>
+                      <option value="abdomen">腹</option>
+                      <option value="chest">胸</option>
+                      <option value="waist">腰</option>
+                      <option value="back_shoulder_neck">背中・肩・首</option>
+                      <option value="tooth">歯</option>
+                      <option value="eye">眼</option>
+                      <option value="ear">耳</option>
+                      <option value="nose">鼻</option>
+                      <option value="other">その他</option>
+                    </select>
+                  </div>
+
+                  <!-- 発生場所 -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                      発生場所
+                    </label>
+                    <select
+                      v-model="visit.injury_place"
+                      class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    >
+                      <option value="">選択してください</option>
+                      <option value="classroom">教室</option>
+                      <option value="hallway">廊下</option>
+                      <option value="stairs">階段</option>
+                      <option value="gymnasium">体育館</option>
+                      <option value="ground">グランド</option>
+                      <option value="schoolyard">校庭</option>
+                      <option value="music_room">音楽室</option>
+                      <option value="art_room">美術室</option>
+                      <option value="science_room">理科室</option>
+                      <option value="auditorium">講堂</option>
+                      <option value="home_economics">家庭科室</option>
+                      <option value="cooking_room">調理室</option>
+                      <option value="computer_room">コンピュータ室</option>
+                      <option value="commute_route">通学路</option>
+                      <option value="toilet">トイレ</option>
+                      <option value="unknown">不明</option>
+                      <option value="bicycle_parking">自転車置き場</option>
+                      <option value="martial_arts">格技室</option>
+                      <option value="practice_room">実習室</option>
+                      <option value="cafeteria">食堂</option>
+                      <option value="other">その他</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- 外科の処置 -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    処置
+                  </label>
+                  <select
+                    v-model="visit.surgical_treatment"
+                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  >
+                    <option value="">選択してください</option>
+                    <option value="disinfection">処置（消毒）</option>
+                    <option value="icing">処置（アイシング・湿布）</option>
+                    <option value="warm_compress">温罨法</option>
+                    <option value="foreign_removal">異物除去</option>
+                    <option value="parent_contact">保護者連絡</option>
+                    <option value="hospital_instruction">病院受診を指示</option>
+                    <option value="hospital_transport">病院へ搬送</option>
+                    <option value="observation">経過観察</option>
+                    <option value="rest_observation">経過観察（安静）</option>
+                    <option value="teacher_contact">担任・部活顧問連絡</option>
+                    <option value="bandaid">カットバン貼付</option>
+                    <option value="ointment">塗り薬</option>
+                    <option value="other">その他</option>
                   </select>
                 </div>
               </div>
@@ -1124,18 +1298,26 @@ export default {
         treatment_notes: '',
         breakfast: '', // 朝食
         bowel_movement: '', // 便通
-        treatment: '', // 処置
+        treatment: '', // 処置（内科）
+        absence_reason: '', // 原因・理由（欠席・遅刻他）
+        injury_location: '', // 怪我の部位（外科）
+        injury_place: '', // 発生場所（外科）
+        surgical_treatment: '', // 処置（外科）
         selectedClass: '',
         selected_student_number: ''
       });
     };
 
     const onCategoryChange = (index) => {
-      // 分類が変更されたら種別詳細と内科関連フィールドをリセット
+      // 分類が変更されたらすべての関連フィールドをリセット
       nursingVisits.value[index].type_detail = '';
+      nursingVisits.value[index].absence_reason = '';
       nursingVisits.value[index].breakfast = '';
       nursingVisits.value[index].bowel_movement = '';
       nursingVisits.value[index].treatment = '';
+      nursingVisits.value[index].injury_location = '';
+      nursingVisits.value[index].injury_place = '';
+      nursingVisits.value[index].surgical_treatment = '';
     };
     
     const removeNursingVisit = (index) => {
