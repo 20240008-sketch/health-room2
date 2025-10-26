@@ -336,202 +336,407 @@
             </div>
           </template>
 
-          <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
-                    時間
-                  </th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    学生情報（年・組・番・氏名・性）
-                  </th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
-                    分類
-                  </th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
-                    種別
-                  </th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40">
-                    発生時
-                  </th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    処置・原因・備考
-                  </th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
-                    操作
-                  </th>
-                </tr>
-              </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
-                <tr v-if="nursingVisits.length === 0">
-                  <td colspan="6" class="px-6 py-8 text-center text-sm text-gray-500">
-                    来室記録がありません。「来室記録追加」ボタンから記録を追加してください。
-                  </td>
-                </tr>
-                <tr v-for="(visit, index) in nursingVisits" :key="index">
-                  <td class="px-4 py-4 whitespace-nowrap">
+          <!-- Nursing Visit Records -->
+          <div class="space-y-4">
+            <div v-if="nursingVisits.length === 0" class="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+              <p class="text-sm text-gray-500">
+                来室記録がありません。「来室記録追加」ボタンから記録を追加してください。
+              </p>
+            </div>
+            
+            <!-- Individual Visit Card -->
+            <div
+              v-for="(visit, index) in nursingVisits"
+              :key="index"
+              class="bg-white border border-gray-300 rounded-lg p-4 space-y-4"
+            >
+              <!-- Card Header -->
+              <div class="flex items-center justify-between pb-3 border-b border-gray-200">
+                <h3 class="text-sm font-semibold text-gray-900">来室記録 #{{ index + 1 }}</h3>
+                <button
+                  @click="removeNursingVisit(index)"
+                  type="button"
+                  class="text-red-600 hover:text-red-900"
+                >
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Time -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    来室時間 <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="time"
+                    v-model="visit.time"
+                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  />
+                </div>
+              </div>
+
+              <!-- Student Information -->
+              <div class="space-y-3 bg-gray-50 p-3 rounded-md">
+                <h4 class="text-sm font-medium text-gray-700">学生情報</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">クラス <span class="text-red-500">*</span></label>
+                    <select
+                      v-model="visit.selectedClass"
+                      @change="onClassChange(index)"
+                      class="block w-full px-2 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    >
+                      <option value="">選択してください</option>
+                      <option
+                        v-for="cls in classes"
+                        :key="cls.id"
+                        :value="cls.class_id"
+                      >
+                        {{ cls.name }}
+                      </option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">
+                      出席番号 <span class="text-red-500">*</span>
+                    </label>
                     <input
-                      type="time"
-                      v-model="visit.time"
-                      class="block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      type="number"
+                      v-model.number="visit.selected_student_number"
+                      @input="onStudentNumberSelect(index)"
+                      class="block w-full px-2 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      :disabled="!visit.selectedClass"
+                      placeholder="番号を入力"
+                      min="1"
+                      max="99"
                     />
-                  </td>
-                  <td class="px-4 py-4">
-                    <div class="space-y-2">
-                      <!-- クラス選択 -->
-                      <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">クラス</label>
-                        <select
-                          v-model="visit.selectedClass"
-                          @change="onClassChange(index)"
-                          class="block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                        >
-                          <option value="">クラスを選択</option>
-                          <option
-                            v-for="cls in classes"
-                            :key="cls.id"
-                            :value="cls.class_id"
-                          >
-                            {{ cls.name }}
-                          </option>
-                        </select>
-                      </div>
-                      
-                      <!-- 出席番号入力 -->
-                      <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">
-                          出席番号
-                        </label>
-                        <input
-                          type="number"
-                          v-model.number="visit.selected_student_number"
-                          @input="onStudentNumberSelect(index)"
-                          class="block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                          :disabled="!visit.selectedClass"
-                          placeholder="番号を入力"
-                          min="1"
-                          max="99"
-                        />
-                        <p v-if="visit.selectedClass && visit.selected_student_number && !visit.student_id" class="mt-1 text-xs text-red-600">
-                          該当する学生が見つかりません
-                        </p>
-                      </div>
-                      
-                      <!-- 学生名表示 -->
-                      <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">
-                          学生名
-                        </label>
-                        <div class="block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm bg-gray-50 sm:text-sm min-h-[32px] flex items-center">
-                          <span v-if="visit.student_id" class="text-gray-900">
-                            {{ getStudentById(visit.student_id)?.name }} ({{ getGenderLabel(getStudentById(visit.student_id)?.gender) }})
-                          </span>
-                          <span v-else class="text-gray-400">
-                            クラスと出席番号を選択してください
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <!-- 選択された学生の表示 -->
-                      <div v-if="visit.student_id" class="p-2 bg-blue-50 rounded-md">
-                        <div class="flex items-center justify-between">
-                          <div class="text-xs">
-                            <span class="font-medium text-gray-900">{{ getStudentById(visit.student_id)?.name }}</span>
-                            <div class="text-gray-600 mt-1">
-                              {{ getStudentById(visit.student_id)?.schoolClass?.grade || '-' }}年 
-                              {{ getStudentById(visit.student_id)?.schoolClass?.name?.replace(/[0-9]年/, '') || '-' }}組 
-                              {{ getStudentById(visit.student_id)?.student_number || '-' }}番 
-                              ({{ getGenderLabel(getStudentById(visit.student_id)?.gender) }})
-                            </div>
-                          </div>
-                          <button
-                            @click="clearStudent(index)"
-                            type="button"
-                            class="ml-2 text-gray-400 hover:text-gray-600"
-                          >
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
-                        </div>
+                    <p v-if="visit.selectedClass && visit.selected_student_number && !visit.student_id" class="mt-1 text-xs text-red-600">
+                      該当する学生が見つかりません
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">学生名</label>
+                    <div class="block w-full px-2 py-2 border border-gray-300 rounded-md shadow-sm bg-white sm:text-sm min-h-[38px] flex items-center">
+                      <span v-if="visit.student_id" class="text-gray-900 font-medium">
+                        {{ getStudentById(visit.student_id)?.name }} ({{ getGenderLabel(getStudentById(visit.student_id)?.gender) }})
+                      </span>
+                      <span v-else class="text-gray-400 text-xs">
+                        クラスと出席番号を選択
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Selected Student Display -->
+                <div v-if="visit.student_id" class="p-2 bg-blue-50 rounded-md">
+                  <div class="flex items-center justify-between">
+                    <div class="text-xs">
+                      <span class="font-medium text-gray-900">{{ getStudentById(visit.student_id)?.name }}</span>
+                      <div class="text-gray-600 mt-1">
+                        {{ getStudentById(visit.student_id)?.schoolClass?.grade || '-' }}年 
+                        {{ getStudentById(visit.student_id)?.schoolClass?.name?.replace(/[0-9]年/, '') || '-' }}組 
+                        {{ getStudentById(visit.student_id)?.student_number || '-' }}番 
+                        ({{ getGenderLabel(getStudentById(visit.student_id)?.gender) }})
                       </div>
                     </div>
-                  </td>
-                  <td class="px-4 py-4 whitespace-nowrap">
-                    <select
-                      v-model="visit.category"
-                      @change="onCategoryChange(index)"
-                      class="block w-20 px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    >
-                      <option value="internal">内科</option>
-                      <option value="surgical">外科</option>
-                      <option value="other">その他</option>
-                      <option value="absence">欠席</option>
-                    </select>
-                  </td>
-                  <td class="px-4 py-4 whitespace-nowrap">
-                    <select
-                      v-model="visit.type_detail"
-                      class="block w-24 px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                      :disabled="!visit.category"
-                    >
-                      <option value="">選択</option>
-                      <template v-if="visit.category === 'internal'">
-                        <option value="stomachache">腹痛</option>
-                        <option value="headache">頭痛</option>
-                        <option value="fever">発熱</option>
-                        <option value="cough">咳</option>
-                      </template>
-                      <template v-else-if="visit.category === 'surgical'">
-                        <option value="cut">切り傷</option>
-                        <option value="bruise">打撲</option>
-                        <option value="sprain">捻挫</option>
-                        <option value="fracture">骨折</option>
-                      </template>
-                      <template v-else-if="visit.category === 'other'">
-                        <option value="counseling">相談</option>
-                        <option value="rest">休養</option>
-                        <option value="other">その他</option>
-                      </template>
-                      <template v-else-if="visit.category === 'absence'">
-                        <option value="sick">病欠</option>
-                        <option value="accident">事故欠</option>
-                        <option value="suspension">出停</option>
-                        <option value="mourning">忌引</option>
-                        <option value="other">その他</option>
-                      </template>
-                    </select>
-                  </td>
-                  <td class="px-4 py-4 whitespace-nowrap">
-                    <input
-                      type="text"
-                      v-model="visit.occurrence_time"
-                      class="block w-32 px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                      placeholder="休み時間"
-                    />
-                  </td>
-                  <td class="px-4 py-4">
-                    <input
-                      type="text"
-                      v-model="visit.treatment_notes"
-                      class="block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                      placeholder="体温37.2度、冷却、休養後下校"
-                    />
-                  </td>
-                  <td class="px-4 py-4 whitespace-nowrap">
                     <button
-                      @click="removeNursingVisit(index)"
-                      class="text-red-600 hover:text-red-900"
+                      @click="clearStudent(index)"
+                      type="button"
+                      class="ml-2 text-gray-400 hover:text-gray-600"
                     >
-                      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Category and Type -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    分類 <span class="text-red-500">*</span>
+                  </label>
+                  <select
+                    v-model="visit.category"
+                    @change="onCategoryChange(index)"
+                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  >
+                    <option value="">選択してください</option>
+                    <option value="internal">内科</option>
+                    <option value="surgical">外科</option>
+                    <option value="other">その他</option>
+                    <option value="absence">欠席</option>
+                    <option value="late">遅刻他</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    種別
+                  </label>
+                  <select
+                    v-model="visit.type_detail"
+                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    :disabled="!visit.category"
+                  >
+                    <option value="">選択してください</option>
+                    <template v-if="visit.category === 'internal'">
+                      <option value="headache">頭痛</option>
+                      <option value="stomachache">腹痛</option>
+                      <option value="stomach_pain">胃痛</option>
+                      <option value="cold">かぜ症状</option>
+                      <option value="diarrhea">下痢</option>
+                      <option value="nausea">吐き気・嘔吐</option>
+                      <option value="constipation">便秘</option>
+                      <option value="menstrual_pain">月経痛</option>
+                      <option value="toothache">歯痛</option>
+                      <option value="sleep_deprivation">睡眠不足</option>
+                      <option value="feeling_sick">気分が悪い</option>
+                      <option value="asthma">喘息</option>
+                      <option value="poor_health">体調不良</option>
+                      <option value="hyperventilation">過呼吸</option>
+                      <option value="fatigue">倦怠感</option>
+                      <option value="dizziness">めまい・貧血</option>
+                      <option value="seizure">発作</option>
+                      <option value="fever">発熱</option>
+                      <option value="other">その他</option>
+                    </template>
+                    <template v-else-if="visit.category === 'surgical'">
+                      <option value="cut">切り傷</option>
+                      <option value="bruise">打撲</option>
+                      <option value="sprain">捻挫</option>
+                      <option value="fracture">骨折</option>
+                    </template>
+                    <template v-else-if="visit.category === 'other'">
+                      <option value="counseling">相談</option>
+                      <option value="rest">休養</option>
+                      <option value="other">その他</option>
+                    </template>
+                    <template v-else-if="visit.category === 'absence'">
+                      <option value="sick">病欠</option>
+                      <option value="accident">事故欠</option>
+                      <option value="suspension">出停</option>
+                      <option value="mourning">忌引</option>
+                      <option value="other">その他</option>
+                    </template>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Occurrence Time and Conditional Fields -->
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    発生時
+                  </label>
+                  <select
+                    v-model="visit.occurrence_time"
+                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  >
+                    <option value="">選択してください</option>
+                    <option value="during_class">授業中</option>
+                    <option value="self_study">自習中</option>
+                    <option value="before_school">始業前</option>
+                    <option value="break">休憩時間</option>
+                    <option value="lunch">昼休み</option>
+                    <option value="cleaning">掃除中</option>
+                    <option value="after_school">放課後</option>
+                    <option value="club">部活動</option>
+                    <option value="commute">登下校中</option>
+                    <option value="event">行事</option>
+                    <option value="exam">試験中</option>
+                    <option value="supplementary">補習</option>
+                    <option value="extracurricular">課外授業</option>
+                    <option value="other">その他</option>
+                  </select>
+                </div>
+
+                <!-- Subject (shown when occurrence_time is class-related) -->
+                <div v-if="['during_class', 'exam', 'supplementary', 'extracurricular'].includes(visit.occurrence_time)">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    教科
+                  </label>
+                  <select
+                    v-model="visit.subject"
+                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  >
+                    <option value="">選択してください</option>
+                    <option value="japanese">国語</option>
+                    <option value="social_studies">社会</option>
+                    <option value="mathematics">数学</option>
+                    <option value="science">理科</option>
+                    <option value="english">英語</option>
+                    <option value="music">音楽</option>
+                    <option value="art">美術</option>
+                    <option value="technology">技術</option>
+                    <option value="home_economics">家庭科</option>
+                    <option value="health_pe">保健体育</option>
+                    <option value="lhr">LHR</option>
+                    <option value="integrated">総合</option>
+                    <option value="commerce">商業</option>
+                    <option value="welfare">福祉</option>
+                    <option value="industrial">工業</option>
+                    <option value="information">情報</option>
+                    <option value="research">課題研究</option>
+                    <option value="life_culture">生活教養</option>
+                    <option value="calligraphy">書道</option>
+                    <option value="elective">選択</option>
+                    <option value="childcare">保育</option>
+                    <option value="other">その他</option>
+                  </select>
+                </div>
+
+                <!-- Club (shown when occurrence_time is club) -->
+                <div v-if="visit.occurrence_time === 'club'">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    部活
+                  </label>
+                  <select
+                    v-model="visit.club"
+                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  >
+                    <option value="">選択してください</option>
+                    <option value="volleyball">バレー</option>
+                    <option value="basketball">バスケット</option>
+                    <option value="tennis">テニス</option>
+                    <option value="soccer">サッカー</option>
+                    <option value="baseball">野球</option>
+                    <option value="track_field">陸上</option>
+                    <option value="art">美術</option>
+                    <option value="brass_band">吹奏楽</option>
+                    <option value="judo">柔道</option>
+                    <option value="cycling">自転車競技</option>
+                    <option value="golf">ゴルフ</option>
+                    <option value="table_tennis">卓球</option>
+                    <option value="archery">弓道</option>
+                    <option value="other">その他</option>
+                  </select>
+                </div>
+
+                <!-- Event (shown when occurrence_time is event) -->
+                <div v-if="visit.occurrence_time === 'event'">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    行事
+                  </label>
+                  <select
+                    v-model="visit.event"
+                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  >
+                    <option value="">選択してください</option>
+                    <option value="school_trip">修学旅行</option>
+                    <option value="class_match">クラスマッチ</option>
+                    <option value="monthly_address">月頭訓話</option>
+                    <option value="sports_day">運動会</option>
+                    <option value="field_training">郊外研修・実習</option>
+                    <option value="culture_festival">文化祭</option>
+                    <option value="lecture">講演会</option>
+                    <option value="assembly">全校・学年別集会</option>
+                    <option value="entrance_ceremony">入学式</option>
+                    <option value="graduation_ceremony">卒業式</option>
+                    <option value="student_assembly">生徒総会</option>
+                    <option value="opening_ceremony">始業式</option>
+                    <option value="closing_ceremony">終業式</option>
+                    <option value="graduation_rehearsal">卒業式予行</option>
+                    <option value="clean_operation">クリーン作戦</option>
+                    <option value="open_school">オープンスクール</option>
+                    <option value="other">その他</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Internal Medicine Specific Fields -->
+              <div v-if="visit.category === 'internal'" class="space-y-4 bg-blue-50 p-3 rounded-md">
+                <h4 class="text-sm font-medium text-gray-700">内科関連情報</h4>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <!-- Breakfast -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                      朝食
+                    </label>
+                    <select
+                      v-model="visit.breakfast"
+                      class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    >
+                      <option value="">選択してください</option>
+                      <option value="ate">食べた</option>
+                      <option value="not_ate">食べていない</option>
+                      <option value="never_eat">いつも食べない</option>
+                      <option value="no_appetite">欲しくない</option>
+                      <option value="no_time">時間がない</option>
+                      <option value="other">その他</option>
+                    </select>
+                  </div>
+
+                  <!-- Bowel Movement -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                      便通
+                    </label>
+                    <select
+                      v-model="visit.bowel_movement"
+                      class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    >
+                      <option value="">選択してください</option>
+                      <option value="this_morning">今朝した</option>
+                      <option value="normal">普通便</option>
+                      <option value="diarrhea">下痢便</option>
+                      <option value="not_this_morning">今朝はしなかった</option>
+                      <option value="never_morning">朝はいつもしない</option>
+                      <option value="no_time">時間がなかった</option>
+                      <option value="constipated">便秘ぎみ</option>
+                      <option value="no_urge">便意がなかった</option>
+                      <option value="other">その他</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Treatment for Internal -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    処置
+                  </label>
+                  <select
+                    v-model="visit.treatment"
+                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  >
+                    <option value="">選択してください</option>
+                    <option value="observe_classroom">教室で観察</option>
+                    <option value="rest_infirmary">保健室で休養</option>
+                    <option value="health_consultation">健康相談</option>
+                    <option value="infirmary_attendance">保健室登校</option>
+                    <option value="infirmary_exam">保健室試験</option>
+                    <option value="safe_place">居場所</option>
+                    <option value="rest_early_leave">休養早退</option>
+                    <option value="early_leave">早退</option>
+                    <option value="hospital_visit">病院受診</option>
+                    <option value="separate_exam">別室受験</option>
+                    <option value="separate_move">別室移動</option>
+                    <option value="other">その他</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Notes -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  備考・原因・その他
+                </label>
+                <textarea
+                  v-model="visit.treatment_notes"
+                  rows="2"
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="体温37.2度、冷却、休養後下校"
+                ></textarea>
+              </div>
+            </div>
           </div>
 
           <div class="mt-6 flex justify-end space-x-3">
@@ -913,15 +1118,24 @@ export default {
         type: 'illness',
         type_detail: '',
         occurrence_time: '',
+        subject: '', // 教科
+        club: '', // 部活
+        event: '', // 行事
         treatment_notes: '',
+        breakfast: '', // 朝食
+        bowel_movement: '', // 便通
+        treatment: '', // 処置
         selectedClass: '',
         selected_student_number: ''
       });
     };
 
     const onCategoryChange = (index) => {
-      // 分類が変更されたら種別詳細をリセット
+      // 分類が変更されたら種別詳細と内科関連フィールドをリセット
       nursingVisits.value[index].type_detail = '';
+      nursingVisits.value[index].breakfast = '';
+      nursingVisits.value[index].bowel_movement = '';
+      nursingVisits.value[index].treatment = '';
     };
     
     const removeNursingVisit = (index) => {
