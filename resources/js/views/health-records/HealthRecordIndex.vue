@@ -1230,7 +1230,13 @@ export default {
     
     const getVisionGrade = (vision) => {
       if (!vision) return '-';
+      // 既にA/B/C/D形式の場合はそのまま返す
+      if (['A', 'B', 'C', 'D'].includes(vision.toUpperCase())) {
+        return vision.toUpperCase();
+      }
+      // 数値の場合は判定
       const v = parseFloat(vision);
+      if (isNaN(v)) return '-';
       if (v >= 1.0) return 'A';
       if (v >= 0.7) return 'B';
       if (v >= 0.3) return 'C';
