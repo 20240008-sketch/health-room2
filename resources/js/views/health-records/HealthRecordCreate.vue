@@ -874,38 +874,298 @@
 
                   <!-- Hearing Test -->
                   <div v-if="measurementItems.hearing_test" class="sm:col-span-2">
-                    <BaseInput
-                      type="textarea"
-                      v-model="form.hearing_test_result"
-                      label="聴力検査結果"
-                      placeholder="検査結果を入力してください"
-                      :error="errors.hearing_test_result"
-                      rows="2"
-                    />
+                    <h4 class="text-sm font-semibold text-gray-900 mb-3">聴力検査</h4>
+                    
+                    <div 
+                      v-for="(item, index) in form.hearing_test_items" 
+                      :key="index"
+                      class="border border-gray-300 rounded-lg p-4 mb-3 bg-white"
+                    >
+                      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        <!-- 検診結果 -->
+                        <div>
+                          <label class="block text-xs font-medium text-gray-700 mb-1">検診結果</label>
+                          <select
+                            v-model="item.exam_result"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="異常なし">異常なし</option>
+                            <option value="未検査">未検査</option>
+                            <option value="難聴の疑い・両">難聴の疑い・両</option>
+                            <option value="難聴の疑い・右">難聴の疑い・右</option>
+                            <option value="難聴の疑い・左">難聴の疑い・左</option>
+                          </select>
+                        </div>
+
+                        <!-- 診断結果 -->
+                        <div>
+                          <label class="block text-xs font-medium text-gray-700 mb-1">診断結果</label>
+                          <select
+                            v-model="item.diagnosis"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="異常なし">異常なし</option>
+                            <option value="感音難聴">感音難聴</option>
+                            <option value="伝音難聴">伝音難聴</option>
+                            <option value="難聴">難聴</option>
+                          </select>
+                        </div>
+
+                        <!-- 処置 -->
+                        <div>
+                          <label class="block text-xs font-medium text-gray-700 mb-1">処置</label>
+                          <select
+                            v-model="item.treatment"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="経過観察">経過観察</option>
+                            <option value="治療不要">治療不要</option>
+                            <option value="治療中">治療中</option>
+                            <option value="治療完了">治療完了</option>
+                            <option value="管理不要">管理不要</option>
+                            <option value="要管理Ａ">要管理Ａ</option>
+                            <option value="要管理Ｂ">要管理Ｂ</option>
+                            <option value="要管理Ｃ">要管理Ｃ</option>
+                            <option value="要管理Ｄ">要管理Ｄ</option>
+                            <option value="要管理Ｅ">要管理Ｅ</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <!-- 削除ボタン -->
+                      <div v-if="form.hearing_test_items.length > 1" class="mt-3 flex justify-end">
+                        <button
+                          @click="removeHearingTestItem(index)"
+                          type="button"
+                          class="text-sm text-red-600 hover:text-red-800"
+                        >
+                          削除
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- 追加ボタン -->
+                    <div 
+                      v-if="shouldShowAddHearingTestButton"
+                      class="mt-3"
+                    >
+                      <button
+                        @click="addHearingTestItem"
+                        type="button"
+                        class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        検診項目を追加
+                      </button>
+                    </div>
                   </div>
 
                   <!-- Tuberculosis Test -->
                   <div v-if="measurementItems.tuberculosis_test" class="sm:col-span-2">
-                    <BaseInput
-                      type="textarea"
-                      v-model="form.tuberculosis_test_result"
-                      label="結核検査結果"
-                      placeholder="検査結果を入力してください"
-                      :error="errors.tuberculosis_test_result"
-                      rows="2"
-                    />
+                    <h4 class="text-sm font-semibold text-gray-900 mb-3">結核検査</h4>
+                    
+                    <div 
+                      v-for="(item, index) in form.tuberculosis_test_items" 
+                      :key="index"
+                      class="border border-gray-300 rounded-lg p-4 mb-3 bg-white"
+                    >
+                      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        <!-- 検診結果 -->
+                        <div>
+                          <label class="block text-xs font-medium text-gray-700 mb-1">検診結果</label>
+                          <select
+                            v-model="item.exam_result"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="異常なし">異常なし</option>
+                            <option value="未検査">未検査</option>
+                            <option value="要検討者">要検討者</option>
+                            <option value="精密検査">精密検査</option>
+                          </select>
+                        </div>
+
+                        <!-- 診断結果 -->
+                        <div>
+                          <label class="block text-xs font-medium text-gray-700 mb-1">診断結果</label>
+                          <select
+                            v-model="item.diagnosis"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="異常なし">異常なし</option>
+                            <option value="経過観察">経過観察</option>
+                            <option value="精密検査">精密検査</option>
+                          </select>
+                        </div>
+
+                        <!-- 処置 -->
+                        <div>
+                          <label class="block text-xs font-medium text-gray-700 mb-1">処置</label>
+                          <select
+                            v-model="item.treatment"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="経過観察">経過観察</option>
+                            <option value="治療不要">治療不要</option>
+                            <option value="治療中">治療中</option>
+                            <option value="治療完了">治療完了</option>
+                            <option value="管理不要">管理不要</option>
+                            <option value="要管理Ａ">要管理Ａ</option>
+                            <option value="要管理Ｂ">要管理Ｂ</option>
+                            <option value="要管理Ｃ">要管理Ｃ</option>
+                            <option value="要管理Ｄ">要管理Ｄ</option>
+                            <option value="要管理Ｅ">要管理Ｅ</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <!-- 削除ボタン -->
+                      <div v-if="form.tuberculosis_test_items.length > 1" class="mt-3 flex justify-end">
+                        <button
+                          @click="removeTuberculosisTestItem(index)"
+                          type="button"
+                          class="text-sm text-red-600 hover:text-red-800"
+                        >
+                          削除
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- 追加ボタン -->
+                    <div 
+                      v-if="shouldShowAddTuberculosisTestButton"
+                      class="mt-3"
+                    >
+                      <button
+                        @click="addTuberculosisTestItem"
+                        type="button"
+                        class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        検診項目を追加
+                      </button>
+                    </div>
                   </div>
 
                   <!-- Urine Test -->
                   <div v-if="measurementItems.urine_test" class="sm:col-span-2">
-                    <BaseInput
-                      type="textarea"
-                      v-model="form.urine_test_result"
-                      label="尿検査結果"
-                      placeholder="検査結果を入力してください"
-                      :error="errors.urine_test_result"
-                      rows="2"
-                    />
+                    <h4 class="text-sm font-semibold text-gray-900 mb-3">尿検査</h4>
+                    
+                    <div 
+                      v-for="(item, index) in form.urine_test_items" 
+                      :key="index"
+                      class="border border-gray-300 rounded-lg p-4 mb-3 bg-white"
+                    >
+                      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        <!-- 検診結果 -->
+                        <div>
+                          <label class="block text-xs font-medium text-gray-700 mb-1">検診結果</label>
+                          <select
+                            v-model="item.exam_result"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="異常なし">異常なし</option>
+                            <option value="未検査">未検査</option>
+                            <option value="蛋白±">蛋白±</option>
+                            <option value="蛋白＋">蛋白＋</option>
+                            <option value="蛋白＋＋">蛋白＋＋</option>
+                            <option value="糖±">糖±</option>
+                            <option value="糖＋">糖＋</option>
+                            <option value="糖＋＋">糖＋＋</option>
+                            <option value="潜血±">潜血±</option>
+                            <option value="潜血＋">潜血＋</option>
+                            <option value="潜血＋＋">潜血＋＋</option>
+                            <option value="再検異常なし">再検異常なし</option>
+                          </select>
+                        </div>
+
+                        <!-- 診断結果 -->
+                        <div>
+                          <label class="block text-xs font-medium text-gray-700 mb-1">診断結果</label>
+                          <select
+                            v-model="item.diagnosis"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="異常なし">異常なし</option>
+                            <option value="蛋白尿">蛋白尿</option>
+                            <option value="糖尿">糖尿</option>
+                            <option value="血尿">血尿</option>
+                            <option value="起立性蛋白尿">起立性蛋白尿</option>
+                            <option value="慢性腎炎">慢性腎炎</option>
+                            <option value="ネフローゼ症候群">ネフローゼ症候群</option>
+                            <option value="急性腎炎">急性腎炎</option>
+                            <option value="IgA腎症">IgA腎症</option>
+                            <option value="糖尿病">糖尿病</option>
+                            <option value="尿路感染症">尿路感染症</option>
+                            <option value="膀胱炎">膀胱炎</option>
+                            <option value="腎盂腎炎">腎盂腎炎</option>
+                            <option value="尿路結石">尿路結石</option>
+                            <option value="腎機能障害">腎機能障害</option>
+                            <option value="その他">その他</option>
+                          </select>
+                        </div>
+
+                        <!-- 処置 -->
+                        <div>
+                          <label class="block text-xs font-medium text-gray-700 mb-1">処置</label>
+                          <select
+                            v-model="item.treatment"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="経過観察">経過観察</option>
+                            <option value="治療不要">治療不要</option>
+                            <option value="治療中">治療中</option>
+                            <option value="治療完了">治療完了</option>
+                            <option value="管理不要">管理不要</option>
+                            <option value="要管理Ａ">要管理Ａ</option>
+                            <option value="要管理Ｂ">要管理Ｂ</option>
+                            <option value="要管理Ｃ">要管理Ｃ</option>
+                            <option value="要管理Ｄ">要管理Ｄ</option>
+                            <option value="要管理Ｅ">要管理Ｅ</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <!-- 削除ボタン -->
+                      <div v-if="form.urine_test_items.length > 1" class="mt-3 flex justify-end">
+                        <button
+                          @click="removeUrineTestItem(index)"
+                          type="button"
+                          class="text-sm text-red-600 hover:text-red-800"
+                        >
+                          削除
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- 追加ボタン -->
+                    <div 
+                      v-if="shouldShowAddUrineTestButton"
+                      class="mt-3"
+                    >
+                      <button
+                        @click="addUrineTestItem"
+                        type="button"
+                        class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        検診項目を追加
+                      </button>
+                    </div>
                   </div>
 
                   <!-- ECG -->
@@ -917,7 +1177,7 @@
                       :key="index"
                       class="border border-gray-300 rounded-lg p-4 mb-3 bg-white"
                     >
-                      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         <!-- 検診結果 -->
                         <div>
                           <label class="block text-xs font-medium text-gray-700 mb-1">検診結果</label>
@@ -972,6 +1232,27 @@
                             <option value="洞性除脈">洞性除脈</option>
                             <option value="上室性期外収縮">上室性期外収縮</option>
                             <option value="洞性頻脈">洞性頻脈</option>
+                          </select>
+                        </div>
+
+                        <!-- 処置 -->
+                        <div>
+                          <label class="block text-xs font-medium text-gray-700 mb-1">処置</label>
+                          <select
+                            v-model="item.treatment"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="経過観察">経過観察</option>
+                            <option value="治療不要">治療不要</option>
+                            <option value="治療中">治療中</option>
+                            <option value="治療完了">治療完了</option>
+                            <option value="管理不要">管理不要</option>
+                            <option value="要管理Ａ">要管理Ａ</option>
+                            <option value="要管理Ｂ">要管理Ｂ</option>
+                            <option value="要管理Ｃ">要管理Ｃ</option>
+                            <option value="要管理Ｄ">要管理Ｄ</option>
+                            <option value="要管理Ｅ">要管理Ｅ</option>
                           </select>
                         </div>
                       </div>
@@ -1578,6 +1859,27 @@
                             <option value="洞性頻脈">洞性頻脈</option>
                           </select>
                         </div>
+
+                        <!-- 処置 -->
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 mb-1">処置</label>
+                          <select
+                            v-model="item.treatment"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="経過観察">経過観察</option>
+                            <option value="治療不要">治療不要</option>
+                            <option value="治療中">治療中</option>
+                            <option value="治療完了">治療完了</option>
+                            <option value="管理不要">管理不要</option>
+                            <option value="要管理Ａ">要管理Ａ</option>
+                            <option value="要管理Ｂ">要管理Ｂ</option>
+                            <option value="要管理Ｃ">要管理Ｃ</option>
+                            <option value="要管理Ｄ">要管理Ｄ</option>
+                            <option value="要管理Ｅ">要管理Ｅ</option>
+                          </select>
+                        </div>
                       </div>
                     </div>
 
@@ -1600,8 +1902,391 @@
                   </div>
                 </div>
                 
+                <!-- Card Format for Hearing Test -->
+                <div v-if="measurementItems.hearing_test" class="space-y-4">
+                  <h4 class="text-sm font-semibold text-gray-900">聴力検査 - 学生ごとの入力</h4>
+                  <div 
+                    v-for="student in selectedStudents" 
+                    :key="student.id"
+                    class="border border-gray-300 rounded-lg p-4 bg-white space-y-4"
+                  >
+                    <!-- Student Info Header -->
+                    <div class="bg-gray-50 p-3 rounded-md border-l-4 border-purple-500">
+                      <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                          <span class="text-gray-600">出席番号:</span>
+                          <span class="ml-2 font-semibold">{{ student.student_number }}</span>
+                        </div>
+                        <div>
+                          <span class="text-gray-600">氏名:</span>
+                          <span class="ml-2 font-semibold">{{ student.name }}</span>
+                        </div>
+                        <div class="col-span-2 text-xs text-gray-500">
+                          {{ getStudentClassDisplay(student) }} | {{ student.student_id }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Initialize data if needed -->
+                    <div v-if="!bulkMeasurements[student.id].hearing_test_items">
+                      {{ initializeHearingTestData(student.id) }}
+                    </div>
+
+                    <!-- 聴力検査項目（追加形式） -->
+                    <div
+                      v-for="(item, index) in bulkMeasurements[student.id].hearing_test_items"
+                      :key="index"
+                      class="border border-gray-200 rounded-md p-3 bg-gray-50 relative"
+                    >
+                      <!-- 削除ボタン -->
+                      <button
+                        v-if="bulkMeasurements[student.id].hearing_test_items.length > 1"
+                        @click="removeBulkHearingTestItem(student.id, index)"
+                        type="button"
+                        class="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                      >
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+
+                      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pr-8">
+                        <!-- 検診結果 -->
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 mb-1">検診結果</label>
+                          <select
+                            v-model="item.exam_result"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="異常なし">異常なし</option>
+                            <option value="未検査">未検査</option>
+                            <option value="難聴の疑い・両">難聴の疑い・両</option>
+                            <option value="難聴の疑い・右">難聴の疑い・右</option>
+                            <option value="難聴の疑い・左">難聴の疑い・左</option>
+                          </select>
+                        </div>
+
+                        <!-- 診断結果 -->
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 mb-1">診断結果</label>
+                          <select
+                            v-model="item.diagnosis"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="異常なし">異常なし</option>
+                            <option value="感音難聴">感音難聴</option>
+                            <option value="伝音難聴">伝音難聴</option>
+                            <option value="難聴">難聴</option>
+                          </select>
+                        </div>
+
+                        <!-- 処置 -->
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 mb-1">処置</label>
+                          <select
+                            v-model="item.treatment"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="経過観察">経過観察</option>
+                            <option value="治療不要">治療不要</option>
+                            <option value="治療中">治療中</option>
+                            <option value="治療完了">治療完了</option>
+                            <option value="管理不要">管理不要</option>
+                            <option value="要管理Ａ">要管理Ａ</option>
+                            <option value="要管理Ｂ">要管理Ｂ</option>
+                            <option value="要管理Ｃ">要管理Ｃ</option>
+                            <option value="要管理Ｄ">要管理Ｄ</option>
+                            <option value="要管理Ｅ">要管理Ｅ</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- 追加ボタン -->
+                    <div
+                      v-if="shouldShowAddBulkHearingTestButton(student.id)"
+                      class="mt-3"
+                    >
+                      <button
+                        @click="addBulkHearingTestItem(student.id)"
+                        type="button"
+                        class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                      >
+                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        検診項目を追加
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Card Format for Tuberculosis Test -->
+                <div v-if="measurementItems.tuberculosis_test" class="space-y-4">
+                  <h4 class="text-sm font-semibold text-gray-900">結核検査 - 学生ごとの入力</h4>
+                  <div 
+                    v-for="student in selectedStudents" 
+                    :key="student.id"
+                    class="border border-gray-300 rounded-lg p-4 bg-white space-y-4"
+                  >
+                    <!-- Student Info Header -->
+                    <div class="bg-gray-50 p-3 rounded-md border-l-4 border-yellow-500">
+                      <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                          <span class="text-gray-600">出席番号:</span>
+                          <span class="ml-2 font-semibold">{{ student.student_number }}</span>
+                        </div>
+                        <div>
+                          <span class="text-gray-600">氏名:</span>
+                          <span class="ml-2 font-semibold">{{ student.name }}</span>
+                        </div>
+                        <div class="col-span-2 text-xs text-gray-500">
+                          {{ getStudentClassDisplay(student) }} | {{ student.student_id }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Initialize data if needed -->
+                    <div v-if="!bulkMeasurements[student.id].tuberculosis_test_items">
+                      {{ initializeTuberculosisTestData(student.id) }}
+                    </div>
+
+                    <!-- 結核検査項目（追加形式） -->
+                    <div
+                      v-for="(item, index) in bulkMeasurements[student.id].tuberculosis_test_items"
+                      :key="index"
+                      class="border border-gray-200 rounded-md p-3 bg-gray-50 relative"
+                    >
+                      <!-- 削除ボタン -->
+                      <button
+                        v-if="bulkMeasurements[student.id].tuberculosis_test_items.length > 1"
+                        @click="removeBulkTuberculosisTestItem(student.id, index)"
+                        type="button"
+                        class="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                      >
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+
+                      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pr-8">
+                        <!-- 検診結果 -->
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 mb-1">検診結果</label>
+                          <select
+                            v-model="item.exam_result"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="異常なし">異常なし</option>
+                            <option value="未検査">未検査</option>
+                            <option value="要検討者">要検討者</option>
+                            <option value="精密検査">精密検査</option>
+                          </select>
+                        </div>
+
+                        <!-- 診断結果 -->
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 mb-1">診断結果</label>
+                          <select
+                            v-model="item.diagnosis"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="異常なし">異常なし</option>
+                            <option value="経過観察">経過観察</option>
+                            <option value="精密検査">精密検査</option>
+                          </select>
+                        </div>
+
+                        <!-- 処置 -->
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 mb-1">処置</label>
+                          <select
+                            v-model="item.treatment"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="経過観察">経過観察</option>
+                            <option value="治療不要">治療不要</option>
+                            <option value="治療中">治療中</option>
+                            <option value="治療完了">治療完了</option>
+                            <option value="管理不要">管理不要</option>
+                            <option value="要管理Ａ">要管理Ａ</option>
+                            <option value="要管理Ｂ">要管理Ｂ</option>
+                            <option value="要管理Ｃ">要管理Ｃ</option>
+                            <option value="要管理Ｄ">要管理Ｄ</option>
+                            <option value="要管理Ｅ">要管理Ｅ</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- 追加ボタン -->
+                    <div
+                      v-if="shouldShowAddBulkTuberculosisTestButton(student.id)"
+                      class="mt-3"
+                    >
+                      <button
+                        @click="addBulkTuberculosisTestItem(student.id)"
+                        type="button"
+                        class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+                      >
+                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        検診項目を追加
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Card Format for Urine Test -->
+                <div v-if="measurementItems.urine_test" class="space-y-4">
+                  <h4 class="text-sm font-semibold text-gray-900">尿検査 - 学生ごとの入力</h4>
+                  <div 
+                    v-for="student in selectedStudents" 
+                    :key="student.id"
+                    class="border border-gray-300 rounded-lg p-4 bg-white space-y-4"
+                  >
+                    <!-- Student Info Header -->
+                    <div class="bg-gray-50 p-3 rounded-md border-l-4 border-green-500">
+                      <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                          <span class="text-gray-600">出席番号:</span>
+                          <span class="ml-2 font-semibold">{{ student.student_number }}</span>
+                        </div>
+                        <div>
+                          <span class="text-gray-600">氏名:</span>
+                          <span class="ml-2 font-semibold">{{ student.name }}</span>
+                        </div>
+                        <div class="col-span-2 text-xs text-gray-500">
+                          {{ getStudentClassDisplay(student) }} | {{ student.student_id }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Initialize data if needed -->
+                    <div v-if="!bulkMeasurements[student.id].urine_test_items">
+                      {{ initializeUrineTestData(student.id) }}
+                    </div>
+
+                    <!-- 尿検査項目（追加形式） -->
+                    <div
+                      v-for="(item, index) in bulkMeasurements[student.id].urine_test_items"
+                      :key="index"
+                      class="border border-gray-200 rounded-md p-3 bg-gray-50 relative"
+                    >
+                      <!-- 削除ボタン -->
+                      <button
+                        v-if="bulkMeasurements[student.id].urine_test_items.length > 1"
+                        @click="removeBulkUrineTestItem(student.id, index)"
+                        type="button"
+                        class="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                      >
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+
+                      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pr-8">
+                        <!-- 検診結果 -->
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 mb-1">検診結果</label>
+                          <select
+                            v-model="item.exam_result"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="異常なし">異常なし</option>
+                            <option value="未検査">未検査</option>
+                            <option value="蛋白±">蛋白±</option>
+                            <option value="蛋白＋">蛋白＋</option>
+                            <option value="蛋白＋＋">蛋白＋＋</option>
+                            <option value="糖±">糖±</option>
+                            <option value="糖＋">糖＋</option>
+                            <option value="糖＋＋">糖＋＋</option>
+                            <option value="潜血±">潜血±</option>
+                            <option value="潜血＋">潜血＋</option>
+                            <option value="潜血＋＋">潜血＋＋</option>
+                            <option value="再検異常なし">再検異常なし</option>
+                          </select>
+                        </div>
+
+                        <!-- 診断結果 -->
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 mb-1">診断結果</label>
+                          <select
+                            v-model="item.diagnosis"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="異常なし">異常なし</option>
+                            <option value="蛋白尿">蛋白尿</option>
+                            <option value="糖尿">糖尿</option>
+                            <option value="血尿">血尿</option>
+                            <option value="起立性蛋白尿">起立性蛋白尿</option>
+                            <option value="慢性腎炎">慢性腎炎</option>
+                            <option value="ネフローゼ症候群">ネフローゼ症候群</option>
+                            <option value="急性腎炎">急性腎炎</option>
+                            <option value="IgA腎症">IgA腎症</option>
+                            <option value="糖尿病">糖尿病</option>
+                            <option value="尿路感染症">尿路感染症</option>
+                            <option value="膀胱炎">膀胱炎</option>
+                            <option value="腎盂腎炎">腎盂腎炎</option>
+                            <option value="尿路結石">尿路結石</option>
+                            <option value="腎機能障害">腎機能障害</option>
+                            <option value="その他">その他</option>
+                          </select>
+                        </div>
+
+                        <!-- 処置 -->
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 mb-1">処置</label>
+                          <select
+                            v-model="item.treatment"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="経過観察">経過観察</option>
+                            <option value="治療不要">治療不要</option>
+                            <option value="治療中">治療中</option>
+                            <option value="治療完了">治療完了</option>
+                            <option value="管理不要">管理不要</option>
+                            <option value="要管理Ａ">要管理Ａ</option>
+                            <option value="要管理Ｂ">要管理Ｂ</option>
+                            <option value="要管理Ｃ">要管理Ｃ</option>
+                            <option value="要管理Ｄ">要管理Ｄ</option>
+                            <option value="要管理Ｅ">要管理Ｅ</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- 追加ボタン -->
+                    <div
+                      v-if="shouldShowAddBulkUrineTestButton(student.id)"
+                      class="mt-3"
+                    >
+                      <button
+                        @click="addBulkUrineTestItem(student.id)"
+                        type="button"
+                        class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                      >
+                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        検診項目を追加
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
                 <!-- Table Format for Other Measurements -->
-                <div v-if="!measurementItems.ophthalmology && !measurementItems.otolaryngology && !measurementItems.internal_medicine && !measurementItems.ecg" class="overflow-x-auto border border-gray-300 rounded-lg">
+                <div v-if="!measurementItems.ophthalmology && !measurementItems.otolaryngology && !measurementItems.internal_medicine && !measurementItems.ecg && !measurementItems.hearing_test && !measurementItems.tuberculosis_test && !measurementItems.urine_test" class="overflow-x-auto border border-gray-300 rounded-lg">
                   <table class="min-w-full divide-y divide-gray-300">
                     <thead class="bg-gray-50">
                       <tr>
@@ -2097,15 +2782,37 @@ export default {
         }
       ],
       hearing_test_result: '',
+      hearing_test_items: [
+        {
+          exam_result: '',
+          diagnosis: '',
+          treatment: ''
+        }
+      ],
       tuberculosis_test_result: '',
+      tuberculosis_test_items: [
+        {
+          exam_result: '',
+          diagnosis: '',
+          treatment: ''
+        }
+      ],
       urine_test_result: '',
+      urine_test_items: [
+        {
+          exam_result: '',
+          diagnosis: '',
+          treatment: ''
+        }
+      ],
       ecg_result: '',
       ecg_exam_result: '',
       ecg_diagnosis: '',
       ecg_items: [
         {
           exam_result: '',
-          diagnosis: ''
+          diagnosis: '',
+          treatment: ''
         }
       ],
       notes: ''
@@ -2269,6 +2976,33 @@ export default {
       return lastItem.exam_result && lastItem.exam_result !== '異常なし' && lastItem.exam_result !== '未検診';
     });
     
+    // 聴力検査の追加ボタン表示判定
+    const shouldShowAddHearingTestButton = computed(() => {
+      if (!form.hearing_test_items || form.hearing_test_items.length === 0) {
+        return false;
+      }
+      const lastItem = form.hearing_test_items[form.hearing_test_items.length - 1];
+      return lastItem.exam_result && lastItem.exam_result !== '異常なし' && lastItem.exam_result !== '未検査';
+    });
+    
+    // 結核検査の追加ボタン表示判定
+    const shouldShowAddTuberculosisTestButton = computed(() => {
+      if (!form.tuberculosis_test_items || form.tuberculosis_test_items.length === 0) {
+        return false;
+      }
+      const lastItem = form.tuberculosis_test_items[form.tuberculosis_test_items.length - 1];
+      return lastItem.exam_result && lastItem.exam_result !== '異常なし' && lastItem.exam_result !== '未検査';
+    });
+    
+    // 尿検査の追加ボタン表示判定
+    const shouldShowAddUrineTestButton = computed(() => {
+      if (!form.urine_test_items || form.urine_test_items.length === 0) {
+        return false;
+      }
+      const lastItem = form.urine_test_items[form.urine_test_items.length - 1];
+      return lastItem.exam_result && lastItem.exam_result !== '異常なし' && lastItem.exam_result !== '未検査';
+    });
+    
     // Methods
     const searchStudents = () => {
       if (!studentSearch.value.trim()) {
@@ -2336,7 +3070,8 @@ export default {
     const addEcgItem = () => {
       form.ecg_items.push({
         exam_result: '',
-        diagnosis: ''
+        diagnosis: '',
+        treatment: ''
       });
     };
     
@@ -2344,6 +3079,54 @@ export default {
     const removeEcgItem = (index) => {
       if (form.ecg_items.length > 1) {
         form.ecg_items.splice(index, 1);
+      }
+    };
+    
+    // 聴力検査項目を追加
+    const addHearingTestItem = () => {
+      form.hearing_test_items.push({
+        exam_result: '',
+        diagnosis: '',
+        treatment: ''
+      });
+    };
+    
+    // 聴力検査項目を削除
+    const removeHearingTestItem = (index) => {
+      if (form.hearing_test_items.length > 1) {
+        form.hearing_test_items.splice(index, 1);
+      }
+    };
+    
+    // 結核検査項目を追加
+    const addTuberculosisTestItem = () => {
+      form.tuberculosis_test_items.push({
+        exam_result: '',
+        diagnosis: '',
+        treatment: ''
+      });
+    };
+    
+    // 結核検査項目を削除
+    const removeTuberculosisTestItem = (index) => {
+      if (form.tuberculosis_test_items.length > 1) {
+        form.tuberculosis_test_items.splice(index, 1);
+      }
+    };
+    
+    // 尿検査項目を追加
+    const addUrineTestItem = () => {
+      form.urine_test_items.push({
+        exam_result: '',
+        diagnosis: '',
+        treatment: ''
+      });
+    };
+    
+    // 尿検査項目を削除
+    const removeUrineTestItem = (index) => {
+      if (form.urine_test_items.length > 1) {
+        form.urine_test_items.splice(index, 1);
       }
     };
     
@@ -2429,7 +3212,8 @@ export default {
       }
       bulkMeasurements[studentId].ecg_items.push({
         exam_result: '',
-        diagnosis: ''
+        diagnosis: '',
+        treatment: ''
       });
     };
     
@@ -2450,6 +3234,93 @@ export default {
       return lastItem.exam_result && lastItem.exam_result !== '異常なし' && lastItem.exam_result !== '未検診';
     };
     
+    // 一括測定用：聴力検査項目を追加
+    const addBulkHearingTestItem = (studentId) => {
+      if (!bulkMeasurements[studentId].hearing_test_items) {
+        initializeHearingTestData(studentId);
+      }
+      bulkMeasurements[studentId].hearing_test_items.push({
+        exam_result: '',
+        diagnosis: '',
+        treatment: ''
+      });
+    };
+    
+    // 一括測定用：聴力検査項目を削除
+    const removeBulkHearingTestItem = (studentId, index) => {
+      if (bulkMeasurements[studentId].hearing_test_items.length > 1) {
+        bulkMeasurements[studentId].hearing_test_items.splice(index, 1);
+      }
+    };
+    
+    // 一括測定用：聴力検査追加ボタン表示判定
+    const shouldShowAddBulkHearingTestButton = (studentId) => {
+      const items = bulkMeasurements[studentId]?.hearing_test_items;
+      if (!items || items.length === 0) {
+        return false;
+      }
+      const lastItem = items[items.length - 1];
+      return lastItem.exam_result && lastItem.exam_result !== '異常なし' && lastItem.exam_result !== '未検査';
+    };
+    
+    // 一括測定用：結核検査項目を追加
+    const addBulkTuberculosisTestItem = (studentId) => {
+      if (!bulkMeasurements[studentId].tuberculosis_test_items) {
+        initializeTuberculosisTestData(studentId);
+      }
+      bulkMeasurements[studentId].tuberculosis_test_items.push({
+        exam_result: '',
+        diagnosis: '',
+        treatment: ''
+      });
+    };
+    
+    // 一括測定用：結核検査項目を削除
+    const removeBulkTuberculosisTestItem = (studentId, index) => {
+      if (bulkMeasurements[studentId].tuberculosis_test_items.length > 1) {
+        bulkMeasurements[studentId].tuberculosis_test_items.splice(index, 1);
+      }
+    };
+    
+    // 一括測定用：結核検査追加ボタン表示判定
+    const shouldShowAddBulkTuberculosisTestButton = (studentId) => {
+      const items = bulkMeasurements[studentId]?.tuberculosis_test_items;
+      if (!items || items.length === 0) {
+        return false;
+      }
+      const lastItem = items[items.length - 1];
+      return lastItem.exam_result && lastItem.exam_result !== '異常なし' && lastItem.exam_result !== '未検査';
+    };
+    
+    // 一括測定用：尿検査項目を追加
+    const addBulkUrineTestItem = (studentId) => {
+      if (!bulkMeasurements[studentId].urine_test_items) {
+        initializeUrineTestData(studentId);
+      }
+      bulkMeasurements[studentId].urine_test_items.push({
+        exam_result: '',
+        diagnosis: '',
+        treatment: ''
+      });
+    };
+    
+    // 一括測定用：尿検査項目を削除
+    const removeBulkUrineTestItem = (studentId, index) => {
+      if (bulkMeasurements[studentId].urine_test_items.length > 1) {
+        bulkMeasurements[studentId].urine_test_items.splice(index, 1);
+      }
+    };
+    
+    // 一括測定用：尿検査追加ボタン表示判定
+    const shouldShowAddBulkUrineTestButton = (studentId) => {
+      const items = bulkMeasurements[studentId]?.urine_test_items;
+      if (!items || items.length === 0) {
+        return false;
+      }
+      const lastItem = items[items.length - 1];
+      return lastItem.exam_result && lastItem.exam_result !== '異常なし' && lastItem.exam_result !== '未検査';
+    };
+    
     // 一括測定用：内科検診データを初期化
     const initializeInternalMedicineData = (studentId) => {
       if (!bulkMeasurements[studentId].internal_medicine_items) {
@@ -2466,7 +3337,44 @@ export default {
       if (!bulkMeasurements[studentId].ecg_items) {
         bulkMeasurements[studentId].ecg_items = [{
           exam_result: '',
-          diagnosis: ''
+          diagnosis: '',
+          treatment: ''
+        }];
+      }
+      return '';
+    };
+    
+    // 一括測定用：聴力検査データを初期化
+    const initializeHearingTestData = (studentId) => {
+      if (!bulkMeasurements[studentId].hearing_test_items) {
+        bulkMeasurements[studentId].hearing_test_items = [{
+          exam_result: '',
+          diagnosis: '',
+          treatment: ''
+        }];
+      }
+      return '';
+    };
+    
+    // 一括測定用：結核検査データを初期化
+    const initializeTuberculosisTestData = (studentId) => {
+      if (!bulkMeasurements[studentId].tuberculosis_test_items) {
+        bulkMeasurements[studentId].tuberculosis_test_items = [{
+          exam_result: '',
+          diagnosis: '',
+          treatment: ''
+        }];
+      }
+      return '';
+    };
+    
+    // 一括測定用：尿検査データを初期化
+    const initializeUrineTestData = (studentId) => {
+      if (!bulkMeasurements[studentId].urine_test_items) {
+        bulkMeasurements[studentId].urine_test_items = [{
+          exam_result: '',
+          diagnosis: '',
+          treatment: ''
         }];
       }
       return '';
@@ -2517,6 +3425,27 @@ export default {
           ophthalmology_exam_result: '',
           ophthalmology_diagnosis: '',
           ophthalmology_treatment: '',
+          hearing_test_items: [
+            {
+              exam_result: '',
+              diagnosis: '',
+              treatment: ''
+            }
+          ],
+          tuberculosis_test_items: [
+            {
+              exam_result: '',
+              diagnosis: '',
+              treatment: ''
+            }
+          ],
+          urine_test_items: [
+            {
+              exam_result: '',
+              diagnosis: '',
+              treatment: ''
+            }
+          ],
           bmi: null
         };
       }
@@ -2847,9 +3776,9 @@ export default {
             ophthalmology_treatment: measurementItems.ophthalmology && form.ophthalmology_treatment ? form.ophthalmology_treatment : null,
             otolaryngology_result: measurementItems.otolaryngology ? JSON.stringify(form.otolaryngology_items) : null,
             internal_medicine_result: measurementItems.internal_medicine ? JSON.stringify(form.internal_medicine_items) : null,
-            hearing_test_result: measurementItems.hearing_test && form.hearing_test_result ? form.hearing_test_result : null,
-            tuberculosis_test_result: measurementItems.tuberculosis_test && form.tuberculosis_test_result ? form.tuberculosis_test_result : null,
-            urine_test_result: measurementItems.urine_test && form.urine_test_result ? form.urine_test_result : null,
+            hearing_test_result: measurementItems.hearing_test ? JSON.stringify(form.hearing_test_items) : null,
+            tuberculosis_test_result: measurementItems.tuberculosis_test ? JSON.stringify(form.tuberculosis_test_items) : null,
+            urine_test_result: measurementItems.urine_test ? JSON.stringify(form.urine_test_items) : null,
             ecg_result: measurementItems.ecg ? JSON.stringify(form.ecg_items) : null,
             notes: form.notes || null
           };
@@ -2892,9 +3821,9 @@ export default {
               ophthalmology_treatment: measurementItems.ophthalmology && measurement.ophthalmology_treatment ? measurement.ophthalmology_treatment : null,
               otolaryngology_result: measurementItems.otolaryngology && measurement.otolaryngology_items ? JSON.stringify(measurement.otolaryngology_items) : null,
               internal_medicine_result: measurementItems.internal_medicine && measurement.internal_medicine_items ? JSON.stringify(measurement.internal_medicine_items) : null,
-              hearing_test_result: measurementItems.hearing_test && form.hearing_test_result ? form.hearing_test_result : null,
-              tuberculosis_test_result: measurementItems.tuberculosis_test && form.tuberculosis_test_result ? form.tuberculosis_test_result : null,
-              urine_test_result: measurementItems.urine_test && form.urine_test_result ? form.urine_test_result : null,
+              hearing_test_result: measurementItems.hearing_test && measurement.hearing_test_items ? JSON.stringify(measurement.hearing_test_items) : null,
+              tuberculosis_test_result: measurementItems.tuberculosis_test && measurement.tuberculosis_test_items ? JSON.stringify(measurement.tuberculosis_test_items) : null,
+              urine_test_result: measurementItems.urine_test && measurement.urine_test_items ? JSON.stringify(measurement.urine_test_items) : null,
               ecg_result: measurementItems.ecg && measurement.ecg_items ? JSON.stringify(measurement.ecg_items) : null,
               notes: form.notes || null
             };
@@ -3039,6 +3968,12 @@ export default {
       removeInternalMedicineItem,
       addEcgItem,
       removeEcgItem,
+      addHearingTestItem,
+      removeHearingTestItem,
+      addTuberculosisTestItem,
+      removeTuberculosisTestItem,
+      addUrineTestItem,
+      removeUrineTestItem,
       initializeOtolaryngologyItems,
       addBulkOtolaryngologyItem,
       removeBulkOtolaryngologyItem,
@@ -3049,10 +3984,25 @@ export default {
       addBulkEcgItem,
       removeBulkEcgItem,
       shouldShowAddBulkEcgButton,
+      addBulkHearingTestItem,
+      removeBulkHearingTestItem,
+      shouldShowAddBulkHearingTestButton,
+      addBulkTuberculosisTestItem,
+      removeBulkTuberculosisTestItem,
+      shouldShowAddBulkTuberculosisTestButton,
+      addBulkUrineTestItem,
+      removeBulkUrineTestItem,
+      shouldShowAddBulkUrineTestButton,
       shouldShowAddInternalMedicineButton,
       shouldShowAddEcgButton,
+      shouldShowAddHearingTestButton,
+      shouldShowAddTuberculosisTestButton,
+      shouldShowAddUrineTestButton,
       initializeInternalMedicineData,
       initializeEcgData,
+      initializeHearingTestData,
+      initializeTuberculosisTestData,
+      initializeUrineTestData,
       updateBulkSelection,
       toggleAllStudents,
       toggleStudentSelection,

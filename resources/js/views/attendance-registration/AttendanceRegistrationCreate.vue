@@ -15,7 +15,7 @@
     </template>
 
     <!-- Content -->
-    <div class="space-y-6">
+    <div class="space-y-4">
       <!-- Tab Navigation -->
       <div class="border-b border-gray-200">
         <nav class="-mb-px flex space-x-8" aria-label="Tabs">
@@ -52,7 +52,7 @@
           <h2 class="text-lg font-medium text-gray-900">基本情報</h2>
         </template>
 
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <!-- Date Selection (Scroll Type) -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -62,21 +62,21 @@
               <select
                 v-model="dateComponents.year"
                 @change="updateDate"
-                class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                class="block w-full px-2 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               >
                 <option v-for="y in years" :key="y" :value="y">{{ y }}年</option>
               </select>
               <select
                 v-model="dateComponents.month"
                 @change="updateDate"
-                class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                class="block w-full px-2 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               >
                 <option v-for="m in 12" :key="m" :value="m">{{ m }}月</option>
               </select>
               <select
                 v-model="dateComponents.day"
                 @change="updateDate"
-                class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                class="block w-full px-2 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               >
                 <option v-for="d in daysInMonth" :key="d" :value="d">{{ d }}日</option>
               </select>
@@ -209,7 +209,7 @@
                 <td class="px-6 py-4 whitespace-nowrap">
                   <select
                     v-model="attendanceData[student.id].status"
-                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    class="block w-full px-2 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     @change="onStatusChange(student.id)"
                   >
                     <option value="present">出席</option>
@@ -225,7 +225,7 @@
                     v-if="['late'].includes(attendanceData[student.id].status)"
                     type="time"
                     v-model="attendanceData[student.id].arrival_time"
-                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    class="block w-full px-2 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   />
                   <span v-else class="text-gray-400">-</span>
                 </td>
@@ -234,7 +234,7 @@
                     v-if="['early_leave'].includes(attendanceData[student.id].status)"
                     type="time"
                     v-model="attendanceData[student.id].departure_time"
-                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    class="block w-full px-2 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   />
                   <span v-else class="text-gray-400">-</span>
                 </td>
@@ -242,7 +242,7 @@
                   <input
                     type="text"
                     v-model="attendanceData[student.id].notes"
-                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    class="block w-full px-2 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     placeholder="備考"
                   />
                 </td>
@@ -288,7 +288,7 @@
             <h2 class="text-lg font-medium text-gray-900">基本情報</h2>
           </template>
 
-          <div class="grid grid-cols-1 gap-4 sm:grid-cols-1">
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-1">
             <!-- Date Selection (Scroll Type) -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -298,21 +298,21 @@
                 <select
                   v-model="nursingDateComponents.year"
                   @change="updateNursingDate"
-                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  class="block w-full px-2 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 >
                   <option v-for="y in years" :key="y" :value="y">{{ y }}年</option>
                 </select>
                 <select
                   v-model="nursingDateComponents.month"
                   @change="updateNursingDate"
-                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  class="block w-full px-2 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 >
                   <option v-for="m in 12" :key="m" :value="m">{{ m }}月</option>
                 </select>
                 <select
                   v-model="nursingDateComponents.day"
                   @change="updateNursingDate"
-                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  class="block w-full px-2 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 >
                   <option v-for="d in nursingDaysInMonth" :key="d" :value="d">{{ d }}日</option>
                 </select>
@@ -337,8 +337,8 @@
           </template>
 
           <!-- Nursing Visit Records -->
-          <div class="space-y-4">
-            <div v-if="nursingVisits.length === 0" class="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+          <div class="space-y-3">
+            <div v-if="nursingVisits.length === 0" class="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
               <p class="text-sm text-gray-500">
                 来室記録がありません。「来室記録追加」ボタンから記録を追加してください。
               </p>
@@ -348,10 +348,10 @@
             <div
               v-for="(visit, index) in nursingVisits"
               :key="index"
-              class="bg-white border border-gray-300 rounded-lg p-4 space-y-4"
+              class="bg-white border border-gray-300 rounded-lg p-3 space-y-3"
             >
               <!-- Card Header -->
-              <div class="flex items-center justify-between pb-3 border-b border-gray-200">
+              <div class="flex items-center justify-between pb-2 border-b border-gray-200">
                 <h3 class="text-sm font-semibold text-gray-900">来室記録 #{{ index + 1 }}</h3>
                 <button
                   @click="removeNursingVisit(index)"
@@ -365,7 +365,7 @@
               </div>
 
               <!-- Time -->
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">
                     来室時間 <span class="text-red-500">*</span>
@@ -373,7 +373,7 @@
                   <input
                     type="time"
                     v-model="visit.time"
-                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    class="block w-full px-2 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   />
                 </div>
               </div>
@@ -458,7 +458,7 @@
               </div>
 
               <!-- Category and Type -->
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">
                     分類 <span class="text-red-500">*</span>
@@ -466,7 +466,7 @@
                   <select
                     v-model="visit.category"
                     @change="onCategoryChange(index)"
-                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    class="block w-full px-2 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   >
                     <option value="">選択してください</option>
                     <option value="internal">内科</option>
@@ -484,7 +484,7 @@
                   </label>
                   <select
                     v-model="visit.type_detail"
-                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    class="block w-full px-2 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     :disabled="!visit.category"
                   >
                     <option value="">選択してください</option>
@@ -559,7 +559,7 @@
                   </label>
                   <select
                     v-model="visit.absence_reason"
-                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    class="block w-full px-2 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   >
                     <option value="">選択してください</option>
                     <template v-if="visit.category === 'absence'">
@@ -607,10 +607,10 @@
               </div>
 
               <!-- 外科専用フィールド -->
-              <div v-if="visit.category === 'surgical'" class="space-y-4 bg-red-50 p-3 rounded-md">
+              <div v-if="visit.category === 'surgical'" class="space-y-2 bg-red-50 p-2.5 rounded-md">
                 <h4 class="text-sm font-medium text-gray-700">外科関連情報</h4>
                 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <!-- 怪我の部位 -->
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -618,7 +618,7 @@
                     </label>
                     <select
                       v-model="visit.injury_location"
-                      class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      class="block w-full px-2 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     >
                       <option value="">選択してください</option>
                       <option value="hand_wrist">手・手首</option>
@@ -649,7 +649,7 @@
                     </label>
                     <select
                       v-model="visit.injury_place"
-                      class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      class="block w-full px-2 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     >
                       <option value="">選択してください</option>
                       <option value="classroom">教室</option>
@@ -684,7 +684,7 @@
                   </label>
                   <select
                     v-model="visit.surgical_treatment"
-                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    class="block w-full px-2 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   >
                     <option value="">選択してください</option>
                     <option value="disinfection">処置（消毒）</option>
@@ -705,14 +705,14 @@
               </div>
 
               <!-- Occurrence Time and Conditional Fields -->
-              <div class="space-y-4">
+              <div class="space-y-2">
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">
                     発生時
                   </label>
                   <select
                     v-model="visit.occurrence_time"
-                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    class="block w-full px-2 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   >
                     <option value="">選択してください</option>
                     <option value="during_class">授業中</option>
@@ -739,7 +739,7 @@
                   </label>
                   <select
                     v-model="visit.subject"
-                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    class="block w-full px-2 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   >
                     <option value="">選択してください</option>
                     <option value="japanese">国語</option>
@@ -774,7 +774,7 @@
                   </label>
                   <select
                     v-model="visit.club"
-                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    class="block w-full px-2 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   >
                     <option value="">選択してください</option>
                     <option value="volleyball">バレー</option>
@@ -801,7 +801,7 @@
                   </label>
                   <select
                     v-model="visit.event"
-                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    class="block w-full px-2 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   >
                     <option value="">選択してください</option>
                     <option value="school_trip">修学旅行</option>
@@ -826,10 +826,10 @@
               </div>
 
               <!-- Internal Medicine Specific Fields -->
-              <div v-if="visit.category === 'internal'" class="space-y-4 bg-blue-50 p-3 rounded-md">
+              <div v-if="visit.category === 'internal'" class="space-y-2 bg-blue-50 p-2.5 rounded-md">
                 <h4 class="text-sm font-medium text-gray-700">内科関連情報</h4>
                 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <!-- Breakfast -->
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -837,7 +837,7 @@
                     </label>
                     <select
                       v-model="visit.breakfast"
-                      class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      class="block w-full px-2 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     >
                       <option value="">選択してください</option>
                       <option value="ate">食べた</option>
@@ -856,7 +856,7 @@
                     </label>
                     <select
                       v-model="visit.bowel_movement"
-                      class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      class="block w-full px-2 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     >
                       <option value="">選択してください</option>
                       <option value="this_morning">今朝した</option>
@@ -879,7 +879,7 @@
                   </label>
                   <select
                     v-model="visit.treatment"
-                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    class="block w-full px-2 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   >
                     <option value="">選択してください</option>
                     <option value="observe_classroom">教室で観察</option>
@@ -906,14 +906,14 @@
                 <textarea
                   v-model="visit.treatment_notes"
                   rows="2"
-                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  class="block w-full px-2 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   placeholder="体温37.2度、冷却、休養後下校"
                 ></textarea>
               </div>
             </div>
           </div>
 
-          <div class="mt-6 flex justify-end space-x-3">
+          <div class="mt-4 flex justify-end space-x-3">
             <BaseButton
               variant="secondary"
               @click="cancel"
