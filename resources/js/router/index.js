@@ -239,6 +239,21 @@ const routes = [
       ]
     }
   },
+  {
+    path: '/health-records/print',
+    name: 'health-records.print',
+    component: () => import('@/views/health-records/HealthRecordPrint.vue'),
+    meta: {
+      requiresAuth: true,
+      layout: AppLayout,
+      title: '結果印刷',
+      breadcrumb: [
+        { name: 'ホーム', href: '/dashboard' },
+        { name: '健康記録', href: '/health-records' },
+        { name: '結果印刷', href: '/health-records/print' }
+      ]
+    }
+  },
   
   // Attendance Registration routes
   // 出席記録一覧 - 削除

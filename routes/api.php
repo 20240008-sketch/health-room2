@@ -64,6 +64,8 @@ Route::group(['prefix' => 'v1'], function () {
         ->name('health-records.statistics');
     Route::get('health-records/statistics-pdf', [HealthRecordController::class, 'statisticsPdf'])
         ->name('health-records.statistics-pdf');
+    Route::get('health-records/print-results/{studentId}', [HealthRecordController::class, 'getPrintResults'])
+        ->name('health-records.print-results');
     
     // 健康記録管理API
     Route::apiResource('health-records', HealthRecordController::class);

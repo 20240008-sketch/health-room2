@@ -172,6 +172,11 @@ export default {
               name: '統計・分析',
               href: '/health-records/statistics',
               routeName: 'health-records.statistics'
+            },
+            {
+              name: '結果印刷',
+              href: '/health-records/print',
+              routeName: 'health-records.print'
             }
           ]
         },

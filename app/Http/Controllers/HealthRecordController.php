@@ -1042,4 +1042,38 @@ class HealthRecordController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Get student's health records for printing exam results
+     */
+    public function getPrintResults(string $studentId): JsonResponse
+    {
+        try {
+            $student = Student::with(['schoolClass', 'healthRecords' => function($query) {
+                $query->orderBy('year', 'desc')->orderBy('measured_date', 'desc');
+            }])->where('student_id', $studentId)->firstOrFail();
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'student' => $student,
+                    'health_records' => $student->healthRecords
+                ],
+                'message' => '印刷用データを取得しました'
+            ]);
+
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => '指定された生徒が見つかりません'
+            ], 404);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'データの取得に失敗しました',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
