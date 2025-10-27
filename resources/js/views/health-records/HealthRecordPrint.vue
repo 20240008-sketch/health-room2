@@ -160,6 +160,7 @@ import BaseButton from '@/components/base/BaseButton.vue';
 import { useHealthRecordStore } from '@/stores/healthRecord';
 import { useNotificationStore } from '@/stores/notification';
 import OtolaryngologyPrintForm from './print-forms/OtolaryngologyPrintForm.vue';
+import VisionTestPrintForm from '@/components/print-forms/VisionTestPrintForm.vue';
 
 // Icons
 const ChevronRightIcon = {
@@ -184,7 +185,8 @@ export default {
     ChevronRightIcon,
     MagnifyingGlassIcon,
     PrinterIcon,
-    OtolaryngologyPrintForm
+    OtolaryngologyPrintForm,
+    VisionTestPrintForm
   },
   setup() {
     const router = useRouter();
@@ -198,6 +200,7 @@ export default {
     const studentHealthRecords = ref([]);
 
     const examTypes = [
+      { value: 'vision_test', label: '視力検査' },
       { value: 'ophthalmology', label: '眼科検診' },
       { value: 'otolaryngology', label: '耳鼻科検診' },
       { value: 'internal_medicine', label: '内科検診' },
@@ -217,6 +220,8 @@ export default {
 
     const currentPrintComponent = computed(() => {
       switch (selectedExam.value) {
+        case 'vision_test':
+          return VisionTestPrintForm;
         case 'otolaryngology':
           return OtolaryngologyPrintForm;
         default:
