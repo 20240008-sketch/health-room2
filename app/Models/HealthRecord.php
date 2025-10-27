@@ -35,15 +35,12 @@ class HealthRecord extends Model
     ];
 
     protected $casts = [
-        'student_id' => 'integer',
         'year' => 'integer',
         'measured_date' => 'date',
         'height' => 'decimal:2',
         'weight' => 'decimal:2',
-        'vision_left' => 'decimal:2',
-        'vision_right' => 'decimal:2',
-        'vision_left_corrected' => 'decimal:2',
-        'vision_right_corrected' => 'decimal:2',
+        'hearing_left' => 'boolean',
+        'hearing_right' => 'boolean',
     ];
 
     protected $appends = ['bmi', 'academic_year'];

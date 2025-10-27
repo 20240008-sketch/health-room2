@@ -214,6 +214,70 @@
               />
               <span class="ml-2 text-sm text-gray-700">BMI</span>
             </label>
+            <label class="inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="displayColumns.exams"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
+              />
+              <span class="ml-2 text-sm text-gray-700">検査結果</span>
+            </label>
+            <label class="inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="displayColumns.ophthalmology"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
+              />
+              <span class="ml-2 text-sm text-gray-700">眼科検診</span>
+            </label>
+            <label class="inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="displayColumns.otolaryngology"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
+              />
+              <span class="ml-2 text-sm text-gray-700">耳鼻科検診</span>
+            </label>
+            <label class="inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="displayColumns.internal_medicine"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
+              />
+              <span class="ml-2 text-sm text-gray-700">内科検診</span>
+            </label>
+            <label class="inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="displayColumns.hearing_test"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
+              />
+              <span class="ml-2 text-sm text-gray-700">聴力検査</span>
+            </label>
+            <label class="inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="displayColumns.tuberculosis_test"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
+              />
+              <span class="ml-2 text-sm text-gray-700">結核検査</span>
+            </label>
+            <label class="inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="displayColumns.urine_test"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
+              />
+              <span class="ml-2 text-sm text-gray-700">尿検査</span>
+            </label>
+            <label class="inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="displayColumns.ecg"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
+              />
+              <span class="ml-2 text-sm text-gray-700">心電図</span>
+            </label>
           </div>
         </div>
       </div>
@@ -433,6 +497,54 @@
           <template #cell(bmi)="{ item }">
             <div class="text-sm font-medium" :class="getBMIColor(item.bmi)">
               {{ item.bmi || '-' }}
+            </div>
+          </template>
+
+          <template #cell(exams)="{ item }">
+            <div class="text-xs text-gray-600">
+              {{ getExamSummary(item) }}
+            </div>
+          </template>
+
+          <template #cell(ophthalmology)="{ item }">
+            <div class="text-xs text-gray-600">
+              {{ getExamDetail(item, 'ophthalmology') }}
+            </div>
+          </template>
+
+          <template #cell(otolaryngology)="{ item }">
+            <div class="text-xs text-gray-600">
+              {{ getExamDetail(item, 'otolaryngology') }}
+            </div>
+          </template>
+
+          <template #cell(internal_medicine)="{ item }">
+            <div class="text-xs text-gray-600">
+              {{ getExamDetail(item, 'internal_medicine') }}
+            </div>
+          </template>
+
+          <template #cell(hearing_test)="{ item }">
+            <div class="text-xs text-gray-600">
+              {{ getExamDetail(item, 'hearing_test') }}
+            </div>
+          </template>
+
+          <template #cell(tuberculosis_test)="{ item }">
+            <div class="text-xs text-gray-600">
+              {{ getExamDetail(item, 'tuberculosis_test') }}
+            </div>
+          </template>
+
+          <template #cell(urine_test)="{ item }">
+            <div class="text-xs text-gray-600">
+              {{ getExamDetail(item, 'urine_test') }}
+            </div>
+          </template>
+
+          <template #cell(ecg)="{ item }">
+            <div class="text-xs text-gray-600">
+              {{ getExamDetail(item, 'ecg') }}
             </div>
           </template>
 
@@ -809,7 +921,15 @@ export default {
       height: true,
       weight: true,
       vision: true,
-      bmi: true
+      bmi: true,
+      exams: false, // 検査結果まとめ
+      ophthalmology: false, // 眼科検診
+      otolaryngology: false, // 耳鼻科検診
+      internal_medicine: false, // 内科検診
+      hearing_test: false, // 聴力検査
+      tuberculosis_test: false, // 結核検査
+      urine_test: false, // 尿検査
+      ecg: false // 心電図
     });
     
     // Computed
@@ -1011,6 +1131,30 @@ export default {
       if (displayColumns.bmi) {
         dataColumns.push({ key: 'bmi', title: 'BMI', label: 'BMI', sortable: true, width: '80px' });
       }
+      if (displayColumns.exams) {
+        dataColumns.push({ key: 'exams', title: '検査結果', label: '検査結果', width: '150px' });
+      }
+      if (displayColumns.ophthalmology) {
+        dataColumns.push({ key: 'ophthalmology', title: '眼科検診', label: '眼科検診', width: '120px' });
+      }
+      if (displayColumns.otolaryngology) {
+        dataColumns.push({ key: 'otolaryngology', title: '耳鼻科検診', label: '耳鼻科検診', width: '120px' });
+      }
+      if (displayColumns.internal_medicine) {
+        dataColumns.push({ key: 'internal_medicine', title: '内科検診', label: '内科検診', width: '120px' });
+      }
+      if (displayColumns.hearing_test) {
+        dataColumns.push({ key: 'hearing_test', title: '聴力検査', label: '聴力検査', width: '120px' });
+      }
+      if (displayColumns.tuberculosis_test) {
+        dataColumns.push({ key: 'tuberculosis_test', title: '結核検査', label: '結核検査', width: '120px' });
+      }
+      if (displayColumns.urine_test) {
+        dataColumns.push({ key: 'urine_test', title: '尿検査', label: '尿検査', width: '120px' });
+      }
+      if (displayColumns.ecg) {
+        dataColumns.push({ key: 'ecg', title: '心電図', label: '心電図', width: '120px' });
+      }
       
       return [
         ...baseColumns,
@@ -1121,6 +1265,181 @@ export default {
       if (rightIsCorrected) rightVision = '矯' + rightVision;
       
       return leftVision + '/' + rightVision;
+    };
+    
+    const getExamSummary = (record) => {
+      if (!record) return '-';
+      
+      const exams = [];
+      
+      // 眼科検診
+      if (record.ophthalmology_exam_result || record.ophthalmology_diagnosis) {
+        exams.push('眼科');
+      }
+      
+      // 耳鼻科検診
+      if (record.otolaryngology_result) {
+        try {
+          const items = JSON.parse(record.otolaryngology_result);
+          if (items && items.length > 0) exams.push('耳鼻科');
+        } catch (e) {}
+      }
+      
+      // 内科検診
+      if (record.internal_medicine_result) {
+        try {
+          const items = JSON.parse(record.internal_medicine_result);
+          if (items && items.length > 0) exams.push('内科');
+        } catch (e) {}
+      }
+      
+      // 聴力検査
+      if (record.hearing_test_result) {
+        try {
+          const items = JSON.parse(record.hearing_test_result);
+          if (items && items.length > 0) exams.push('聴力');
+        } catch (e) {}
+      }
+      
+      // 結核検査
+      if (record.tuberculosis_test_result) {
+        try {
+          const items = JSON.parse(record.tuberculosis_test_result);
+          if (items && items.length > 0) exams.push('結核');
+        } catch (e) {}
+      }
+      
+      // 尿検査
+      if (record.urine_test_result) {
+        try {
+          const items = JSON.parse(record.urine_test_result);
+          if (items && items.length > 0) exams.push('尿');
+        } catch (e) {}
+      }
+      
+      // 心電図
+      if (record.ecg_result) {
+        try {
+          const items = JSON.parse(record.ecg_result);
+          if (items && items.length > 0) exams.push('心電図');
+        } catch (e) {}
+      }
+      
+      return exams.length > 0 ? exams.join(', ') : '-';
+    };
+    
+    const getExamDetail = (record, examType) => {
+      if (!record) return '-';
+      
+      try {
+        switch (examType) {
+          case 'ophthalmology':
+            if (record.ophthalmology_exam_result || record.ophthalmology_diagnosis || record.ophthalmology_treatment) {
+              const parts = [];
+              if (record.ophthalmology_exam_result) parts.push(record.ophthalmology_exam_result);
+              if (record.ophthalmology_diagnosis) parts.push(record.ophthalmology_diagnosis);
+              if (record.ophthalmology_treatment) parts.push(record.ophthalmology_treatment);
+              return parts.join(' / ');
+            }
+            return '-';
+          
+          case 'otolaryngology':
+            if (record.otolaryngology_result) {
+              const items = JSON.parse(record.otolaryngology_result);
+              if (items && items.length > 0) {
+                return items.map(item => {
+                  const parts = [];
+                  if (item.exam_result) parts.push(item.exam_result);
+                  if (item.diagnosis) parts.push(item.diagnosis);
+                  if (item.treatment) parts.push(item.treatment);
+                  return parts.join(' / ');
+                }).join('; ');
+              }
+            }
+            return '-';
+          
+          case 'internal_medicine':
+            if (record.internal_medicine_result) {
+              const items = JSON.parse(record.internal_medicine_result);
+              if (items && items.length > 0) {
+                return items.map(item => {
+                  const parts = [];
+                  if (item.exam_result) parts.push(item.exam_result);
+                  if (item.diagnosis) parts.push(item.diagnosis);
+                  if (item.treatment) parts.push(item.treatment);
+                  return parts.join(' / ');
+                }).join('; ');
+              }
+            }
+            return '-';
+          
+          case 'hearing_test':
+            if (record.hearing_test_result) {
+              const items = JSON.parse(record.hearing_test_result);
+              if (items && items.length > 0) {
+                return items.map(item => {
+                  const parts = [];
+                  if (item.exam_result) parts.push(item.exam_result);
+                  if (item.diagnosis) parts.push(item.diagnosis);
+                  if (item.treatment) parts.push(item.treatment);
+                  return parts.join(' / ');
+                }).join('; ');
+              }
+            }
+            return '-';
+          
+          case 'tuberculosis_test':
+            if (record.tuberculosis_test_result) {
+              const items = JSON.parse(record.tuberculosis_test_result);
+              if (items && items.length > 0) {
+                return items.map(item => {
+                  const parts = [];
+                  if (item.exam_result) parts.push(item.exam_result);
+                  if (item.diagnosis) parts.push(item.diagnosis);
+                  if (item.treatment) parts.push(item.treatment);
+                  return parts.join(' / ');
+                }).join('; ');
+              }
+            }
+            return '-';
+          
+          case 'urine_test':
+            if (record.urine_test_result) {
+              const items = JSON.parse(record.urine_test_result);
+              if (items && items.length > 0) {
+                return items.map(item => {
+                  const parts = [];
+                  if (item.exam_result) parts.push(item.exam_result);
+                  if (item.diagnosis) parts.push(item.diagnosis);
+                  if (item.treatment) parts.push(item.treatment);
+                  return parts.join(' / ');
+                }).join('; ');
+              }
+            }
+            return '-';
+          
+          case 'ecg':
+            if (record.ecg_result) {
+              const items = JSON.parse(record.ecg_result);
+              if (items && items.length > 0) {
+                return items.map(item => {
+                  const parts = [];
+                  if (item.exam_result) parts.push(item.exam_result);
+                  if (item.diagnosis) parts.push(item.diagnosis);
+                  if (item.treatment) parts.push(item.treatment);
+                  return parts.join(' / ');
+                }).join('; ');
+              }
+            }
+            return '-';
+          
+          default:
+            return '-';
+        }
+      } catch (e) {
+        console.error(`Error parsing ${examType}:`, e);
+        return '-';
+      }
     };
     
     const exportToPDF = async () => {
@@ -1301,6 +1620,8 @@ export default {
       getBMIColor,
       getVisionGrade,
       formatVision,
+      getExamSummary,
+      getExamDetail,
       exportToPDF,
       exportHealthRecords,
       showDeleteModal,

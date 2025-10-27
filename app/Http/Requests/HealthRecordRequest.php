@@ -240,7 +240,14 @@ class HealthRecordRequest extends FormRequest
                                 !empty($this->vision_left) || 
                                 !empty($this->vision_right) ||
                                 !empty($this->vision_left_corrected) ||
-                                !empty($this->vision_right_corrected);
+                                !empty($this->vision_right_corrected) ||
+                                !empty($this->ophthalmology_result) ||
+                                !empty($this->otolaryngology_result) ||
+                                !empty($this->internal_medicine_result) ||
+                                !empty($this->hearing_test_result) ||
+                                !empty($this->tuberculosis_test_result) ||
+                                !empty($this->urine_test_result) ||
+                                !empty($this->ecg_result);
             
             if (!$hasAnyMeasurement) {
                 $validator->addFailure('height', 'no_measurements', '少なくとも1つの測定項目を入力してください。');

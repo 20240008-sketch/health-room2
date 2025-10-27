@@ -231,6 +231,180 @@
         </div>
       </BaseCard>
 
+      <!-- 検査結果 -->
+      <BaseCard v-if="hasExamResults">
+        <template #header>
+          <h2 class="text-lg font-medium text-gray-900">検査結果</h2>
+        </template>
+        
+        <div class="space-y-6">
+          <!-- 眼科検診 -->
+          <div v-if="record.ophthalmology_exam_result || record.ophthalmology_diagnosis || record.ophthalmology_treatment || record.ophthalmology_result" class="border-l-4 border-blue-500 pl-4">
+            <h3 class="text-sm font-semibold text-gray-900 mb-3">眼科検診</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div v-if="record.ophthalmology_exam_result">
+                <div class="text-xs text-gray-500 mb-1">検診結果</div>
+                <div class="text-sm font-medium text-gray-900">{{ record.ophthalmology_exam_result }}</div>
+              </div>
+              <div v-if="record.ophthalmology_diagnosis">
+                <div class="text-xs text-gray-500 mb-1">診断結果</div>
+                <div class="text-sm font-medium text-gray-900">{{ record.ophthalmology_diagnosis }}</div>
+              </div>
+              <div v-if="record.ophthalmology_treatment">
+                <div class="text-xs text-gray-500 mb-1">処置</div>
+                <div class="text-sm font-medium text-gray-900">{{ record.ophthalmology_treatment }}</div>
+              </div>
+            </div>
+            <div v-if="record.ophthalmology_result" class="mt-3">
+              <div class="text-xs text-gray-500 mb-1">備考</div>
+              <div class="text-sm text-gray-700 bg-gray-50 rounded p-2">{{ record.ophthalmology_result }}</div>
+            </div>
+          </div>
+
+          <!-- 耳鼻科検診 -->
+          <div v-if="otolaryngologyItems.length > 0" class="border-l-4 border-green-500 pl-4">
+            <h3 class="text-sm font-semibold text-gray-900 mb-3">耳鼻科検診</h3>
+            <div class="space-y-3">
+              <div v-for="(item, index) in otolaryngologyItems" :key="index" class="bg-gray-50 rounded p-3">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+                  <div v-if="item.category">
+                    <div class="text-xs text-gray-500 mb-1">分類</div>
+                    <div class="text-sm font-medium text-gray-900">{{ item.category }}</div>
+                  </div>
+                  <div v-if="item.exam_result">
+                    <div class="text-xs text-gray-500 mb-1">検診結果</div>
+                    <div class="text-sm font-medium text-gray-900">{{ item.exam_result }}</div>
+                  </div>
+                  <div v-if="item.findings">
+                    <div class="text-xs text-gray-500 mb-1">所見</div>
+                    <div class="text-sm font-medium text-gray-900">{{ item.findings }}</div>
+                  </div>
+                  <div v-if="item.diagnosis">
+                    <div class="text-xs text-gray-500 mb-1">診断結果</div>
+                    <div class="text-sm font-medium text-gray-900">{{ item.diagnosis }}</div>
+                  </div>
+                  <div v-if="item.treatment">
+                    <div class="text-xs text-gray-500 mb-1">処置</div>
+                    <div class="text-sm font-medium text-gray-900">{{ item.treatment }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 内科検診 -->
+          <div v-if="internalMedicineItems.length > 0" class="border-l-4 border-purple-500 pl-4">
+            <h3 class="text-sm font-semibold text-gray-900 mb-3">内科検診</h3>
+            <div class="space-y-3">
+              <div v-for="(item, index) in internalMedicineItems" :key="index" class="bg-gray-50 rounded p-3">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div v-if="item.exam_result">
+                    <div class="text-xs text-gray-500 mb-1">検診結果</div>
+                    <div class="text-sm font-medium text-gray-900">{{ item.exam_result }}</div>
+                  </div>
+                  <div v-if="item.diagnosis">
+                    <div class="text-xs text-gray-500 mb-1">診断結果</div>
+                    <div class="text-sm font-medium text-gray-900">{{ item.diagnosis }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 聴力検査 -->
+          <div v-if="hearingTestItems.length > 0" class="border-l-4 border-indigo-500 pl-4">
+            <h3 class="text-sm font-semibold text-gray-900 mb-3">聴力検査</h3>
+            <div class="space-y-3">
+              <div v-for="(item, index) in hearingTestItems" :key="index" class="bg-gray-50 rounded p-3">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div v-if="item.exam_result">
+                    <div class="text-xs text-gray-500 mb-1">検診結果</div>
+                    <div class="text-sm font-medium text-gray-900">{{ item.exam_result }}</div>
+                  </div>
+                  <div v-if="item.diagnosis">
+                    <div class="text-xs text-gray-500 mb-1">診断結果</div>
+                    <div class="text-sm font-medium text-gray-900">{{ item.diagnosis }}</div>
+                  </div>
+                  <div v-if="item.treatment">
+                    <div class="text-xs text-gray-500 mb-1">処置</div>
+                    <div class="text-sm font-medium text-gray-900">{{ item.treatment }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 結核検査 -->
+          <div v-if="tuberculosisTestItems.length > 0" class="border-l-4 border-yellow-500 pl-4">
+            <h3 class="text-sm font-semibold text-gray-900 mb-3">結核検査</h3>
+            <div class="space-y-3">
+              <div v-for="(item, index) in tuberculosisTestItems" :key="index" class="bg-gray-50 rounded p-3">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div v-if="item.exam_result">
+                    <div class="text-xs text-gray-500 mb-1">検診結果</div>
+                    <div class="text-sm font-medium text-gray-900">{{ item.exam_result }}</div>
+                  </div>
+                  <div v-if="item.diagnosis">
+                    <div class="text-xs text-gray-500 mb-1">診断結果</div>
+                    <div class="text-sm font-medium text-gray-900">{{ item.diagnosis }}</div>
+                  </div>
+                  <div v-if="item.treatment">
+                    <div class="text-xs text-gray-500 mb-1">処置</div>
+                    <div class="text-sm font-medium text-gray-900">{{ item.treatment }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 尿検査 -->
+          <div v-if="urineTestItems.length > 0" class="border-l-4 border-pink-500 pl-4">
+            <h3 class="text-sm font-semibold text-gray-900 mb-3">尿検査</h3>
+            <div class="space-y-3">
+              <div v-for="(item, index) in urineTestItems" :key="index" class="bg-gray-50 rounded p-3">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div v-if="item.exam_result">
+                    <div class="text-xs text-gray-500 mb-1">検診結果</div>
+                    <div class="text-sm font-medium text-gray-900">{{ item.exam_result }}</div>
+                  </div>
+                  <div v-if="item.diagnosis">
+                    <div class="text-xs text-gray-500 mb-1">診断結果</div>
+                    <div class="text-sm font-medium text-gray-900">{{ item.diagnosis }}</div>
+                  </div>
+                  <div v-if="item.treatment">
+                    <div class="text-xs text-gray-500 mb-1">処置</div>
+                    <div class="text-sm font-medium text-gray-900">{{ item.treatment }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 心電図 -->
+          <div v-if="ecgItems.length > 0" class="border-l-4 border-red-500 pl-4">
+            <h3 class="text-sm font-semibold text-gray-900 mb-3">心電図</h3>
+            <div class="space-y-3">
+              <div v-for="(item, index) in ecgItems" :key="index" class="bg-gray-50 rounded p-3">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div v-if="item.exam_result">
+                    <div class="text-xs text-gray-500 mb-1">検診結果</div>
+                    <div class="text-sm font-medium text-gray-900">{{ item.exam_result }}</div>
+                  </div>
+                  <div v-if="item.diagnosis">
+                    <div class="text-xs text-gray-500 mb-1">診断結果</div>
+                    <div class="text-sm font-medium text-gray-900">{{ item.diagnosis }}</div>
+                  </div>
+                  <div v-if="item.treatment">
+                    <div class="text-xs text-gray-500 mb-1">処置</div>
+                    <div class="text-sm font-medium text-gray-900">{{ item.treatment }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </BaseCard>
+
       <!-- Growth Chart -->
       <BaseCard v-if="growthHistory.length > 1">
         <template #header>
@@ -725,6 +899,77 @@ export default {
       return record.value.bmi - peerComparison.value.averageBMI;
     });
     
+    // 検査結果のパース
+    const otolaryngologyItems = computed(() => {
+      if (!record.value?.otolaryngology_result) return [];
+      try {
+        return JSON.parse(record.value.otolaryngology_result);
+      } catch (e) {
+        return [];
+      }
+    });
+    
+    const internalMedicineItems = computed(() => {
+      if (!record.value?.internal_medicine_result) return [];
+      try {
+        return JSON.parse(record.value.internal_medicine_result);
+      } catch (e) {
+        return [];
+      }
+    });
+    
+    const hearingTestItems = computed(() => {
+      if (!record.value?.hearing_test_result) return [];
+      try {
+        return JSON.parse(record.value.hearing_test_result);
+      } catch (e) {
+        return [];
+      }
+    });
+    
+    const tuberculosisTestItems = computed(() => {
+      if (!record.value?.tuberculosis_test_result) return [];
+      try {
+        return JSON.parse(record.value.tuberculosis_test_result);
+      } catch (e) {
+        return [];
+      }
+    });
+    
+    const urineTestItems = computed(() => {
+      if (!record.value?.urine_test_result) return [];
+      try {
+        return JSON.parse(record.value.urine_test_result);
+      } catch (e) {
+        return [];
+      }
+    });
+    
+    const ecgItems = computed(() => {
+      if (!record.value?.ecg_result) return [];
+      try {
+        return JSON.parse(record.value.ecg_result);
+      } catch (e) {
+        return [];
+      }
+    });
+    
+    // 検査結果があるかどうか
+    const hasExamResults = computed(() => {
+      return !!(
+        record.value?.ophthalmology_exam_result ||
+        record.value?.ophthalmology_diagnosis ||
+        record.value?.ophthalmology_treatment ||
+        record.value?.ophthalmology_result ||
+        otolaryngologyItems.value.length > 0 ||
+        internalMedicineItems.value.length > 0 ||
+        hearingTestItems.value.length > 0 ||
+        tuberculosisTestItems.value.length > 0 ||
+        urineTestItems.value.length > 0 ||
+        ecgItems.value.length > 0
+      );
+    });
+    
     const relatedRecords = computed(() => {
       return studentRecords.value
         .filter(r => r.id !== record.value?.id)
@@ -916,6 +1161,13 @@ export default {
       heightDiffFromAverage,
       weightDiffFromAverage,
       bmiDiffFromAverage,
+      otolaryngologyItems,
+      internalMedicineItems,
+      hearingTestItems,
+      tuberculosisTestItems,
+      urineTestItems,
+      ecgItems,
+      hasExamResults,
       relatedRecords,
       formatDate,
       formatShortDate,

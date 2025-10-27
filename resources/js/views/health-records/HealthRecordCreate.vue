@@ -3673,8 +3673,23 @@ export default {
       }
       
       // 少なくとも1つの測定項目が選択されているか確認
-      if (!measurementItems.height && !measurementItems.weight && !measurementItems.vision) {
-        notificationStore.showError('少なくとも1つの測定項目を選択してください');
+      const hasAnyMeasurement = measurementItems.height || 
+                                measurementItems.weight || 
+                                measurementItems.vision ||
+                                measurementItems.ophthalmology ||
+                                measurementItems.otolaryngology ||
+                                measurementItems.internal_medicine ||
+                                measurementItems.hearing_test ||
+                                measurementItems.tuberculosis_test ||
+                                measurementItems.urine_test ||
+                                measurementItems.ecg;
+      
+      if (!hasAnyMeasurement) {
+        notificationStore.addNotification({
+          type: 'warning',
+          title: '測定項目未選択',
+          message: '少なくとも1つの測定項目を選択してください'
+        });
         return false;
       }
       
