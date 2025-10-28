@@ -124,11 +124,7 @@ export default {
     }
   },
   mounted() {
-    console.log('VisionTestPrintForm mounted');
-    console.log('Student:', this.student);
-    console.log('Health Record:', this.healthRecord);
-    console.log('Vision Right:', this.healthRecord?.vision_right);
-    console.log('Vision Left:', this.healthRecord?.vision_left);
+    console.log('VisionTestPrintForm mounted - Health Record:', this.healthRecord);
   },
   methods: {
     getCourseName() {

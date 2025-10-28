@@ -198,6 +198,7 @@ export default {
     const selectedStudent = ref(null);
     const selectedExam = ref('');
     const studentHealthRecords = ref([]);
+    const latestHealthRecord = ref(null);
 
     const examTypes = [
       { value: 'vision_test', label: '視力検査' },
@@ -209,14 +210,6 @@ export default {
       { value: 'urine_test', label: '尿検査' },
       { value: 'ecg', label: '心電図' }
     ];
-
-    // 最新の健康記録を取得（年度が最も新しいもの）
-    const latestHealthRecord = computed(() => {
-      if (!studentHealthRecords.value.length) return null;
-      // 年度でソートして最新のものを返す
-      const sorted = [...studentHealthRecords.value].sort((a, b) => b.year - a.year);
-      return sorted[0];
-    });
 
     const currentPrintComponent = computed(() => {
       switch (selectedExam.value) {
@@ -281,7 +274,18 @@ export default {
           studentHealthRecords.value = data.data.health_records;
           
           console.log('Student health records:', studentHealthRecords.value);
-          console.log('Available years:', availableYears.value);
+          console.log('Student health records length:', studentHealthRecords.value.length);
+          console.log('Student health records array:', JSON.stringify(studentHealthRecords.value, null, 2));
+          
+          // 最新の健康記録を設定（年度が最も新しいもの）
+          if (studentHealthRecords.value.length > 0) {
+            const sorted = [...studentHealthRecords.value].sort((a, b) => b.year - a.year);
+            latestHealthRecord.value = sorted[0];
+            console.log('Latest health record set to:', latestHealthRecord.value);
+          } else {
+            latestHealthRecord.value = null;
+            console.log('No health records, latestHealthRecord set to null');
+          }
           
           if (studentHealthRecords.value.length === 0) {
             notificationStore.addNotification({
@@ -305,6 +309,7 @@ export default {
       selectedStudent.value = null;
       selectedExam.value = '';
       studentHealthRecords.value = [];
+      latestHealthRecord.value = null;
       searchResults.value = [];
       studentSearch.value = '';
     };
