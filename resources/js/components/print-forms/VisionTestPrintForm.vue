@@ -3,13 +3,15 @@
     <div class="header">
       <div class="header-top">
         <span>※保護者様</span>
-        <span class="date-right">令和　　年　　月</span>
+        <span class="date-right">
+          令和<input type="text" v-model="formData.year" class="input-year" />年<input type="text" v-model="formData.month" class="input-month" />月
+        </span>
       </div>
       <div class="school-info">
         <span class="school-name">誠英高等学校</span>
       </div>
       <div class="principal">
-        <span>校長　　　　　　　　　　</span>
+        <span>校長　<input type="text" v-model="formData.principal" class="input-principal" /></span>
       </div>
     </div>
 
@@ -72,13 +74,21 @@
       <tbody>
         <tr>
           <td class="label">右</td>
-          <td class="empty-cell"></td>
-          <td class="empty-cell"></td>
+          <td class="input-cell">
+            <input type="text" v-model="formData.followup_vision_right" class="vision-input" />
+          </td>
+          <td class="input-cell">
+            <input type="text" v-model="formData.followup_vision_right_corrected" class="vision-input" />
+          </td>
         </tr>
         <tr>
           <td class="label">左</td>
-          <td class="empty-cell"></td>
-          <td class="empty-cell"></td>
+          <td class="input-cell">
+            <input type="text" v-model="formData.followup_vision_left" class="vision-input" />
+          </td>
+          <td class="input-cell">
+            <input type="text" v-model="formData.followup_vision_left_corrected" class="vision-input" />
+          </td>
         </tr>
       </tbody>
     </table>
@@ -87,23 +97,30 @@
       <div class="diagnosis-item">
         （１）屈折異常<br>
         <div class="ml-16">
-          調節緊張症　・近視　・近視性乱視　・遠視　・遠視性乱視<br>
-          その他　（　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　）
+          <label><input type="checkbox" v-model="formData.diagnosis.adjustment" /> 調節緊張症</label>　・
+          <label><input type="checkbox" v-model="formData.diagnosis.myopia" /> 近視</label>　・
+          <label><input type="checkbox" v-model="formData.diagnosis.myopic_astigmatism" /> 近視性乱視</label>　・
+          <label><input type="checkbox" v-model="formData.diagnosis.hyperopia" /> 遠視</label>　・
+          <label><input type="checkbox" v-model="formData.diagnosis.hyperopic_astigmatism" /> 遠視性乱視</label><br>
+          その他　（<input type="text" v-model="formData.diagnosis.other_refraction" class="input-long" />）
         </div>
       </div>
 
       <div class="diagnosis-item">
-        （２）眼位異常　　　（　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　）
+        （２）眼位異常　　　（<input type="text" v-model="formData.eye_position_abnormality" class="input-long" />）
       </div>
 
       <div class="diagnosis-item">
         （３）指導又は治療方針<br>
         <div class="ml-16">
-          １　　経過観察　　　　　２　　点眼治療<br>
+          <label><input type="radio" v-model="formData.treatment_policy" value="observation" name="treatment" /> １　　経過観察</label>　　　　　
+          <label><input type="radio" v-model="formData.treatment_policy" value="eye_drops" name="treatment" /> ２　　点眼治療</label><br>
           <br>
-          ３　　眼科・コンタクト処方　　（　新規　・　更新　）<br>
+          <label><input type="radio" v-model="formData.treatment_policy" value="prescription" name="treatment" /> ３　　眼科・コンタクト処方</label>　　（
+          <label><input type="radio" v-model="formData.prescription_type" value="new" name="prescription" /> 新規</label>　・　
+          <label><input type="radio" v-model="formData.prescription_type" value="renewal" name="prescription" /> 更新</label>　）<br>
           <br>
-          ４　　その他　（　　　　　　　　　　　　　　　　　　　　　　）
+          <label><input type="radio" v-model="formData.treatment_policy" value="other" name="treatment" /> ４　　その他</label>　（<input type="text" v-model="formData.other_treatment" class="input-long" />）
         </div>
       </div>
     </div>
@@ -111,6 +128,8 @@
 </template>
 
 <script>
+import { ref, reactive } from 'vue';
+
 export default {
   name: 'VisionTestPrintForm',
   props: {
@@ -122,6 +141,33 @@ export default {
       type: Object,
       required: true
     }
+  },
+  setup() {
+    const formData = reactive({
+      year: '',
+      month: '',
+      principal: '',
+      followup_vision_right: '',
+      followup_vision_right_corrected: '',
+      followup_vision_left: '',
+      followup_vision_left_corrected: '',
+      diagnosis: {
+        adjustment: false,
+        myopia: false,
+        myopic_astigmatism: false,
+        hyperopia: false,
+        hyperopic_astigmatism: false,
+        other_refraction: ''
+      },
+      eye_position_abnormality: '',
+      treatment_policy: '',
+      prescription_type: '',
+      other_treatment: ''
+    });
+
+    return {
+      formData
+    };
   },
   mounted() {
     console.log('VisionTestPrintForm mounted - Health Record:', this.healthRecord);
@@ -254,6 +300,57 @@ export default {
   min-width: 100px;
 }
 
+.vision-table .input-cell {
+  padding: 4px;
+}
+
+.vision-input {
+  width: 100%;
+  text-align: center;
+  border: none;
+  border-bottom: 1px solid #333;
+  font-size: 12pt;
+  padding: 4px;
+  background: transparent;
+}
+
+.input-year,
+.input-month {
+  width: 40px;
+  border: none;
+  border-bottom: 1px solid #333;
+  text-align: center;
+  font-size: 11pt;
+  background: transparent;
+}
+
+.input-principal {
+  width: 200px;
+  border: none;
+  border-bottom: 1px solid #333;
+  font-size: 11pt;
+  background: transparent;
+}
+
+.input-long {
+  width: 400px;
+  border: none;
+  border-bottom: 1px solid #333;
+  font-size: 10pt;
+  background: transparent;
+}
+
+.diagnosis-section label {
+  cursor: pointer;
+  user-select: none;
+}
+
+.diagnosis-section input[type="checkbox"],
+.diagnosis-section input[type="radio"] {
+  margin-right: 4px;
+  cursor: pointer;
+}
+
 .vision-table .empty-cell {
   height: 35px;
   background-color: #fafafa;
@@ -291,6 +388,17 @@ export default {
   @page {
     size: A4;
     margin: 0;
+  }
+
+  /* 印刷時に入力フィールドの枠線を表示 */
+  .vision-input,
+  .input-year,
+  .input-month,
+  .input-principal,
+  .input-long {
+    border-bottom: 1px solid #333 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }
 </style>
