@@ -43,13 +43,21 @@
       <tbody>
         <tr>
           <td class="label">右</td>
-          <td class="result">{{ healthRecord?.vision_right || '' }}</td>
-          <td class="result">{{ healthRecord?.vision_right_corrected || '' }}</td>
+          <td class="input-cell">
+            <input type="text" v-model="formData.school_vision_right" class="vision-input" :placeholder="healthRecord?.vision_right || ''" />
+          </td>
+          <td class="input-cell">
+            <input type="text" v-model="formData.school_vision_right_corrected" class="vision-input" :placeholder="healthRecord?.vision_right_corrected || ''" />
+          </td>
         </tr>
         <tr>
           <td class="label">左</td>
-          <td class="result">{{ healthRecord?.vision_left || '' }}</td>
-          <td class="result">{{ healthRecord?.vision_left_corrected || '' }}</td>
+          <td class="input-cell">
+            <input type="text" v-model="formData.school_vision_left" class="vision-input" :placeholder="healthRecord?.vision_left || ''" />
+          </td>
+          <td class="input-cell">
+            <input type="text" v-model="formData.school_vision_left_corrected" class="vision-input" :placeholder="healthRecord?.vision_left_corrected || ''" />
+          </td>
         </tr>
       </tbody>
     </table>
@@ -147,6 +155,10 @@ export default {
       year: '',
       month: '',
       principal: '',
+      school_vision_right: '',
+      school_vision_right_corrected: '',
+      school_vision_left: '',
+      school_vision_left_corrected: '',
       followup_vision_right: '',
       followup_vision_right_corrected: '',
       followup_vision_left: '',

@@ -358,6 +358,12 @@ export default {
       }
 
       try {
+        notificationStore.addNotification({
+          type: 'info',
+          title: 'PDF生成中',
+          message: 'PDFを生成しています...'
+        });
+
         // 印刷エリアの要素を取得
         const element = document.getElementById('printArea');
         if (!element) {
@@ -365,17 +371,24 @@ export default {
         }
 
         // html2canvasとjsPDFを動的にインポート
-        const html2canvas = (await import('html2canvas')).default;
-        const jsPDF = (await import('jspdf')).default;
+        console.log('Loading html2canvas...');
+        const html2canvasModule = await import('html2canvas');
+        const html2canvas = html2canvasModule.default;
+        
+        console.log('Loading jsPDF...');
+        const jsPDFModule = await import('jspdf');
+        const jsPDF = jsPDFModule.default;
 
+        console.log('Creating canvas...');
         // HTML要素をキャンバスに変換
         const canvas = await html2canvas(element, {
           scale: 2,
           useCORS: true,
-          logging: false,
+          logging: true,
           backgroundColor: '#ffffff'
         });
 
+        console.log('Canvas created, generating PDF...');
         // PDFを作成
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF({
@@ -394,6 +407,7 @@ export default {
         const examTypeName = examTypes.find(e => e.value === selectedExam.value)?.label || '検診';
         const fileName = `${selectedStudent.value.name}_${examTypeName}_${new Date().toISOString().split('T')[0]}.pdf`;
 
+        console.log('Saving PDF:', fileName);
         // PDFをダウンロード
         pdf.save(fileName);
 
@@ -404,10 +418,11 @@ export default {
         });
       } catch (error) {
         console.error('PDF generation error:', error);
+        console.error('Error stack:', error.stack);
         notificationStore.addNotification({
           type: 'danger',
           title: 'PDF生成エラー',
-          message: 'PDFの生成に失敗しました'
+          message: `PDFの生成に失敗しました: ${error.message}`
         });
       }
     };
