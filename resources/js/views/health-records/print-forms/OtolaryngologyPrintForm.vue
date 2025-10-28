@@ -321,13 +321,26 @@ export default {
       return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
     };
 
+    const getFormData = () => {
+      // 選択された所見番号を配列に変換
+      const selectedFindingNumbers = Object.keys(selectedFindings)
+        .filter(key => selectedFindings[key])
+        .map(key => parseInt(key));
+      
+      return {
+        ...formData,
+        selected_findings: selectedFindingNumbers
+      };
+    };
+
     return {
       selectedFindings,
       formData,
       getClassGrade,
       toggleFinding,
       getCheckmark,
-      formatDate
+      formatDate,
+      getFormData
     };
   }
 };

@@ -145,6 +145,7 @@
           <BaseCard>
             <div id="printArea">
               <component
+                ref="printFormComponent"
                 :is="currentPrintComponent"
                 :student="selectedStudent"
                 :health-record="latestHealthRecord"
@@ -211,6 +212,7 @@ export default {
     const selectedExam = ref('');
     const studentHealthRecords = ref([]);
     const latestHealthRecord = ref(null);
+    const printFormComponent = ref(null);
 
     const examTypes = [
       { value: 'vision_test', label: '視力検査' },
@@ -365,17 +367,13 @@ export default {
         });
 
         // 印刷フォームコンポーネントからformDataを取得
-        const printFormRef = document.querySelector('.print-form');
         let formData = {};
         
-        if (selectedExam.value === 'vision_test') {
-          // VisionTestPrintFormのformDataを取得
-          const visionForm = printFormRef?.__vueParentComponent?.ctx;
-          formData = visionForm?.formData || {};
-        } else if (selectedExam.value === 'otolaryngology') {
-          // OtolaryngologyPrintFormのformDataを取得
-          const otolaryngologyForm = printFormRef?.__vueParentComponent?.ctx;
-          formData = otolaryngologyForm?.formData || {};
+        if (printFormComponent.value && typeof printFormComponent.value.getFormData === 'function') {
+          formData = printFormComponent.value.getFormData();
+          console.log('Form data from component:', formData);
+        } else {
+          console.warn('printFormComponent.getFormData not available');
         }
 
         // APIエンドポイントにPOSTリクエスト
@@ -481,6 +479,7 @@ export default {
       examTypes,
       latestHealthRecord,
       currentPrintComponent,
+      printFormComponent,
       searchStudents,
       selectStudent,
       clearSelection,

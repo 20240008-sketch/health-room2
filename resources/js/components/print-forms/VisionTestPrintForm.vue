@@ -200,6 +200,9 @@ export default {
         return match ? match[1] : '';
       }
       return '__';
+    },
+    getFormData() {
+      return this.formData;
     }
   }
 };

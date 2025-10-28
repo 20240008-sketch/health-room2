@@ -112,7 +112,8 @@ class HealthRecordPrintController extends Controller
             $className = $classMatch[1] ?? '';
         }
         
-        $gradeId = $student['school_class']['grade_id'] ?? '';
+        // 学年を取得（school_class.gradeまたはgrade_idから）
+        $gradeId = $student['school_class']['grade'] ?? $student['school_class']['grade_id'] ?? '';
         $studentNumber = $student['student_number'] ?? '';
         
         $html = '
@@ -215,7 +216,8 @@ class HealthRecordPrintController extends Controller
         $formData = $data['form_data'] ?? [];
         $selectedFindings = $formData['selected_findings'] ?? [];
         
-        $gradeId = $student['school_class']['grade_id'] ?? '';
+        // 学年を取得（school_class.gradeまたはgrade_idから）
+        $gradeId = $student['school_class']['grade'] ?? $student['school_class']['grade_id'] ?? '';
         $className = $student['school_class']['name'] ?? '';
         
         $html = '
