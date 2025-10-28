@@ -49,7 +49,7 @@ class Student extends Model
      */
     public function healthRecords(): HasMany
     {
-        return $this->hasMany(HealthRecord::class);
+        return $this->hasMany(HealthRecord::class, 'student_id', 'student_id');
     }
 
     /**
