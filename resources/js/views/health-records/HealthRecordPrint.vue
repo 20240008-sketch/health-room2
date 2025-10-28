@@ -348,11 +348,11 @@ export default {
     };
 
     const downloadPDF = async () => {
-      if (!latestHealthRecord.value) {
+      if (!selectedStudent.value) {
         notificationStore.addNotification({
           type: 'warning',
-          title: 'データなし',
-          message: 'この生徒の健康記録が見つかりません'
+          title: '生徒未選択',
+          message: '生徒を選択してください'
         });
         return;
       }
@@ -364,52 +364,73 @@ export default {
           message: 'PDFを生成しています...'
         });
 
-        // 印刷エリアの要素を取得
-        const element = document.getElementById('printArea');
-        if (!element) {
-          throw new Error('印刷エリアが見つかりません');
+        // 印刷フォームコンポーネントからformDataを取得
+        const printFormRef = document.querySelector('.print-form');
+        let formData = {};
+        
+        if (selectedExam.value === 'vision_test') {
+          // VisionTestPrintFormのformDataを取得
+          const visionForm = printFormRef?.__vueParentComponent?.ctx;
+          formData = visionForm?.formData || {};
+        } else if (selectedExam.value === 'otolaryngology') {
+          // OtolaryngologyPrintFormのformDataを取得
+          const otolaryngologyForm = printFormRef?.__vueParentComponent?.ctx;
+          formData = otolaryngologyForm?.formData || {};
         }
 
-        // html2canvasとjsPDFを動的にインポート
-        console.log('Loading html2canvas...');
-        const html2canvasModule = await import('html2canvas');
-        const html2canvas = html2canvasModule.default;
-        
-        console.log('Loading jsPDF...');
-        const jsPDFModule = await import('jspdf');
-        const jsPDF = jsPDFModule.default;
+        // APIエンドポイントにPOSTリクエスト
+        const apiUrl = '/api/v1/health-records/generate-pdf';
+        const payload = {
+          exam_type: selectedExam.value,
+          student: {
+            id: selectedStudent.value.id,
+            name: selectedStudent.value.name,
+            student_id: selectedStudent.value.student_id,
+            student_number: selectedStudent.value.student_number,
+            school_class: selectedStudent.value.school_class || {}
+          },
+          health_record: latestHealthRecord.value || {},
+          form_data: formData
+        };
 
-        console.log('Creating canvas...');
-        // HTML要素をキャンバスに変換
-        const canvas = await html2canvas(element, {
-          scale: 2,
-          useCORS: true,
-          logging: true,
-          backgroundColor: '#ffffff'
+        console.log('Requesting PDF from server:', apiUrl, payload);
+
+        const response = await axios.post(apiUrl, payload, {
+          responseType: 'blob',
+          headers: {
+            'Accept': 'application/pdf',
+            'Content-Type': 'application/json'
+          }
         });
 
-        console.log('Canvas created, generating PDF...');
-        // PDFを作成
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF({
-          orientation: 'portrait',
-          unit: 'mm',
-          format: 'a4'
-        });
-
-        const imgWidth = 210; // A4幅(mm)
-        const pageHeight = 297; // A4高さ(mm)
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+        // レスポンスがPDFかどうかを確認
+        const blob = response.data;
+        if (blob.type !== 'application/pdf') {
+          // エラーレスポンスの場合
+          const text = await blob.text();
+          const errorData = JSON.parse(text);
+          throw new Error(errorData.message || 'PDF生成に失敗しました');
+        }
 
         // ファイル名を生成
         const examTypeName = examTypes.find(e => e.value === selectedExam.value)?.label || '検診';
         const fileName = `${selectedStudent.value.name}_${examTypeName}_${new Date().toISOString().split('T')[0]}.pdf`;
 
-        console.log('Saving PDF:', fileName);
-        // PDFをダウンロード
-        pdf.save(fileName);
+        // Blobからダウンロード用URLを作成
+        const blobUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+
+        // クリーンアップ
+        setTimeout(() => {
+          window.URL.revokeObjectURL(blobUrl);
+          document.body.removeChild(a);
+        }, 100);
+
+        console.log('PDF downloaded successfully:', fileName);
 
         notificationStore.addNotification({
           type: 'success',
@@ -418,11 +439,25 @@ export default {
         });
       } catch (error) {
         console.error('PDF generation error:', error);
-        console.error('Error stack:', error.stack);
+        console.error('Error details:', error.response?.data);
+        
+        let errorMessage = 'PDFの生成に失敗しました';
+        if (error.response?.data) {
+          try {
+            const text = await error.response.data.text();
+            const errorData = JSON.parse(text);
+            errorMessage = errorData.message || errorMessage;
+          } catch (e) {
+            // JSONパースエラーは無視
+          }
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        
         notificationStore.addNotification({
           type: 'danger',
           title: 'PDF生成エラー',
-          message: `PDFの生成に失敗しました: ${error.message}`
+          message: errorMessage
         });
       }
     };

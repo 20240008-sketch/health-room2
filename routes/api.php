@@ -9,6 +9,7 @@ use App\Http\Controllers\HealthRecordController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\Api\V1\NursingLogController;
+use App\Http\Controllers\Api\V1\HealthRecordPrintController;
 
 /*
 |--------------------------------------------------------------------------
@@ -66,6 +67,10 @@ Route::group(['prefix' => 'v1'], function () {
         ->name('health-records.statistics-pdf');
     Route::get('health-records/print-results/{studentId}', [HealthRecordController::class, 'getPrintResults'])
         ->name('health-records.print-results');
+    
+    // 健康記録印刷PDF生成
+    Route::post('health-records/generate-pdf', [HealthRecordPrintController::class, 'generatePdf'])
+        ->name('health-records.generate-pdf');
     
     // 健康記録管理API
     Route::apiResource('health-records', HealthRecordController::class);
