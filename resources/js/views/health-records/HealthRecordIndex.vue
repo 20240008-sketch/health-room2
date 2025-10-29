@@ -548,7 +548,7 @@
             </div>
           </template>
 
-          <template #actions="{ item }">
+          <template #cell(actions)="{ item }">
             <div class="flex space-x-1">
               <BaseButton
                 size="sm"
@@ -599,6 +599,31 @@
           @click="$router.push(`/health-records/${record.id}`)"
         >
           <div class="p-6">
+            <!-- Actions -->
+            <div class="flex justify-center space-x-2 mb-4">
+              <BaseButton
+                size="sm"
+                variant="secondary"
+                @click.stop="$router.push(`/health-records/${record.id}/edit`)"
+              >
+                編集
+              </BaseButton>
+              <BaseButton
+                size="sm"
+                variant="primary"
+                @click.stop="$router.push(`/health-records/${record.id}`)"
+              >
+                詳細
+              </BaseButton>
+              <BaseButton
+                size="sm"
+                variant="danger"
+                @click.stop="confirmDelete(record)"
+              >
+                削除
+              </BaseButton>
+            </div>
+
             <!-- Header -->
             <div class="flex items-center justify-between mb-4">
               <div>
@@ -658,33 +683,8 @@
             </div>
 
             <!-- Date -->
-            <div class="text-center text-sm text-gray-500 mb-4">
+            <div class="text-center text-sm text-gray-500">
               {{ formatDate(record.measured_date) }}
-            </div>
-
-            <!-- Actions -->
-            <div class="flex justify-center space-x-2">
-              <BaseButton
-                size="sm"
-                variant="secondary"
-                @click.stop="$router.push(`/health-records/${record.id}/edit`)"
-              >
-                編集
-              </BaseButton>
-              <BaseButton
-                size="sm"
-                variant="primary"
-                @click.stop="$router.push(`/health-records/${record.id}`)"
-              >
-                詳細
-              </BaseButton>
-              <BaseButton
-                size="sm"
-                variant="danger"
-                @click.stop="confirmDelete(record)"
-              >
-                削除
-              </BaseButton>
             </div>
           </div>
         </div>
@@ -1113,6 +1113,7 @@ export default {
     
     const tableColumns = computed(() => {
       const baseColumns = [
+        { key: 'actions', title: '操作', label: '操作', width: '180px' },
         { key: 'student_name', title: '学生名・出席番号', label: '学生名・出席番号', sortable: true, width: '180px' },
         { key: 'class_grade', title: 'クラス・学年', label: 'クラス・学年', width: '120px' },
         { key: 'measured_date', title: '測定日', label: '測定日', sortable: true, width: '100px' }
@@ -1158,8 +1159,7 @@ export default {
       
       return [
         ...baseColumns,
-        ...dataColumns,
-        { key: 'actions', title: '操作', label: '操作', width: '180px' }
+        ...dataColumns
       ];
     });
     
