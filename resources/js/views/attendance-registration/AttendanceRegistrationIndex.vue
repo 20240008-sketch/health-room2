@@ -240,13 +240,6 @@
                 </BaseButton>
                 <BaseButton
                   size="sm"
-                  variant="secondary"
-                  @click.stop="router.push({ name: 'attendance-registration.edit', params: { id: item.id } })"
-                >
-                  編集
-                </BaseButton>
-                <BaseButton
-                  size="sm"
                   variant="danger"
                   @click.stop="handleDelete(item)"
                 >
@@ -345,15 +338,15 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
               <div v-if="selectedRecord.breakfast">
                 <span class="text-gray-600">朝食:</span>
-                <span class="ml-2 font-medium">{{ selectedRecord.breakfast || '-' }}</span>
+                <span class="ml-2 font-medium">{{ getBreakfastLabel(selectedRecord.breakfast) }}</span>
               </div>
               <div v-if="selectedRecord.bowel_movement">
                 <span class="text-gray-600">便通:</span>
-                <span class="ml-2 font-medium">{{ selectedRecord.bowel_movement || '-' }}</span>
+                <span class="ml-2 font-medium">{{ getBowelMovementLabel(selectedRecord.bowel_movement) }}</span>
               </div>
               <div v-if="selectedRecord.treatment" class="col-span-2">
                 <span class="text-gray-600">処置:</span>
-                <span class="ml-2 font-medium">{{ selectedRecord.treatment || '-' }}</span>
+                <span class="ml-2 font-medium">{{ getTreatmentLabel(selectedRecord.treatment) }}</span>
               </div>
             </div>
           </div>
@@ -391,12 +384,6 @@
               @click="closeDetailModal"
             >
               閉じる
-            </BaseButton>
-            <BaseButton
-              variant="primary"
-              @click="router.push({ name: 'attendance-registration.edit', params: { id: selectedRecord.id } }); closeDetailModal();"
-            >
-              編集
             </BaseButton>
           </div>
         </template>
@@ -866,6 +853,51 @@ export default {
       return labels[treatment] || treatment || '';
     };
 
+    const getBreakfastLabel = (breakfast) => {
+      const labels = {
+        'ate': '食べた',
+        'not_ate': '食べていない',
+        'never_eat': 'いつも食べない',
+        'no_appetite': '欲しくない',
+        'no_time': '時間がない',
+        'other': 'その他'
+      };
+      return labels[breakfast] || breakfast || '-';
+    };
+
+    const getBowelMovementLabel = (bowelMovement) => {
+      const labels = {
+        'this_morning': '今朝した',
+        'normal': '普通便',
+        'diarrhea': '下痢便',
+        'not_this_morning': '今朝はしなかった',
+        'never_morning': '朝はいつもしない',
+        'no_time': '時間がなかった',
+        'constipated': '便秘ぎみ',
+        'no_urge': '便意がなかった',
+        'other': 'その他'
+      };
+      return labels[bowelMovement] || bowelMovement || '-';
+    };
+
+    const getTreatmentLabel = (treatment) => {
+      const labels = {
+        'observe_classroom': '教室で観察',
+        'rest_infirmary': '保健室で休養',
+        'health_consultation': '健康相談',
+        'infirmary_attendance': '保健室登校',
+        'infirmary_exam': '保健室試験',
+        'safe_place': '居場所',
+        'rest_early_leave': '休養早退',
+        'early_leave': '早退',
+        'hospital_visit': '病院受診',
+        'separate_exam': '別室受験',
+        'separate_move': '別室移動',
+        'other': 'その他'
+      };
+      return labels[treatment] || treatment || '-';
+    };
+
     const getOccurrenceTimeLabel = (occurrenceTime) => {
       const labels = {
         'during_class': '授業中',
@@ -1089,6 +1121,9 @@ export default {
       getCategoryLabel,
       getTypeDetailLabel,
       getAbsenceReasonLabel,
+      getBreakfastLabel,
+      getBowelMovementLabel,
+      getTreatmentLabel,
       getInjuryLocationLabel,
       getInjuryPlaceLabel,
       getSurgicalTreatmentLabel,

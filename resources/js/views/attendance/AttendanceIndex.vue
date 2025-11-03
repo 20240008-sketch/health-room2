@@ -532,6 +532,9 @@ export default {
         'exam': '試験中',
         'supplementary': '補習',
         'extracurricular': '課外授業',
+        'during_class': '授業中',
+        'self_study': '自習中',
+        'commute': '登下校中',
         'other': 'その他'
       };
       return labels[occurrenceTime] || occurrenceTime;
@@ -546,6 +549,196 @@ export default {
         'late': '遅刻他'
       };
       return categoryLabels[category] || category;
+    };
+
+    // 詳細情報をフォーマットする関数
+    const formatDetailedInfo = (record) => {
+      const details = [];
+      
+      // 内科関連情報
+      if (record.breakfast) {
+        const breakfastLabels = {
+          'ate': '朝食:食べた',
+          'not_ate': '朝食:食べていない',
+          'never_eat': '朝食:いつも食べない',
+          'no_appetite': '朝食:欲しくない',
+          'no_time': '朝食:時間がない',
+          'other': '朝食:その他'
+        };
+        if (breakfastLabels[record.breakfast]) {
+          details.push(breakfastLabels[record.breakfast]);
+        }
+      }
+      
+      if (record.bowel_movement) {
+        const bowelLabels = {
+          'this_morning': '便通:今朝した',
+          'normal': '便通:普通便',
+          'diarrhea': '便通:下痢便',
+          'not_this_morning': '便通:今朝はしなかった',
+          'never_morning': '便通:朝はいつもしない',
+          'no_time': '便通:時間がなかった',
+          'constipated': '便通:便秘ぎみ',
+          'no_urge': '便通:便意がなかった',
+          'other': '便通:その他'
+        };
+        if (bowelLabels[record.bowel_movement]) {
+          details.push(bowelLabels[record.bowel_movement]);
+        }
+      }
+      
+      if (record.treatment) {
+        const treatmentLabels = {
+          'observe_classroom': '処置:教室で観察',
+          'rest_infirmary': '処置:保健室で休養',
+          'health_consultation': '処置:健康相談',
+          'infirmary_attendance': '処置:保健室登校',
+          'infirmary_exam': '処置:保健室試験',
+          'safe_place': '処置:居場所',
+          'rest_early_leave': '処置:休養早退',
+          'early_leave': '処置:早退',
+          'hospital_visit': '処置:病院受診',
+          'separate_exam': '処置:別室受験',
+          'separate_move': '処置:別室移動',
+          'other': '処置:その他'
+        };
+        if (treatmentLabels[record.treatment]) {
+          details.push(treatmentLabels[record.treatment]);
+        }
+      }
+      
+      // 外科関連情報
+      if (record.injury_location) {
+        const locationLabels = {
+          'hand_wrist': '部位:手・手首',
+          'arm': '部位:腕',
+          'finger_hand': '部位:指(手)',
+          'finger_foot': '部位:指(足)',
+          'foot_ankle': '部位:足・足首',
+          'leg': '部位:脚',
+          'knee': '部位:膝',
+          'head': '部位:頭',
+          'face': '部位:顔',
+          'abdomen': '部位:腹',
+          'chest': '部位:胸',
+          'waist': '部位:腰',
+          'back_shoulder_neck': '部位:背中・肩・首',
+          'tooth': '部位:歯',
+          'eye': '部位:眼',
+          'ear': '部位:耳',
+          'nose': '部位:鼻',
+          'other': '部位:その他'
+        };
+        if (locationLabels[record.injury_location]) {
+          details.push(locationLabels[record.injury_location]);
+        }
+      }
+      
+      if (record.injury_place) {
+        const placeLabels = {
+          'classroom': '場所:教室',
+          'hallway': '場所:廊下',
+          'stairs': '場所:階段',
+          'gymnasium': '場所:体育館',
+          'ground': '場所:グランド',
+          'schoolyard': '場所:校庭',
+          'music_room': '場所:音楽室',
+          'art_room': '場所:美術室',
+          'science_room': '場所:理科室',
+          'auditorium': '場所:講堂',
+          'home_economics': '場所:家庭科室',
+          'cooking_room': '場所:調理室',
+          'computer_room': '場所:コンピュータ室',
+          'commute_route': '場所:通学路',
+          'toilet': '場所:トイレ',
+          'unknown': '場所:不明',
+          'bicycle_parking': '場所:自転車置き場',
+          'martial_arts': '場所:格技室',
+          'practice_room': '場所:実習室',
+          'cafeteria': '場所:食堂',
+          'other': '場所:その他'
+        };
+        if (placeLabels[record.injury_place]) {
+          details.push(placeLabels[record.injury_place]);
+        }
+      }
+      
+      if (record.surgical_treatment) {
+        const surgicalTreatmentLabels = {
+          'disinfection': '処置:消毒',
+          'icing': '処置:アイシング・湿布',
+          'warm_compress': '処置:温罨法',
+          'foreign_removal': '処置:異物除去',
+          'parent_contact': '処置:保護者連絡',
+          'hospital_instruction': '処置:病院受診を指示',
+          'hospital_transport': '処置:病院へ搬送',
+          'observation': '処置:経過観察',
+          'rest_observation': '処置:経過観察(安静)',
+          'teacher_contact': '処置:担任・部活顧問連絡',
+          'bandaid': '処置:カットバン貼付',
+          'ointment': '処置:塗り薬',
+          'other': '処置:その他'
+        };
+        if (surgicalTreatmentLabels[record.surgical_treatment]) {
+          details.push(surgicalTreatmentLabels[record.surgical_treatment]);
+        }
+      }
+      
+      // 教科
+      if (record.subject) {
+        const subjectLabels = {
+          'japanese': '教科:国語',
+          'social_studies': '教科:社会',
+          'mathematics': '教科:数学',
+          'science': '教科:理科',
+          'english': '教科:英語',
+          'music': '教科:音楽',
+          'art': '教科:美術',
+          'pe': '教科:体育',
+          'technology': '教科:技術',
+          'home_economics': '教科:家庭',
+          'moral': '教科:道徳',
+          'integrated': '教科:総合',
+          'other': '教科:その他'
+        };
+        if (subjectLabels[record.subject]) {
+          details.push(subjectLabels[record.subject]);
+        }
+      }
+      
+      // 部活動
+      if (record.club_activity) {
+        details.push('部活:' + record.club_activity);
+      }
+      
+      // 行事
+      if (record.event_type) {
+        const eventLabels = {
+          'sports_festival': '行事:体育祭',
+          'cultural_festival': '行事:文化祭',
+          'excursion': '行事:遠足',
+          'field_trip': '行事:校外学習',
+          'marathon': '行事:マラソン大会',
+          'chorus_contest': '行事:合唱コンクール',
+          'entrance_ceremony': '行事:入学式',
+          'graduation_ceremony': '行事:卒業式',
+          'entrance_rehearsal': '行事:入学式予行',
+          'graduation_rehearsal': '行事:卒業式予行',
+          'clean_operation': '行事:クリーン作戦',
+          'open_school': '行事:オープンスクール',
+          'other': '行事:その他'
+        };
+        if (eventLabels[record.event_type]) {
+          details.push(eventLabels[record.event_type]);
+        }
+      }
+      
+      // 備考・原因・その他
+      if (record.treatment_notes) {
+        details.push(record.treatment_notes);
+      }
+      
+      return details.join('、');
     };
 
     const addVisit = () => {
@@ -645,7 +838,7 @@ export default {
               
               // Determine type label based on category
               let typeLabel = '';
-              let treatmentText = record.treatment_notes || '';
+              let treatmentText = '';
               
               if (record.category === 'absence' || record.category === 'late') {
                 // For absence/late, use absence_reason
@@ -654,15 +847,23 @@ export default {
                 // Add absence_reason to treatment notes if present
                 if (record.absence_reason) {
                   const reasonLabel = getAbsenceReasonLabel(record.absence_reason);
-                  if (treatmentText) {
-                    treatmentText = reasonLabel + '、' + treatmentText;
-                  } else {
+                  if (reasonLabel) {
                     treatmentText = reasonLabel;
                   }
                 }
               } else {
                 // For other categories, use type_detail
                 typeLabel = getTypeLabel(record.type_detail) || '';
+              }
+              
+              // フォーマットされた詳細情報を取得
+              const detailedInfo = formatDetailedInfo(record);
+              if (detailedInfo) {
+                if (treatmentText) {
+                  treatmentText = treatmentText + '、' + detailedInfo;
+                } else {
+                  treatmentText = detailedInfo;
+                }
               }
               
               // Add to visits list
@@ -863,6 +1064,7 @@ export default {
       getTypeLabel,
       getAbsenceReasonLabel,
       getOccurrenceLabel,
+      formatDetailedInfo,
       addVisit,
       loadDiary,
       saveDiary,

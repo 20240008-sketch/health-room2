@@ -1497,7 +1497,20 @@ export default {
           type: visit.type,
           type_detail: visit.type_detail || null,
           occurrence_time: visit.occurrence_time || null,
-          treatment_notes: visit.treatment_notes || null
+          treatment_notes: visit.treatment_notes || null,
+          // 内科関連情報
+          breakfast: visit.breakfast || null,
+          bowel_movement: visit.bowel_movement || null,
+          treatment: visit.treatment || null,
+          // 外科関連情報
+          injury_location: visit.injury_location || null,
+          injury_place: visit.injury_place || null,
+          surgical_treatment: visit.surgical_treatment || null,
+          // その他の詳細情報
+          subject: visit.subject || null,
+          club_activity: visit.club_activity || null,
+          event_type: visit.event_type || null,
+          absence_reason: visit.absence_reason || null
         }));
         
         console.log('=== Saving Nursing Visits ===');
