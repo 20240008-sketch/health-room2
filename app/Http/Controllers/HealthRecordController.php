@@ -405,7 +405,7 @@ class HealthRecordController extends Controller
     {
         try {
             $request->validate([
-                'class_id' => 'required|exists:school_classes,id',
+                'class_id' => 'required|string',
                 'year' => 'required|integer'
             ]);
 

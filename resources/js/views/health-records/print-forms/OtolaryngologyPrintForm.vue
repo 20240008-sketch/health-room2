@@ -264,6 +264,31 @@ export default {
     }
   },
   setup(props) {
+    // 所見名から番号へのマッピング
+    const findingNameToNumber = {
+      '耳垢': 1,
+      '滲出性中耳炎': 2,
+      '（慢性）中耳炎・鼓膜穿孔': 3,
+      '慢性中耳炎': 3,
+      '中耳炎': 3,
+      '鼓膜穿孔': 3,
+      '難聴の疑い': 4,
+      '難聴': 4,
+      '鼻炎・慢性鼻炎': 5,
+      '鼻炎': 5,
+      '慢性鼻炎': 5,
+      'アレルギー性鼻炎': 6,
+      '副鼻腔炎': 7,
+      '鼻中隔弯曲症': 8,
+      '扁桃肥大': 9,
+      '扁桃炎': 10,
+      'アデノイド': 11,
+      '口内炎': 12,
+      '舌小帯異常': 13,
+      '舌異常': 14,
+      'その他': 15
+    };
+
     const selectedFindings = reactive({
       1: false,  // 耳垢
       2: false,  // 滲出性中耳炎
@@ -281,6 +306,28 @@ export default {
       14: false, // 舌異常
       15: false  // その他
     });
+
+    // healthRecordから所見を読み込む
+    if (props.healthRecord?.otolaryngology_result) {
+      try {
+        const results = typeof props.healthRecord.otolaryngology_result === 'string'
+          ? JSON.parse(props.healthRecord.otolaryngology_result)
+          : props.healthRecord.otolaryngology_result;
+        
+        if (Array.isArray(results)) {
+          results.forEach(result => {
+            // exam_resultから所見名を取得
+            const findingName = result.exam_result || result.findings;
+            if (findingName && findingNameToNumber[findingName]) {
+              const number = findingNameToNumber[findingName];
+              selectedFindings[number] = true;
+            }
+          });
+        }
+      } catch (error) {
+        console.error('耳鼻科検診結果の読み込みエラー:', error);
+      }
+    }
 
     const formData = reactive({
       exam_date_year: '',

@@ -3508,35 +3508,42 @@ export default {
     
     // Focus management for individual mode
     const focusNextField = (currentField) => {
+      const focusElement = (ref) => {
+        if (!ref?.$el) return false;
+        const input = ref.$el.querySelector('input') || ref.$el.querySelector('select');
+        if (input) {
+          input.focus();
+          return true;
+        }
+        return false;
+      };
+
       if (currentField === 'heightInput') {
         // Height -> Weight or Vision Left
         if (measurementItems.weight && weightInput.value) {
-          weightInput.value.$el.querySelector('input').focus();
+          focusElement(weightInput.value);
         } else if (measurementItems.vision && visionLeftInput.value) {
-          visionLeftInput.value.$el.querySelector('input').focus();
+          focusElement(visionLeftInput.value);
         }
-        // Don't jump to notes - user can tab there manually if needed
       } else if (currentField === 'weightInput') {
         // Weight -> Vision Left (skip notes)
         if (measurementItems.vision && visionLeftInput.value) {
-          visionLeftInput.value.$el.querySelector('input').focus();
+          focusElement(visionLeftInput.value);
         }
-        // Don't jump to notes - user can tab there manually if needed
       } else if (currentField === 'visionLeftInput') {
         // Vision Left -> Vision Right
         if (visionRightInput.value) {
-          visionRightInput.value.$el.querySelector('input').focus();
+          focusElement(visionRightInput.value);
         }
       } else if (currentField === 'visionRightInput') {
         // Vision Right -> Vision Left Corrected
         if (visionLeftCorrectedInput.value) {
-          visionLeftCorrectedInput.value.$el.querySelector('input').focus();
+          focusElement(visionLeftCorrectedInput.value);
         }
-        // Don't jump to notes
       } else if (currentField === 'visionLeftCorrectedInput') {
         // Vision Left Corrected -> Vision Right Corrected
         if (visionRightCorrectedInput.value) {
-          visionRightCorrectedInput.value.$el.querySelector('input').focus();
+          focusElement(visionRightCorrectedInput.value);
         }
       } else if (currentField === 'visionRightCorrectedInput') {
         // Last field - don't jump to notes

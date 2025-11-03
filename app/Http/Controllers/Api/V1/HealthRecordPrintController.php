@@ -216,64 +216,78 @@ class HealthRecordPrintController extends Controller
         $formData = $data['form_data'] ?? [];
         $selectedFindings = $formData['selected_findings'] ?? [];
         
-        // 学年を取得（school_class.gradeまたはgrade_idから）
-        $gradeId = $student['school_class']['grade'] ?? $student['school_class']['grade_id'] ?? '';
-        $className = $student['school_class']['name'] ?? '';
+        // 学年を取得（複数のパスを試す）
+        $gradeId = $student['school_class']['grade'] ?? 
+                   $student['school_class']['grade_id'] ?? 
+                   $student['grade_id'] ?? 
+                   '';
+        $className = $student['school_class']['class_name'] ?? 
+                     $student['school_class']['name'] ?? 
+                     '';
+        
+        // 番号を丸で囲む関数
+        $circleNumber = function($num) use ($selectedFindings) {
+            if (in_array($num, $selectedFindings)) {
+                return '<span style="display: inline-block; width: 18px; height: 18px; line-height: 18px; text-align: center; border: 2px solid #000; border-radius: 50%; font-weight: bold;">' . $num . '</span>';
+            }
+            return $num;
+        };
         
         $html = '
         <style>
-            body { font-size: 9pt; }
+            body { font-size: 9pt; font-family: "Noto Sans JP", sans-serif; }
             h2 { font-size: 12pt; text-align: center; border-bottom: 2px solid #000; padding-bottom: 5px; margin: 8px 0; }
             h3 { font-size: 10pt; margin: 8px 0 3px 0; }
             table { border-collapse: collapse; width: 100%; margin: 3px 0; font-size: 8pt; }
             th, td { border: 1px solid #000; padding: 2px; }
             th { background-color: #e0e0e0; text-align: center; }
+            .circle-num { display: inline-block; width: 18px; height: 18px; line-height: 18px; text-align: center; border: 2px solid #000; border-radius: 50%; font-weight: bold; }
         </style>
         
         <h2>耳鼻咽喉科健康検診結果のお知らせ</h2>
         
         <div style="margin: 8px 0;"><strong>氏名：</strong>' . htmlspecialchars($student['name']) . '　<strong>学年：</strong>' . htmlspecialchars($gradeId) . '年' . htmlspecialchars($className) . '</div>
         
-        <p style="margin: 5px 0; line-height: 1.3; font-size: 8pt;">検診の結果、下記のとおりでした。○印の項目について受診をお勧めします。受診後は下欄の連絡票に記入してもらい、切り取らずに学校へ提出してください。</p>
+        <p style="margin: 5px 0; line-height: 1.3; font-size: 8pt;">検診の結果、下記のとおりでした。○で囲んだ項目について受診をお勧めします。受診後は下欄の連絡票に記入してもらい、切り取らずに学校へ提出してください。</p>
         
         <h3>【耳】</h3>
         <table>
             <tr><th style="width: 8%;">番号</th><th style="width: 23%;">所見項目</th><th>説明</th></tr>
-            <tr><td style="text-align: center;">' . (in_array(1, $selectedFindings) ? '○1' : '1') . '</td><td>耳垢</td><td>耳あかが多い</td></tr>
-            <tr><td style="text-align: center;">' . (in_array(2, $selectedFindings) ? '○2' : '2') . '</td><td>滲出性中耳炎</td><td>鼓膜の内側に液がたまる</td></tr>
-            <tr><td style="text-align: center;">' . (in_array(3, $selectedFindings) ? '○3' : '3') . '</td><td>中耳炎・鼓膜穿孔</td><td>中耳に炎症や穴がある</td></tr>
-            <tr><td style="text-align: center;">' . (in_array(4, $selectedFindings) ? '○4' : '4') . '</td><td>難聴の疑い</td><td>聴力検査で聞こえが弱い</td></tr>
+            <tr><td style="text-align: center;">' . $circleNumber(1) . '</td><td>耳垢</td><td>耳あかが多い</td></tr>
+            <tr><td style="text-align: center;">' . $circleNumber(2) . '</td><td>滲出性中耳炎</td><td>鼓膜の内側に液がたまる</td></tr>
+            <tr><td style="text-align: center;">' . $circleNumber(3) . '</td><td>中耳炎・鼓膜穿孔</td><td>中耳に炎症や穴がある</td></tr>
+            <tr><td style="text-align: center;">' . $circleNumber(4) . '</td><td>難聴の疑い</td><td>聴力検査で聞こえが弱い</td></tr>
         </table>
         
         <h3>【鼻】</h3>
         <table>
             <tr><th style="width: 8%;">番号</th><th style="width: 23%;">所見項目</th><th>説明</th></tr>
-            <tr><td style="text-align: center;">' . (in_array(5, $selectedFindings) ? '○5' : '5') . '</td><td>鼻炎・慢性鼻炎</td><td>鼻の粘膜が炎症</td></tr>
-            <tr><td style="text-align: center;">' . (in_array(6, $selectedFindings) ? '○6' : '6') . '</td><td>アレルギー性鼻炎</td><td>花粉やハウスダストでの鼻炎</td></tr>
-            <tr><td style="text-align: center;">' . (in_array(7, $selectedFindings) ? '○7' : '7') . '</td><td>副鼻腔炎</td><td>鼻の奥の空洞に炎症</td></tr>
-            <tr><td style="text-align: center;">' . (in_array(8, $selectedFindings) ? '○8' : '8') . '</td><td>鼻中隔弯曲症</td><td>鼻の仕切りが曲がっている</td></tr>
+            <tr><td style="text-align: center;">' . $circleNumber(5) . '</td><td>鼻炎・慢性鼻炎</td><td>鼻の粘膜が炎症</td></tr>
+            <tr><td style="text-align: center;">' . $circleNumber(6) . '</td><td>アレルギー性鼻炎</td><td>花粉やハウスダストでの鼻炎</td></tr>
+            <tr><td style="text-align: center;">' . $circleNumber(7) . '</td><td>副鼻腔炎</td><td>鼻の奥の空洞に炎症</td></tr>
+            <tr><td style="text-align: center;">' . $circleNumber(8) . '</td><td>鼻中隔弯曲症</td><td>鼻の仕切りが曲がっている</td></tr>
         </table>
         
         <h3>【咽喉】</h3>
         <table>
             <tr><th style="width: 8%;">番号</th><th style="width: 23%;">所見項目</th><th>説明</th></tr>
-            <tr><td style="text-align: center;">' . (in_array(9, $selectedFindings) ? '○9' : '9') . '</td><td>扁桃肥大</td><td>扁桃が大きくなっている</td></tr>
-            <tr><td style="text-align: center;">' . (in_array(10, $selectedFindings) ? '○10' : '10') . '</td><td>扁桃炎</td><td>扁桃が炎症を起こしている</td></tr>
-            <tr><td style="text-align: center;">' . (in_array(11, $selectedFindings) ? '○11' : '11') . '</td><td>アデノイド</td><td>鼻の奥のリンパ組織が肥大</td></tr>
+            <tr><td style="text-align: center;">' . $circleNumber(9) . '</td><td>扁桃肥大</td><td>扁桃が大きくなっている</td></tr>
+            <tr><td style="text-align: center;">' . $circleNumber(10) . '</td><td>扁桃炎</td><td>扁桃が炎症を起こしている</td></tr>
+            <tr><td style="text-align: center;">' . $circleNumber(11) . '</td><td>アデノイド</td><td>鼻の奥のリンパ組織が肥大</td></tr>
         </table>
         
         <h3>【口腔】</h3>
         <table>
             <tr><th style="width: 8%;">番号</th><th style="width: 23%;">所見項目</th><th>説明</th></tr>
-            <tr><td style="text-align: center;">' . (in_array(12, $selectedFindings) ? '○12' : '12') . '</td><td>口内炎</td><td>口の中に炎症</td></tr>
-            <tr><td style="text-align: center;">' . (in_array(13, $selectedFindings) ? '○13' : '13') . '</td><td>舌小帯異常</td><td>舌の裏のひもが短い</td></tr>
-            <tr><td style="text-align: center;">' . (in_array(14, $selectedFindings) ? '○14' : '14') . '</td><td>舌異常</td><td>舌の形や色に異常</td></tr>
+            <tr><td style="text-align: center;">' . $circleNumber(12) . '</td><td>口内炎</td><td>口の中に炎症</td></tr>
+            <tr><td style="text-align: center;">' . $circleNumber(13) . '</td><td>舌小帯異常</td><td>舌の裏のひもが短い</td></tr>
+            <tr><td style="text-align: center;">' . $circleNumber(14) . '</td><td>舌異常</td><td>舌の形や色に異常</td></tr>
         </table>
         
         <h3>【その他】</h3>
         <table>
             <tr><th style="width: 8%;">番号</th><th style="width: 23%;">所見項目</th><th>説明</th></tr>
-            <tr><td style="text-align: center;">' . (in_array(15, $selectedFindings) ? '○15' : '15') . '</td><td>その他</td><td>その他の所見</td></tr>
+            <tr><td style="text-align: center;">' . $circleNumber(15) . '</td><td>その他</td><td>その他の所見</td></tr>
         </table>
         
         <div style="margin: 8px 0; font-size: 8pt;">検診実施日：' . htmlspecialchars($formData['exam_date_year'] ?? '') . '年' . htmlspecialchars($formData['exam_date_month'] ?? '') . '月' . htmlspecialchars($formData['exam_date_day'] ?? '') . '日　校医名：' . htmlspecialchars($formData['doctor_name'] ?? '') . '</div>
