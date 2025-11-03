@@ -65,92 +65,26 @@
     </div>
 
     <!-- Content -->
-    <div v-else-if="schoolClass" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Main Content -->
-      <div class="lg:col-span-2 space-y-6">
-        <!-- Class Overview -->
-        <BaseCard>
-          <template #header>
-            <div class="flex items-center justify-between">
-              <h2 class="text-lg font-medium text-gray-900">クラス概要</h2>
-            </div>
-          </template>
-
-          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <!-- Basic Information -->
-            <div class="space-y-4">
-              <div>
-                <dt class="text-sm font-medium text-gray-500">学年・組</dt>
-                <dd class="mt-1 text-lg font-semibold text-gray-900">
-                  {{ schoolClass.grade }}年{{ schoolClass.class_number }}組
-                </dd>
-              </div>
-
-              <div>
-                <dt class="text-sm font-medium text-gray-500">年度</dt>
-                <dd class="mt-1 text-sm text-gray-900">{{ schoolClass.academic_year }}年度</dd>
-              </div>
-
-              <div>
-                <dt class="text-sm font-medium text-gray-500">定員</dt>
-                <dd class="mt-1 text-sm text-gray-900">
-                  {{ schoolClass.capacity ? `${schoolClass.capacity}名` : '未設定' }}
-                </dd>
-              </div>
-
-              <div>
-                <dt class="text-sm font-medium text-gray-500">現在の学生数</dt>
-                <dd class="mt-1 flex items-center">
-                  <span class="text-2xl font-bold text-blue-600">
-                    {{ studentsCount }}
-                  </span>
-                  <span class="ml-1 text-sm text-gray-500">名</span>
-                  <div v-if="schoolClass.capacity" class="ml-3">
-                    <div class="w-32 bg-gray-200 rounded-full h-2">
-                      <div
-                        class="bg-blue-600 h-2 rounded-full"
-                        :style="{ width: `${Math.min(100, (studentsCount / schoolClass.capacity) * 100)}%` }"
-                      ></div>
-                    </div>
-                    <p class="mt-1 text-xs text-gray-500">
-                      {{ Math.round((studentsCount / schoolClass.capacity) * 100) }}% 充足率
-                    </p>
-                  </div>
-                </dd>
-              </div>
-            </div>
-
-            <!-- Teacher Information -->
-            <div class="space-y-4">
-              <div v-if="schoolClass.homeroom_teacher">
-                <dt class="text-sm font-medium text-gray-500">担任教師</dt>
-                <dd class="mt-1 text-sm font-medium text-gray-900">
-                  {{ schoolClass.homeroom_teacher }}
-                </dd>
-              </div>
-
-              <div v-if="schoolClass.assistant_teacher">
-                <dt class="text-sm font-medium text-gray-500">副担任教師</dt>
-                <dd class="mt-1 text-sm font-medium text-gray-900">
-                  {{ schoolClass.assistant_teacher }}
-                </dd>
-              </div>
-
-              <div v-if="schoolClass.room_number || schoolClass.building">
-                <dt class="text-sm font-medium text-gray-500">教室</dt>
-                <dd class="mt-1 text-sm text-gray-900">
-                  {{ schoolClass.building ? `${schoolClass.building} ` : '' }}{{ schoolClass.room_number }}
-                  {{ schoolClass.floor ? ` (${schoolClass.floor}階)` : '' }}
-                </dd>
-              </div>
-            </div>
-          </div>
-
-          <div v-if="schoolClass.description" class="mt-6 pt-6 border-t border-gray-200">
-            <dt class="text-sm font-medium text-gray-500">説明・備考</dt>
-            <dd class="mt-2 text-sm text-gray-900 whitespace-pre-wrap">{{ schoolClass.description }}</dd>
-          </div>
-        </BaseCard>
+    <div v-else-if="schoolClass" class="space-y-4">
+      <!-- Compact Statistics -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div class="bg-white rounded-lg shadow px-4 py-3">
+          <div class="text-xs text-gray-500">男子</div>
+          <div class="text-lg font-semibold text-gray-900">{{ classStats.maleCount }}名</div>
+        </div>
+        <div class="bg-white rounded-lg shadow px-4 py-3">
+          <div class="text-xs text-gray-500">女子</div>
+          <div class="text-lg font-semibold text-gray-900">{{ classStats.femaleCount }}名</div>
+        </div>
+        <div class="bg-white rounded-lg shadow px-4 py-3">
+          <div class="text-xs text-gray-500">平均年齢</div>
+          <div class="text-lg font-semibold text-gray-900">{{ classStats.averageAge }}歳</div>
+        </div>
+        <div class="bg-white rounded-lg shadow px-4 py-3">
+          <div class="text-xs text-gray-500">健康記録</div>
+          <div class="text-lg font-semibold text-gray-900">{{ classStats.healthRecordsCount }}件</div>
+        </div>
+      </div>
 
         <!-- Students List -->
         <BaseCard>
@@ -318,143 +252,6 @@
             </BaseTable>
           </div>
         </BaseCard>
-      </div>
-
-      <!-- Sidebar -->
-      <div class="space-y-6">
-        <!-- Class Statistics -->
-        <BaseCard>
-          <template #header>
-            <h3 class="text-lg font-medium text-gray-900">クラス統計</h3>
-          </template>
-
-          <div class="space-y-4">
-            <!-- Gender Distribution -->
-            <div>
-              <h4 class="text-sm font-medium text-gray-700 mb-2">性別構成</h4>
-              <div class="space-y-2">
-                <div class="flex items-center justify-between">
-                  <span class="text-sm text-gray-600">男子</span>
-                  <div class="flex items-center">
-                    <div class="w-16 h-2 bg-gray-200 rounded-full mr-2">
-                      <div
-                        class="h-2 bg-blue-500 rounded-full"
-                        :style="{ width: `${classStats.malePercentage}%` }"
-                      ></div>
-                    </div>
-                    <span class="text-sm font-medium">{{ classStats.maleCount }}名</span>
-                  </div>
-                </div>
-                <div class="flex items-center justify-between">
-                  <span class="text-sm text-gray-600">女子</span>
-                  <div class="flex items-center">
-                    <div class="w-16 h-2 bg-gray-200 rounded-full mr-2">
-                      <div
-                        class="h-2 bg-pink-500 rounded-full"
-                        :style="{ width: `${classStats.femalePercentage}%` }"
-                      ></div>
-                    </div>
-                    <span class="text-sm font-medium">{{ classStats.femaleCount }}名</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Average Age -->
-            <div>
-              <h4 class="text-sm font-medium text-gray-700 mb-2">平均年齢</h4>
-              <div class="text-2xl font-bold text-gray-900">
-                {{ classStats.averageAge }}歳
-              </div>
-            </div>
-
-            <!-- Health Records -->
-            <div>
-              <h4 class="text-sm font-medium text-gray-700 mb-2">健康記録</h4>
-              <div class="flex justify-between items-center">
-                <span class="text-sm text-gray-600">記録数</span>
-                <span class="text-sm font-medium">{{ classStats.healthRecordsCount }}件</span>
-              </div>
-              <div class="flex justify-between items-center">
-                <span class="text-sm text-gray-600">最新測定</span>
-                <span class="text-sm font-medium">
-                  {{ classStats.latestMeasurement ? formatDate(classStats.latestMeasurement) : '記録なし' }}
-                </span>
-              </div>
-            </div>
-          </div>
-        </BaseCard>
-
-        <!-- Quick Actions -->
-        <BaseCard>
-          <template #header>
-            <h3 class="text-lg font-medium text-gray-900">クイックアクション</h3>
-          </template>
-
-          <div class="space-y-3">
-            <BaseButton
-              variant="primary"
-              size="sm"
-              class="w-full"
-              @click="$router.push(`/students/create?class_id=${schoolClass.id}`)"
-            >
-              <UserPlusIcon class="h-4 w-4 mr-2" />
-              学生追加
-            </BaseButton>
-
-            <BaseButton
-              variant="secondary"
-              size="sm"
-              class="w-full"
-              @click="$router.push(`/health-records/create?class_id=${schoolClass.id}`)"
-            >
-              <HeartIcon class="h-4 w-4 mr-2" />
-              健康測定実施
-            </BaseButton>
-
-            <BaseButton
-              variant="secondary"
-              size="sm"
-              class="w-full"
-              @click="exportStudentList"
-            >
-              <DocumentArrowDownIcon class="h-4 w-4 mr-2" />
-              学生リストエクスポート
-            </BaseButton>
-
-            <BaseButton
-              variant="secondary"
-              size="sm"
-              class="w-full"
-              @click="$router.push(`/classes/${schoolClass.id}/edit`)"
-            >
-              <PencilIcon class="h-4 w-4 mr-2" />
-              クラス情報編集
-            </BaseButton>
-          </div>
-        </BaseCard>
-
-        <!-- Recent Activity -->
-        <BaseCard v-if="recentActivities.length > 0">
-          <template #header>
-            <h3 class="text-lg font-medium text-gray-900">最近の活動</h3>
-          </template>
-
-          <div class="space-y-3">
-            <div
-              v-for="activity in recentActivities.slice(0, 5)"
-              :key="activity.id"
-              class="flex items-start space-x-3"
-            >
-              <div class="flex-shrink-0 w-2 h-2 bg-blue-400 rounded-full mt-2"></div>
-              <div class="flex-1 min-w-0">
-                <p class="text-sm text-gray-900">{{ activity.description }}</p>
-                <p class="text-xs text-gray-500">{{ formatDate(activity.created_at) }}</p>
-              </div>
-            </div>
-          </div>
-        </BaseCard>
-      </div>
     </div>
   </AppLayout>
 </template>
