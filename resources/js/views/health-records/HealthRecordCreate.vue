@@ -3806,13 +3806,28 @@ export default {
           
           console.log('Found existing record:', existingRecord);
           
+          // 既存レコードがない場合、同じ生徒の最新レコードを取得（身長・体重の引き継ぎ用）
+          let latestRecord = existingRecord;
+          if (!latestRecord && healthRecordStore.healthRecords && healthRecordStore.healthRecords.value) {
+            // 同じ生徒の最新レコードを探す
+            const studentLatestRecords = healthRecordStore.healthRecords.value
+              .filter(r => r.student_id === selectedStudent.value.student_id)
+              .sort((a, b) => new Date(b.measured_date) - new Date(a.measured_date));
+            if (studentLatestRecords.length > 0) {
+              latestRecord = studentLatestRecords[0];
+            }
+          }
+          
+          console.log('Latest record for height/weight inheritance:', latestRecord);
+          
           // Prepare record data
           const recordData = {
             student_id: selectedStudent.value.student_id,
             year: parseInt(form.academic_year),
             measured_date: form.measured_date || null,
-            height: measurementItems.height && form.height ? parseFloat(form.height) : null,
-            weight: measurementItems.weight && form.weight ? parseFloat(form.weight) : null,
+            // 身長・体重：入力されていない場合は最新レコードから引き継ぐ
+            height: measurementItems.height && form.height ? parseFloat(form.height) : (latestRecord?.height || null),
+            weight: measurementItems.weight && form.weight ? parseFloat(form.weight) : (latestRecord?.weight || null),
             vision_left: measurementItems.vision && form.vision_left ? form.vision_left : null,
             vision_right: measurementItems.vision && form.vision_right ? form.vision_right : null,
             vision_left_corrected: measurementItems.vision && form.vision_left_corrected ? form.vision_left_corrected : null,

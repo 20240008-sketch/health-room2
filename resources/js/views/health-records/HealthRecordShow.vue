@@ -131,7 +131,7 @@
                   <div>
                     <div class="text-sm text-gray-500">身長</div>
                     <div class="text-2xl font-bold text-gray-900">
-                      {{ record.height }} <span class="text-lg text-gray-500">cm</span>
+                      {{ displayHeight || '-' }} <span v-if="displayHeight" class="text-lg text-gray-500">cm</span>
                     </div>
                   </div>
                   <div class="text-right">
@@ -152,7 +152,7 @@
                   <div>
                     <div class="text-sm text-gray-500">体重</div>
                     <div class="text-2xl font-bold text-gray-900">
-                      {{ record.weight }} <span class="text-lg text-gray-500">kg</span>
+                      {{ displayWeight || '-' }} <span v-if="displayWeight" class="text-lg text-gray-500">kg</span>
                     </div>
                   </div>
                   <div class="text-right">
@@ -168,20 +168,20 @@
                 </div>
               </div>
               
-              <div v-if="record.vision_left || record.vision_right" class="bg-gray-50 rounded-lg p-4">
+              <div v-if="displayVisionLeft || displayVisionRight" class="bg-gray-50 rounded-lg p-4">
                 <div class="space-y-3">
                   <div class="text-sm text-gray-500">視力</div>
                   <div class="grid grid-cols-2 gap-4">
                     <div>
                       <div class="text-xs text-gray-500 mb-1">左</div>
                       <div class="text-xl font-bold text-gray-900">
-                        {{ record.vision_left || '-' }}
+                        {{ displayVisionLeft || '-' }}
                       </div>
                     </div>
                     <div>
                       <div class="text-xs text-gray-500 mb-1">右</div>
                       <div class="text-xl font-bold text-gray-900">
-                        {{ record.vision_right || '-' }}
+                        {{ displayVisionRight || '-' }}
                       </div>
                     </div>
                   </div>
@@ -194,17 +194,20 @@
           <div class="space-y-4">
             <h4 class="font-medium text-gray-900">BMI分析</h4>
             
-            <div class="bg-white border-2 border-dashed rounded-lg p-6 text-center" 
-                 :class="getBMIBorderColor(record.bmi)">
-              <div class="text-4xl font-bold mb-2" :class="getBMIColor(record.bmi)">
-                {{ record.bmi }}
+            <div v-if="displayBMI" class="bg-white border-2 border-dashed rounded-lg p-6 text-center" 
+                 :class="getBMIBorderColor(displayBMI)">
+              <div class="text-4xl font-bold mb-2" :class="getBMIColor(displayBMI)">
+                {{ displayBMI }}
               </div>
-              <BaseBadge :variant="getBMIVariant(record.bmi)" class="mb-3">
-                {{ getBMICategory(record.bmi) }}
+              <BaseBadge :variant="getBMIVariant(displayBMI)" class="mb-3">
+                {{ getBMICategory(displayBMI) }}
               </BaseBadge>
               <div class="text-sm text-gray-600">
-                {{ getBMIDescription(record.bmi) }}
+                {{ getBMIDescription(displayBMI) }}
               </div>
+            </div>
+            <div v-else class="bg-gray-50 border-2 border-dashed rounded-lg p-6 text-center">
+              <div class="text-lg text-gray-500">未測定</div>
             </div>
             
             <!-- BMI History Chart -->
@@ -234,108 +237,108 @@
       <!-- 検査結果 -->
       <BaseCard v-if="hasExamResults">
         <template #header>
-          <h2 class="text-lg font-medium text-gray-900">検査結果（全{{ allExamResults.length }}件）</h2>
-          <p class="mt-1 text-sm text-gray-500">この生徒のすべての検診結果を新しい順に表示しています</p>
+          <h2 class="text-base font-medium text-gray-900">検査結果（全{{ allExamResults.length }}件）</h2>
+          <p class="mt-0.5 text-xs text-gray-500">この生徒のすべての検診結果を新しい順に表示しています</p>
         </template>
         
-        <div class="space-y-4">
+        <div class="space-y-2">
           <!-- 全ての検診結果を表示 -->
           <div 
             v-for="(exam, index) in allExamResults" 
             :key="`exam-${exam.recordId}-${index}`"
-            class="pl-4 bg-gray-50 rounded p-4 border-l-4"
+            class="pl-3 bg-gray-50 rounded p-2 border-l-4"
             :class="getBorderColorClass(exam.color)"
           >
-            <div class="flex items-center justify-between mb-3">
-              <h3 class="text-sm font-semibold text-gray-900">{{ exam.type }}</h3>
-              <div class="flex items-center space-x-3">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xs font-semibold text-gray-900">{{ exam.type }}</h3>
+              <div class="flex items-center space-x-2">
                 <span class="text-xs text-gray-500">{{ exam.date }}</span>
                 <router-link 
                   :to="`/health-records/${exam.recordId}`"
                   class="text-xs text-blue-600 hover:text-blue-500"
                 >
-                  記録#{{ exam.recordId }}
+                  #{{ exam.recordId }}
                 </router-link>
               </div>
             </div>
             
             <!-- 内科検診 -->
-            <div v-if="exam.type === '内科検診'" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div v-if="exam.type === '内科検診'" class="grid grid-cols-2 gap-2 text-xs">
               <div v-if="exam.data.exam_result">
-                <div class="text-xs text-gray-500 mb-1">検診結果</div>
-                <div class="text-sm font-medium text-gray-900">{{ exam.data.exam_result }}</div>
+                <span class="text-gray-500">検診:</span>
+                <span class="font-medium text-gray-900 ml-1">{{ exam.data.exam_result }}</span>
               </div>
               <div v-if="exam.data.diagnosis">
-                <div class="text-xs text-gray-500 mb-1">診断結果</div>
-                <div class="text-sm font-medium text-gray-900">{{ exam.data.diagnosis }}</div>
+                <span class="text-gray-500">診断:</span>
+                <span class="font-medium text-gray-900 ml-1">{{ exam.data.diagnosis }}</span>
               </div>
             </div>
             
             <!-- 耳鼻科検診 -->
-            <div v-if="exam.type === '耳鼻科検診'" class="grid grid-cols-1 md:grid-cols-5 gap-3">
+            <div v-if="exam.type === '耳鼻科検診'" class="grid grid-cols-5 gap-2 text-xs">
               <div v-if="exam.data.category">
-                <div class="text-xs text-gray-500 mb-1">分類</div>
-                <div class="text-sm font-medium text-gray-900">{{ exam.data.category }}</div>
+                <span class="text-gray-500">分類:</span>
+                <span class="font-medium text-gray-900 ml-1">{{ exam.data.category }}</span>
               </div>
               <div v-if="exam.data.exam_result">
-                <div class="text-xs text-gray-500 mb-1">検診結果</div>
-                <div class="text-sm font-medium text-gray-900">{{ exam.data.exam_result }}</div>
+                <span class="text-gray-500">検診:</span>
+                <span class="font-medium text-gray-900 ml-1">{{ exam.data.exam_result }}</span>
               </div>
               <div v-if="exam.data.findings">
-                <div class="text-xs text-gray-500 mb-1">所見</div>
-                <div class="text-sm font-medium text-gray-900">{{ exam.data.findings }}</div>
+                <span class="text-gray-500">所見:</span>
+                <span class="font-medium text-gray-900 ml-1">{{ exam.data.findings }}</span>
               </div>
               <div v-if="exam.data.diagnosis">
-                <div class="text-xs text-gray-500 mb-1">診断結果</div>
-                <div class="text-sm font-medium text-gray-900">{{ exam.data.diagnosis }}</div>
+                <span class="text-gray-500">診断:</span>
+                <span class="font-medium text-gray-900 ml-1">{{ exam.data.diagnosis }}</span>
               </div>
               <div v-if="exam.data.treatment">
-                <div class="text-xs text-gray-500 mb-1">処置</div>
-                <div class="text-sm font-medium text-gray-900">{{ exam.data.treatment }}</div>
+                <span class="text-gray-500">処置:</span>
+                <span class="font-medium text-gray-900 ml-1">{{ exam.data.treatment }}</span>
               </div>
             </div>
             
             <!-- 眼科検診 -->
             <div v-if="exam.type === '眼科検診'">
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="grid grid-cols-3 gap-2 text-xs">
                 <div v-if="exam.data.exam_result">
-                  <div class="text-xs text-gray-500 mb-1">検診結果</div>
-                  <div class="text-sm font-medium text-gray-900">{{ exam.data.exam_result }}</div>
+                  <span class="text-gray-500">検診:</span>
+                  <span class="font-medium text-gray-900 ml-1">{{ exam.data.exam_result }}</span>
                 </div>
                 <div v-if="exam.data.diagnosis">
-                  <div class="text-xs text-gray-500 mb-1">診断結果</div>
-                  <div class="text-sm font-medium text-gray-900">{{ exam.data.diagnosis }}</div>
+                  <span class="text-gray-500">診断:</span>
+                  <span class="font-medium text-gray-900 ml-1">{{ exam.data.diagnosis }}</span>
                 </div>
                 <div v-if="exam.data.treatment">
-                  <div class="text-xs text-gray-500 mb-1">処置</div>
-                  <div class="text-sm font-medium text-gray-900">{{ exam.data.treatment }}</div>
+                  <span class="text-gray-500">処置:</span>
+                  <span class="font-medium text-gray-900 ml-1">{{ exam.data.treatment }}</span>
                 </div>
               </div>
-              <div v-if="exam.data.result" class="mt-3">
-                <div class="text-xs text-gray-500 mb-1">備考</div>
-                <div class="text-sm text-gray-700 bg-white rounded p-2">{{ exam.data.result }}</div>
+              <div v-if="exam.data.result" class="mt-1.5">
+                <span class="text-xs text-gray-500">備考:</span>
+                <span class="text-xs text-gray-700 ml-1">{{ exam.data.result }}</span>
               </div>
             </div>
             
             <!-- 聴力検査・結核検査・尿検査・心電図 -->
-            <div v-if="['聴力検査', '結核検査', '尿検査', '心電図'].includes(exam.type)" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div v-if="['聴力検査', '結核検査', '尿検査', '心電図'].includes(exam.type)" class="grid grid-cols-3 gap-2 text-xs">
               <div v-if="exam.data.exam_result">
-                <div class="text-xs text-gray-500 mb-1">検診結果</div>
-                <div class="text-sm font-medium text-gray-900">{{ exam.data.exam_result }}</div>
+                <span class="text-gray-500">検診:</span>
+                <span class="font-medium text-gray-900 ml-1">{{ exam.data.exam_result }}</span>
               </div>
               <div v-if="exam.data.diagnosis">
-                <div class="text-xs text-gray-500 mb-1">診断結果</div>
-                <div class="text-sm font-medium text-gray-900">{{ exam.data.diagnosis }}</div>
+                <span class="text-gray-500">診断:</span>
+                <span class="font-medium text-gray-900 ml-1">{{ exam.data.diagnosis }}</span>
               </div>
               <div v-if="exam.data.treatment">
-                <div class="text-xs text-gray-500 mb-1">処置</div>
-                <div class="text-sm font-medium text-gray-900">{{ exam.data.treatment }}</div>
+                <span class="text-gray-500">処置:</span>
+                <span class="font-medium text-gray-900 ml-1">{{ exam.data.treatment }}</span>
               </div>
             </div>
           </div>
           
           <!-- 検診結果がない場合 -->
-          <div v-if="allExamResults.length === 0" class="text-center py-8 text-gray-500">
+          <div v-if="allExamResults.length === 0" class="text-center py-4 text-sm text-gray-500">
             検診結果はまだ記録されていません
           </div>
         </div>
@@ -773,6 +776,56 @@ export default {
       return sorted[0] || null;
     });
     
+    // 過去の測定データから最新の身長・体重を取得
+    const latestHeightWeightRecord = computed(() => {
+      if (!record.value) return null;
+      const sorted = studentRecords.value
+        .filter(r => {
+          // 現在のレコード以前で、身長と体重が両方存在するレコード
+          return new Date(r.measured_date) <= new Date(record.value.measured_date) 
+            && r.height && r.weight;
+        })
+        .sort((a, b) => new Date(b.measured_date) - new Date(a.measured_date));
+      return sorted[0] || null;
+    });
+    
+    // 過去の測定データから最新の視力を取得
+    const latestVisionRecord = computed(() => {
+      if (!record.value) return null;
+      const sorted = studentRecords.value
+        .filter(r => {
+          // 現在のレコード以前で、視力が存在するレコード
+          return new Date(r.measured_date) <= new Date(record.value.measured_date)
+            && (r.vision_left || r.vision_right);
+        })
+        .sort((a, b) => new Date(b.measured_date) - new Date(a.measured_date));
+      return sorted[0] || null;
+    });
+    
+    // 表示用のデータ（現在のレコードに値がなければ過去のデータを使用）
+    const displayHeight = computed(() => {
+      return record.value?.height || latestHeightWeightRecord.value?.height || null;
+    });
+    
+    const displayWeight = computed(() => {
+      return record.value?.weight || latestHeightWeightRecord.value?.weight || null;
+    });
+    
+    const displayVisionLeft = computed(() => {
+      return record.value?.vision_left || latestVisionRecord.value?.vision_left || null;
+    });
+    
+    const displayVisionRight = computed(() => {
+      return record.value?.vision_right || latestVisionRecord.value?.vision_right || null;
+    });
+    
+    const displayBMI = computed(() => {
+      if (displayHeight.value && displayWeight.value) {
+        return (displayWeight.value / ((displayHeight.value / 100) ** 2)).toFixed(2);
+      }
+      return record.value?.bmi || null;
+    });
+    
     const nextRecord = computed(() => {
       const sorted = studentRecords.value
         .filter(r => new Date(r.measured_date) > new Date(record.value?.measured_date))
@@ -781,22 +834,24 @@ export default {
     });
     
     const heightGrowth = computed(() => {
-      if (!record.value || !previousRecord.value) return null;
-      return (record.value.height - previousRecord.value.height).toFixed(1);
+      if (!displayHeight.value || !previousRecord.value?.height) return null;
+      return (displayHeight.value - previousRecord.value.height).toFixed(1);
     });
     
     const weightGrowth = computed(() => {
-      if (!record.value || !previousRecord.value) return null;
-      return (record.value.weight - previousRecord.value.weight).toFixed(1);
+      if (!displayWeight.value || !previousRecord.value?.weight) return null;
+      return (displayWeight.value - previousRecord.value.weight).toFixed(1);
     });
     
     const bmiHistory = computed(() => {
       return studentRecords.value
+        .filter(r => r.height && r.weight) // 身長と体重が両方存在するレコードのみ
         .sort((a, b) => new Date(a.measured_date) - new Date(b.measured_date));
     });
     
     const growthHistory = computed(() => {
       return studentRecords.value
+        .filter(r => r.height || r.weight) // 身長または体重が存在するレコードのみ
         .sort((a, b) => new Date(a.measured_date) - new Date(b.measured_date));
     });
     
@@ -821,18 +876,18 @@ export default {
     });
     
     const heightDiffFromAverage = computed(() => {
-      if (!record.value || !peerComparison.value) return null;
-      return record.value.height - peerComparison.value.averageHeight;
+      if (!displayHeight.value || !peerComparison.value) return null;
+      return displayHeight.value - peerComparison.value.averageHeight;
     });
     
     const weightDiffFromAverage = computed(() => {
-      if (!record.value || !peerComparison.value) return null;
-      return record.value.weight - peerComparison.value.averageWeight;
+      if (!displayWeight.value || !peerComparison.value) return null;
+      return displayWeight.value - peerComparison.value.averageWeight;
     });
     
     const bmiDiffFromAverage = computed(() => {
-      if (!record.value || !peerComparison.value) return null;
-      return record.value.bmi - peerComparison.value.averageBMI;
+      if (!displayBMI.value || !peerComparison.value) return null;
+      return displayBMI.value - peerComparison.value.averageBMI;
     });
     
     // 検査結果のパース
@@ -1037,7 +1092,12 @@ export default {
     
     const relatedRecords = computed(() => {
       return studentRecords.value
-        .filter(r => r.id !== record.value?.id)
+        .filter(r => {
+          // 現在のレコードは除外
+          if (r.id === record.value?.id) return false;
+          // 身長または体重が存在するレコードのみ表示
+          return r.height || r.weight;
+        })
         .sort((a, b) => new Date(b.measured_date) - new Date(a.measured_date))
         .slice(0, 6);
     });
@@ -1227,6 +1287,13 @@ export default {
       studentRecords,
       peerComparison,
       previousRecord,
+      latestHeightWeightRecord,
+      latestVisionRecord,
+      displayHeight,
+      displayWeight,
+      displayVisionLeft,
+      displayVisionRight,
+      displayBMI,
       nextRecord,
       heightGrowth,
       weightGrowth,
