@@ -259,6 +259,12 @@
                 >
                   #{{ exam.recordId }}
                 </router-link>
+                <router-link 
+                  :to="`/health-records/${exam.recordId}/edit`"
+                  class="text-xs text-green-600 hover:text-green-500 font-medium"
+                >
+                  編集
+                </router-link>
               </div>
             </div>
             

@@ -73,6 +73,7 @@
                 <span>月</span>
                 <input type="text" v-model="diary.day" class="border border-gray-300 px-2 py-1 w-12 text-center" />
                 <span>日</span>
+                <span class="font-medium">({{ getDayOfWeek(diary.date) }})</span>
               </div>
               
               <!-- Weather and Temperature -->
