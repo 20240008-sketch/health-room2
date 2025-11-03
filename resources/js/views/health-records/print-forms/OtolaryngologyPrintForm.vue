@@ -349,7 +349,7 @@ export default {
 
     const getClassGrade = () => {
       if (props.student.school_class) {
-        return `${props.student.school_class.grade_id}年${props.student.school_class.name}`;
+        return `${props.student.school_class.grade}年${props.student.school_class.name}`;
       }
       return '　　　　　　　　　';
     };

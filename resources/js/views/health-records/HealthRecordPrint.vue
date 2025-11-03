@@ -145,14 +145,13 @@
               v-for="exam in examTypes"
               :key="exam.value"
               class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50"
-              :class="selectedExam === exam.value ? 'border-blue-500 bg-blue-50' : 'border-gray-300'"
+              :class="selectedExams.includes(exam.value) ? 'border-blue-500 bg-blue-50' : 'border-gray-300'"
             >
               <input
-                type="radio"
-                name="exam_type"
+                type="checkbox"
                 :value="exam.value"
-                v-model="selectedExam"
-                class="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                v-model="selectedExams"
+                class="h-4 w-4 text-blue-600 focus:ring-blue-500 rounded"
               />
               <span class="ml-3 text-sm font-medium text-gray-900">{{ exam.label }}</span>
             </label>
@@ -160,7 +159,7 @@
         </BaseCard>
 
         <!-- 検診結果フォーム表示 -->
-        <div v-if="selectedExam && selectedStudent" class="mb-6">
+        <div v-if="selectedExams.length > 0 && selectedStudent" class="mb-6">
           <div class="flex justify-end mb-4">
             <BaseButton
               variant="primary"
@@ -171,12 +170,12 @@
             </BaseButton>
           </div>
 
-          <!-- Print Preview -->
-          <BaseCard>
-            <div id="printArea">
+          <!-- Print Preview - 複数の検診結果を表示 -->
+          <BaseCard v-for="examType in selectedExams" :key="examType" class="mb-4">
+            <div class="print-section">
               <component
-                ref="printFormComponent"
-                :is="currentPrintComponent"
+                :ref="el => { if (el) printFormRefs[examType] = el }"
+                :is="getPrintComponent(examType)"
                 :student="selectedStudent"
                 :health-record="latestHealthRecord"
               />
@@ -236,10 +235,10 @@ export default {
     const studentSearch = ref('');
     const searchResults = ref([]);
     const selectedStudent = ref(null);
-    const selectedExam = ref('');
+    const selectedExams = ref([]);
     const studentHealthRecords = ref([]);
     const latestHealthRecord = ref(null);
-    const printFormComponent = ref(null);
+    const printFormRefs = ref({});
     const selectedClassId = ref('');
     const selectedStudentNumber = ref('');
     const classStudents = ref([]);
@@ -257,8 +256,8 @@ export default {
       { value: 'ecg', label: '心電図' }
     ];
 
-    const currentPrintComponent = computed(() => {
-      switch (selectedExam.value) {
+    const getPrintComponent = (examType) => {
+      switch (examType) {
         case 'vision_test':
           return VisionTestPrintForm;
         case 'otolaryngology':
@@ -266,7 +265,7 @@ export default {
         default:
           return null;
       }
-    });
+    };
 
     const searchStudents = async () => {
       if (!studentSearch.value || studentSearch.value.length < 1) {
@@ -420,6 +419,15 @@ export default {
         return;
       }
 
+      if (selectedExams.value.length === 0) {
+        notificationStore.addNotification({
+          type: 'warning',
+          title: '検診項目未選択',
+          message: '検診項目を選択してください'
+        });
+        return;
+      }
+
       try {
         notificationStore.addNotification({
           type: 'info',
@@ -427,74 +435,83 @@ export default {
           message: 'PDFを生成しています...'
         });
 
-        // 印刷フォームコンポーネントからformDataを取得
-        let formData = {};
-        
-        if (printFormComponent.value && typeof printFormComponent.value.getFormData === 'function') {
-          formData = printFormComponent.value.getFormData();
-          console.log('Form data from component:', formData);
-        } else {
-          console.warn('printFormComponent.getFormData not available');
-        }
-
-        // APIエンドポイントにPOSTリクエスト
-        const apiUrl = '/api/v1/health-records/generate-pdf';
-        const payload = {
-          exam_type: selectedExam.value,
-          student: {
-            id: selectedStudent.value.id,
-            name: selectedStudent.value.name,
-            student_id: selectedStudent.value.student_id,
-            student_number: selectedStudent.value.student_number,
-            school_class: selectedStudent.value.school_class || {}
-          },
-          health_record: latestHealthRecord.value || {},
-          form_data: formData
-        };
-
-        console.log('Requesting PDF from server:', apiUrl, payload);
-
-        const response = await axios.post(apiUrl, payload, {
-          responseType: 'blob',
-          headers: {
-            'Accept': 'application/pdf',
-            'Content-Type': 'application/json'
+        // 複数の検診項目のPDFを生成
+        for (const examType of selectedExams.value) {
+          // 印刷フォームコンポーネントからformDataを取得
+          let formData = {};
+          
+          const formComponent = printFormRefs.value[examType];
+          if (formComponent && typeof formComponent.getFormData === 'function') {
+            formData = formComponent.getFormData();
+            console.log(`Form data for ${examType}:`, formData);
+          } else {
+            console.warn(`printFormComponent.getFormData not available for ${examType}`);
           }
-        });
 
-        // レスポンスがPDFかどうかを確認
-        const blob = response.data;
-        if (blob.type !== 'application/pdf') {
-          // エラーレスポンスの場合
-          const text = await blob.text();
-          const errorData = JSON.parse(text);
-          throw new Error(errorData.message || 'PDF生成に失敗しました');
+          // APIエンドポイントにPOSTリクエスト
+          const apiUrl = '/api/v1/health-records/generate-pdf';
+          const payload = {
+            exam_type: examType,
+            student: {
+              id: selectedStudent.value.id,
+              name: selectedStudent.value.name,
+              student_id: selectedStudent.value.student_id,
+              student_number: selectedStudent.value.student_number,
+              school_class: selectedStudent.value.school_class || {}
+            },
+            health_record: latestHealthRecord.value || {},
+            form_data: formData
+          };
+
+          console.log('Requesting PDF from server:', apiUrl, payload);
+
+          const response = await axios.post(apiUrl, payload, {
+            responseType: 'blob',
+            headers: {
+              'Accept': 'application/pdf',
+              'Content-Type': 'application/json'
+            }
+          });
+
+          // レスポンスがPDFかどうかを確認
+          const blob = response.data;
+          if (blob.type !== 'application/pdf') {
+            // エラーレスポンスの場合
+            const text = await blob.text();
+            const errorData = JSON.parse(text);
+            throw new Error(errorData.message || 'PDF生成に失敗しました');
+          }
+
+          // ファイル名を生成
+          const examTypeName = examTypes.find(e => e.value === examType)?.label || '検診';
+          const fileName = `${selectedStudent.value.name}_${examTypeName}_${new Date().toISOString().split('T')[0]}.pdf`;
+
+          // Blobからダウンロード用URLを作成
+          const blobUrl = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = blobUrl;
+          a.download = fileName;
+          document.body.appendChild(a);
+          a.click();
+
+          // クリーンアップ
+          setTimeout(() => {
+            window.URL.revokeObjectURL(blobUrl);
+            document.body.removeChild(a);
+          }, 100);
+
+          console.log('PDF downloaded successfully:', fileName);
+
+          // 複数ダウンロード時は少し待機
+          if (selectedExams.value.length > 1) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
         }
-
-        // ファイル名を生成
-        const examTypeName = examTypes.find(e => e.value === selectedExam.value)?.label || '検診';
-        const fileName = `${selectedStudent.value.name}_${examTypeName}_${new Date().toISOString().split('T')[0]}.pdf`;
-
-        // Blobからダウンロード用URLを作成
-        const blobUrl = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = blobUrl;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-
-        // クリーンアップ
-        setTimeout(() => {
-          window.URL.revokeObjectURL(blobUrl);
-          document.body.removeChild(a);
-        }, 100);
-
-        console.log('PDF downloaded successfully:', fileName);
 
         notificationStore.addNotification({
           type: 'success',
           title: 'PDF保存完了',
-          message: 'PDFファイルをダウンロードしました'
+          message: `${selectedExams.value.length}件のPDFファイルをダウンロードしました`
         });
       } catch (error) {
         console.error('PDF generation error:', error);
@@ -527,21 +544,20 @@ export default {
       classStore.fetchClasses();
     });
 
-    watch(selectedExam, (newExam) => {
-      console.log('Selected exam changed:', newExam);
+    watch(selectedExams, (newExams) => {
+      console.log('Selected exams changed:', newExams);
       console.log('Latest health record:', latestHealthRecord.value);
-      console.log('Current print component:', currentPrintComponent.value);
     });
 
     return {
       studentSearch,
       searchResults,
       selectedStudent,
-      selectedExam,
+      selectedExams,
       examTypes,
       latestHealthRecord,
-      currentPrintComponent,
-      printFormComponent,
+      getPrintComponent,
+      printFormRefs,
       classList,
       selectedClassId,
       selectedStudentNumber,
