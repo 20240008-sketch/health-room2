@@ -38,9 +38,46 @@
         </template>
 
         <div class="space-y-4">
+          <!-- クラス選択 -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <BaseInput
+              v-model="selectedClassId"
+              type="select"
+              label="クラス選択"
+              @change="onClassChange"
+            >
+              <option value="">すべてのクラス</option>
+              <option
+                v-for="schoolClass in classList"
+                :key="schoolClass.class_id"
+                :value="schoolClass.class_id"
+              >
+                {{ schoolClass.name }}
+              </option>
+            </BaseInput>
+
+            <BaseInput
+              v-model="selectedStudentNumber"
+              type="select"
+              label="出席番号"
+              :disabled="!selectedClassId"
+              @change="onStudentNumberChange"
+            >
+              <option value="">選択してください</option>
+              <option
+                v-for="student in classStudents"
+                :key="student.id"
+                :value="student.student_number"
+              >
+                {{ student.student_number }}番 - {{ student.name }}
+              </option>
+            </BaseInput>
+          </div>
+
+          <!-- 名前検索 -->
           <BaseInput
             v-model="studentSearch"
-            label="学生名または学生番号で検索"
+            label="または学生名・学生番号で検索"
             placeholder="検索..."
             @input="searchStudents"
           >
@@ -124,20 +161,13 @@
 
         <!-- 検診結果フォーム表示 -->
         <div v-if="selectedExam && selectedStudent" class="mb-6">
-          <div class="flex justify-end space-x-3 mb-4">
+          <div class="flex justify-end mb-4">
             <BaseButton
               variant="primary"
               @click="downloadPDF"
             >
               <DocumentArrowDownIcon class="h-5 w-5 mr-2" />
               PDF保存
-            </BaseButton>
-            <BaseButton
-              variant="success"
-              @click="printResults"
-            >
-              <PrinterIcon class="h-5 w-5 mr-2" />
-              印刷
             </BaseButton>
           </div>
 
@@ -167,6 +197,7 @@ import BaseInput from '@/components/base/BaseInput.vue';
 import BaseButton from '@/components/base/BaseButton.vue';
 import { useHealthRecordStore } from '@/stores/healthRecord';
 import { useNotificationStore } from '@/stores/notification';
+import { useClassStore } from '@/stores/class';
 import OtolaryngologyPrintForm from './print-forms/OtolaryngologyPrintForm.vue';
 import VisionTestPrintForm from '@/components/print-forms/VisionTestPrintForm.vue';
 
@@ -177,10 +208,6 @@ const ChevronRightIcon = {
 
 const MagnifyingGlassIcon = {
   template: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>'
-};
-
-const PrinterIcon = {
-  template: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z" /></svg>'
 };
 
 const DocumentArrowDownIcon = {
@@ -196,7 +223,6 @@ export default {
     BaseButton,
     ChevronRightIcon,
     MagnifyingGlassIcon,
-    PrinterIcon,
     DocumentArrowDownIcon,
     OtolaryngologyPrintForm,
     VisionTestPrintForm
@@ -205,6 +231,7 @@ export default {
     const router = useRouter();
     const healthRecordStore = useHealthRecordStore();
     const notificationStore = useNotificationStore();
+    const classStore = useClassStore();
 
     const studentSearch = ref('');
     const searchResults = ref([]);
@@ -213,6 +240,11 @@ export default {
     const studentHealthRecords = ref([]);
     const latestHealthRecord = ref(null);
     const printFormComponent = ref(null);
+    const selectedClassId = ref('');
+    const selectedStudentNumber = ref('');
+    const classStudents = ref([]);
+
+    const classList = computed(() => classStore.classes || []);
 
     const examTypes = [
       { value: 'vision_test', label: '視力検査' },
@@ -272,6 +304,46 @@ export default {
       }
     };
 
+    const onClassChange = async () => {
+      selectedStudentNumber.value = '';
+      classStudents.value = [];
+      
+      if (!selectedClassId.value) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/v1/students?class_id=${selectedClassId.value}&per_page=100`);
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+          if (data.data.data) {
+            classStudents.value = data.data.data.sort((a, b) => a.student_number - b.student_number);
+          } else if (Array.isArray(data.data)) {
+            classStudents.value = data.data.sort((a, b) => a.student_number - b.student_number);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching class students:', error);
+        notificationStore.addNotification({
+          type: 'danger',
+          title: 'エラー',
+          message: 'クラスの学生情報の取得に失敗しました'
+        });
+      }
+    };
+
+    const onStudentNumberChange = () => {
+      if (!selectedStudentNumber.value) {
+        return;
+      }
+
+      const student = classStudents.value.find(s => s.student_number === parseInt(selectedStudentNumber.value));
+      if (student) {
+        selectStudent(student);
+      }
+    };
+
     const selectStudent = async (student) => {
       selectedStudent.value = student;
       searchResults.value = [];
@@ -326,6 +398,9 @@ export default {
       latestHealthRecord.value = null;
       searchResults.value = [];
       studentSearch.value = '';
+      selectedClassId.value = '';
+      selectedStudentNumber.value = '';
+      classStudents.value = [];
     };
 
     const getClassGradeName = (student) => {
@@ -333,20 +408,6 @@ export default {
         return `${student.school_class.name} (${student.school_class.grade_id}年)`;
       }
       return '未設定';
-    };
-
-    const printResults = () => {
-      if (!latestHealthRecord.value) {
-        notificationStore.addNotification({
-          type: 'warning',
-          title: 'データなし',
-          message: 'この生徒の健康記録が見つかりません'
-        });
-        return;
-      }
-
-      // 印刷ダイアログを開く
-      window.print();
     };
 
     const downloadPDF = async () => {
@@ -461,8 +522,9 @@ export default {
     };
 
     onMounted(() => {
-      // 初期化処理（必要に応じて）
+      // クラスリストをロード
       console.log('HealthRecordPrint mounted');
+      classStore.fetchClasses();
     });
 
     watch(selectedExam, (newExam) => {
@@ -480,11 +542,16 @@ export default {
       latestHealthRecord,
       currentPrintComponent,
       printFormComponent,
+      classList,
+      selectedClassId,
+      selectedStudentNumber,
+      classStudents,
       searchStudents,
       selectStudent,
       clearSelection,
       getClassGradeName,
-      printResults,
+      onClassChange,
+      onStudentNumberChange,
       downloadPDF
     };
   }

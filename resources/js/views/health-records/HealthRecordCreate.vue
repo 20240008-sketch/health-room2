@@ -3781,10 +3781,35 @@ export default {
       
       try {
         if (selectionMethod.value === 'individual') {
-          // Individual record creation
+          // Check if a record already exists for this student on the same date/year
+          await healthRecordStore.fetchHealthRecords({
+            student_id: selectedStudent.value.student_id,
+            year: parseInt(form.academic_year)
+          });
+          
+          // Find a record with the same measured_date (or same year if no measured_date)
+          let existingRecord = null;
+          if (healthRecordStore.healthRecords && healthRecordStore.healthRecords.value) {
+            existingRecord = healthRecordStore.healthRecords.value.find(record => {
+              if (form.measured_date) {
+                // Compare by measured_date if provided (normalize to date part only)
+                const recordDate = record.measured_date ? record.measured_date.split(' ')[0] : '';
+                const formDate = form.measured_date;
+                console.log('Comparing dates:', recordDate, '===', formDate);
+                return recordDate === formDate;
+              } else {
+                // Otherwise, find the most recent record from the same year
+                return true;  // Will use the first record from filtered results
+              }
+            });
+          }
+          
+          console.log('Found existing record:', existingRecord);
+          
+          // Prepare record data
           const recordData = {
             student_id: selectedStudent.value.student_id,
-            year: parseInt(form.academic_year), // academic_year → year
+            year: parseInt(form.academic_year),
             measured_date: form.measured_date || null,
             height: measurementItems.height && form.height ? parseFloat(form.height) : null,
             weight: measurementItems.weight && form.weight ? parseFloat(form.weight) : null,
@@ -3807,21 +3832,127 @@ export default {
           
           console.log('=== Individual Record Submission ===');
           console.log('Form data:', form);
-          console.log('form.academic_year:', form.academic_year, 'Type:', typeof form.academic_year);
-          console.log('parseInt(form.academic_year):', parseInt(form.academic_year));
-          console.log('Selected student:', selectedStudent.value);
+          console.log('Existing record:', existingRecord);
           console.log('Record data to submit:', recordData);
           console.log('===================================');
           
-          const newRecord = await healthRecordStore.createHealthRecord(recordData);
+          let savedRecord;
+          if (existingRecord) {
+            // Update existing record - start with existing data and only update what's being changed
+            const mergedData = { 
+              student_id: existingRecord.student_id,
+              year: existingRecord.year,
+              measured_date: existingRecord.measured_date
+            };
+            
+            // Only update fields that are being changed
+            // Basic measurements
+            if (measurementItems.height && form.height) {
+              mergedData.height = parseFloat(form.height);
+            } else if (existingRecord.height) {
+              mergedData.height = existingRecord.height;
+            }
+            
+            if (measurementItems.weight && form.weight) {
+              mergedData.weight = parseFloat(form.weight);
+            } else if (existingRecord.weight) {
+              mergedData.weight = existingRecord.weight;
+            }
+            
+            // Vision
+            if (measurementItems.vision) {
+              mergedData.vision_left = form.vision_left || null;
+              mergedData.vision_right = form.vision_right || null;
+              mergedData.vision_left_corrected = form.vision_left_corrected || null;
+              mergedData.vision_right_corrected = form.vision_right_corrected || null;
+            } else {
+              mergedData.vision_left = existingRecord.vision_left;
+              mergedData.vision_right = existingRecord.vision_right;
+              mergedData.vision_left_corrected = existingRecord.vision_left_corrected;
+              mergedData.vision_right_corrected = existingRecord.vision_right_corrected;
+            }
+            
+            // Ophthalmology
+            if (measurementItems.ophthalmology) {
+              mergedData.ophthalmology_result = form.ophthalmology_result || null;
+              mergedData.ophthalmology_exam_result = form.ophthalmology_exam_result || null;
+              mergedData.ophthalmology_diagnosis = form.ophthalmology_diagnosis || null;
+              mergedData.ophthalmology_treatment = form.ophthalmology_treatment || null;
+            } else {
+              mergedData.ophthalmology_result = existingRecord.ophthalmology_result;
+              mergedData.ophthalmology_exam_result = existingRecord.ophthalmology_exam_result;
+              mergedData.ophthalmology_diagnosis = existingRecord.ophthalmology_diagnosis;
+              mergedData.ophthalmology_treatment = existingRecord.ophthalmology_treatment;
+            }
+            
+            // Otolaryngology
+            if (measurementItems.otolaryngology) {
+              mergedData.otolaryngology_result = JSON.stringify(form.otolaryngology_items);
+            } else {
+              mergedData.otolaryngology_result = existingRecord.otolaryngology_result;
+            }
+            
+            // Internal Medicine
+            if (measurementItems.internal_medicine) {
+              mergedData.internal_medicine_result = JSON.stringify(form.internal_medicine_items);
+            } else {
+              mergedData.internal_medicine_result = existingRecord.internal_medicine_result;
+            }
+            
+            // Hearing Test
+            if (measurementItems.hearing_test) {
+              mergedData.hearing_test_result = JSON.stringify(form.hearing_test_items);
+            } else {
+              mergedData.hearing_test_result = existingRecord.hearing_test_result;
+            }
+            
+            // Tuberculosis Test
+            if (measurementItems.tuberculosis_test) {
+              mergedData.tuberculosis_test_result = JSON.stringify(form.tuberculosis_test_items);
+            } else {
+              mergedData.tuberculosis_test_result = existingRecord.tuberculosis_test_result;
+            }
+            
+            // Urine Test
+            if (measurementItems.urine_test) {
+              mergedData.urine_test_result = JSON.stringify(form.urine_test_items);
+            } else {
+              mergedData.urine_test_result = existingRecord.urine_test_result;
+            }
+            
+            // ECG
+            if (measurementItems.ecg) {
+              mergedData.ecg_result = JSON.stringify(form.ecg_items);
+            } else {
+              mergedData.ecg_result = existingRecord.ecg_result;
+            }
+            
+            // Notes - update if provided, otherwise keep existing
+            if (form.notes) {
+              mergedData.notes = form.notes;
+            } else {
+              mergedData.notes = existingRecord.notes;
+            }
+            
+            savedRecord = await healthRecordStore.updateHealthRecord(existingRecord.id, mergedData);
+            
+            notificationStore.addNotification({
+              type: 'success',
+              title: '記録更新完了',
+              message: `${selectedStudent.value.name}さんの健康記録を更新しました`
+            });
+          } else {
+            // Create new record
+            savedRecord = await healthRecordStore.createHealthRecord(recordData);
+            
+            notificationStore.addNotification({
+              type: 'success',
+              title: '記録作成完了',
+              message: `${selectedStudent.value.name}さんの健康記録を作成しました`
+            });
+          }
           
-          notificationStore.addNotification({
-            type: 'success',
-            title: '記録作成完了',
-            message: `${selectedStudent.value.name}さんの健康記録を作成しました`
-          });
-          
-          router.push(`/health-records/${newRecord.id}`);
+          router.push(`/health-records/${savedRecord.id}`);
         } else {
           // Bulk record creation with measurements
           const recordsData = selectedStudentIds.value.map(studentId => {

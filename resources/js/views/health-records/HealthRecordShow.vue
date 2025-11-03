@@ -234,173 +234,109 @@
       <!-- 検査結果 -->
       <BaseCard v-if="hasExamResults">
         <template #header>
-          <h2 class="text-lg font-medium text-gray-900">検査結果</h2>
+          <h2 class="text-lg font-medium text-gray-900">検査結果（全{{ allExamResults.length }}件）</h2>
+          <p class="mt-1 text-sm text-gray-500">この生徒のすべての検診結果を新しい順に表示しています</p>
         </template>
         
-        <div class="space-y-6">
-          <!-- 眼科検診 -->
-          <div v-if="record.ophthalmology_exam_result || record.ophthalmology_diagnosis || record.ophthalmology_treatment || record.ophthalmology_result" class="border-l-4 border-blue-500 pl-4">
-            <h3 class="text-sm font-semibold text-gray-900 mb-3">眼科検診</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div v-if="record.ophthalmology_exam_result">
+        <div class="space-y-4">
+          <!-- 全ての検診結果を表示 -->
+          <div 
+            v-for="(exam, index) in allExamResults" 
+            :key="`exam-${exam.recordId}-${index}`"
+            class="pl-4 bg-gray-50 rounded p-4 border-l-4"
+            :class="getBorderColorClass(exam.color)"
+          >
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-semibold text-gray-900">{{ exam.type }}</h3>
+              <div class="flex items-center space-x-3">
+                <span class="text-xs text-gray-500">{{ exam.date }}</span>
+                <router-link 
+                  :to="`/health-records/${exam.recordId}`"
+                  class="text-xs text-blue-600 hover:text-blue-500"
+                >
+                  記録#{{ exam.recordId }}
+                </router-link>
+              </div>
+            </div>
+            
+            <!-- 内科検診 -->
+            <div v-if="exam.type === '内科検診'" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div v-if="exam.data.exam_result">
                 <div class="text-xs text-gray-500 mb-1">検診結果</div>
-                <div class="text-sm font-medium text-gray-900">{{ record.ophthalmology_exam_result }}</div>
+                <div class="text-sm font-medium text-gray-900">{{ exam.data.exam_result }}</div>
               </div>
-              <div v-if="record.ophthalmology_diagnosis">
+              <div v-if="exam.data.diagnosis">
                 <div class="text-xs text-gray-500 mb-1">診断結果</div>
-                <div class="text-sm font-medium text-gray-900">{{ record.ophthalmology_diagnosis }}</div>
+                <div class="text-sm font-medium text-gray-900">{{ exam.data.diagnosis }}</div>
               </div>
-              <div v-if="record.ophthalmology_treatment">
+            </div>
+            
+            <!-- 耳鼻科検診 -->
+            <div v-if="exam.type === '耳鼻科検診'" class="grid grid-cols-1 md:grid-cols-5 gap-3">
+              <div v-if="exam.data.category">
+                <div class="text-xs text-gray-500 mb-1">分類</div>
+                <div class="text-sm font-medium text-gray-900">{{ exam.data.category }}</div>
+              </div>
+              <div v-if="exam.data.exam_result">
+                <div class="text-xs text-gray-500 mb-1">検診結果</div>
+                <div class="text-sm font-medium text-gray-900">{{ exam.data.exam_result }}</div>
+              </div>
+              <div v-if="exam.data.findings">
+                <div class="text-xs text-gray-500 mb-1">所見</div>
+                <div class="text-sm font-medium text-gray-900">{{ exam.data.findings }}</div>
+              </div>
+              <div v-if="exam.data.diagnosis">
+                <div class="text-xs text-gray-500 mb-1">診断結果</div>
+                <div class="text-sm font-medium text-gray-900">{{ exam.data.diagnosis }}</div>
+              </div>
+              <div v-if="exam.data.treatment">
                 <div class="text-xs text-gray-500 mb-1">処置</div>
-                <div class="text-sm font-medium text-gray-900">{{ record.ophthalmology_treatment }}</div>
+                <div class="text-sm font-medium text-gray-900">{{ exam.data.treatment }}</div>
               </div>
             </div>
-            <div v-if="record.ophthalmology_result" class="mt-3">
-              <div class="text-xs text-gray-500 mb-1">備考</div>
-              <div class="text-sm text-gray-700 bg-gray-50 rounded p-2">{{ record.ophthalmology_result }}</div>
-            </div>
-          </div>
-
-          <!-- 耳鼻科検診 -->
-          <div v-if="otolaryngologyItems.length > 0" class="border-l-4 border-green-500 pl-4">
-            <h3 class="text-sm font-semibold text-gray-900 mb-3">耳鼻科検診</h3>
-            <div class="space-y-3">
-              <div v-for="(item, index) in otolaryngologyItems" :key="index" class="bg-gray-50 rounded p-3">
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
-                  <div v-if="item.category">
-                    <div class="text-xs text-gray-500 mb-1">分類</div>
-                    <div class="text-sm font-medium text-gray-900">{{ item.category }}</div>
-                  </div>
-                  <div v-if="item.exam_result">
-                    <div class="text-xs text-gray-500 mb-1">検診結果</div>
-                    <div class="text-sm font-medium text-gray-900">{{ item.exam_result }}</div>
-                  </div>
-                  <div v-if="item.findings">
-                    <div class="text-xs text-gray-500 mb-1">所見</div>
-                    <div class="text-sm font-medium text-gray-900">{{ item.findings }}</div>
-                  </div>
-                  <div v-if="item.diagnosis">
-                    <div class="text-xs text-gray-500 mb-1">診断結果</div>
-                    <div class="text-sm font-medium text-gray-900">{{ item.diagnosis }}</div>
-                  </div>
-                  <div v-if="item.treatment">
-                    <div class="text-xs text-gray-500 mb-1">処置</div>
-                    <div class="text-sm font-medium text-gray-900">{{ item.treatment }}</div>
-                  </div>
+            
+            <!-- 眼科検診 -->
+            <div v-if="exam.type === '眼科検診'">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div v-if="exam.data.exam_result">
+                  <div class="text-xs text-gray-500 mb-1">検診結果</div>
+                  <div class="text-sm font-medium text-gray-900">{{ exam.data.exam_result }}</div>
+                </div>
+                <div v-if="exam.data.diagnosis">
+                  <div class="text-xs text-gray-500 mb-1">診断結果</div>
+                  <div class="text-sm font-medium text-gray-900">{{ exam.data.diagnosis }}</div>
+                </div>
+                <div v-if="exam.data.treatment">
+                  <div class="text-xs text-gray-500 mb-1">処置</div>
+                  <div class="text-sm font-medium text-gray-900">{{ exam.data.treatment }}</div>
                 </div>
               </div>
+              <div v-if="exam.data.result" class="mt-3">
+                <div class="text-xs text-gray-500 mb-1">備考</div>
+                <div class="text-sm text-gray-700 bg-white rounded p-2">{{ exam.data.result }}</div>
+              </div>
             </div>
-          </div>
-
-          <!-- 内科検診 -->
-          <div v-if="internalMedicineItems.length > 0" class="border-l-4 border-purple-500 pl-4">
-            <h3 class="text-sm font-semibold text-gray-900 mb-3">内科検診</h3>
-            <div class="space-y-3">
-              <div v-for="(item, index) in internalMedicineItems" :key="index" class="bg-gray-50 rounded p-3">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div v-if="item.exam_result">
-                    <div class="text-xs text-gray-500 mb-1">検診結果</div>
-                    <div class="text-sm font-medium text-gray-900">{{ item.exam_result }}</div>
-                  </div>
-                  <div v-if="item.diagnosis">
-                    <div class="text-xs text-gray-500 mb-1">診断結果</div>
-                    <div class="text-sm font-medium text-gray-900">{{ item.diagnosis }}</div>
-                  </div>
-                </div>
+            
+            <!-- 聴力検査・結核検査・尿検査・心電図 -->
+            <div v-if="['聴力検査', '結核検査', '尿検査', '心電図'].includes(exam.type)" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div v-if="exam.data.exam_result">
+                <div class="text-xs text-gray-500 mb-1">検診結果</div>
+                <div class="text-sm font-medium text-gray-900">{{ exam.data.exam_result }}</div>
+              </div>
+              <div v-if="exam.data.diagnosis">
+                <div class="text-xs text-gray-500 mb-1">診断結果</div>
+                <div class="text-sm font-medium text-gray-900">{{ exam.data.diagnosis }}</div>
+              </div>
+              <div v-if="exam.data.treatment">
+                <div class="text-xs text-gray-500 mb-1">処置</div>
+                <div class="text-sm font-medium text-gray-900">{{ exam.data.treatment }}</div>
               </div>
             </div>
           </div>
-
-          <!-- 聴力検査 -->
-          <div v-if="hearingTestItems.length > 0" class="border-l-4 border-indigo-500 pl-4">
-            <h3 class="text-sm font-semibold text-gray-900 mb-3">聴力検査</h3>
-            <div class="space-y-3">
-              <div v-for="(item, index) in hearingTestItems" :key="index" class="bg-gray-50 rounded p-3">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div v-if="item.exam_result">
-                    <div class="text-xs text-gray-500 mb-1">検診結果</div>
-                    <div class="text-sm font-medium text-gray-900">{{ item.exam_result }}</div>
-                  </div>
-                  <div v-if="item.diagnosis">
-                    <div class="text-xs text-gray-500 mb-1">診断結果</div>
-                    <div class="text-sm font-medium text-gray-900">{{ item.diagnosis }}</div>
-                  </div>
-                  <div v-if="item.treatment">
-                    <div class="text-xs text-gray-500 mb-1">処置</div>
-                    <div class="text-sm font-medium text-gray-900">{{ item.treatment }}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 結核検査 -->
-          <div v-if="tuberculosisTestItems.length > 0" class="border-l-4 border-yellow-500 pl-4">
-            <h3 class="text-sm font-semibold text-gray-900 mb-3">結核検査</h3>
-            <div class="space-y-3">
-              <div v-for="(item, index) in tuberculosisTestItems" :key="index" class="bg-gray-50 rounded p-3">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div v-if="item.exam_result">
-                    <div class="text-xs text-gray-500 mb-1">検診結果</div>
-                    <div class="text-sm font-medium text-gray-900">{{ item.exam_result }}</div>
-                  </div>
-                  <div v-if="item.diagnosis">
-                    <div class="text-xs text-gray-500 mb-1">診断結果</div>
-                    <div class="text-sm font-medium text-gray-900">{{ item.diagnosis }}</div>
-                  </div>
-                  <div v-if="item.treatment">
-                    <div class="text-xs text-gray-500 mb-1">処置</div>
-                    <div class="text-sm font-medium text-gray-900">{{ item.treatment }}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 尿検査 -->
-          <div v-if="urineTestItems.length > 0" class="border-l-4 border-pink-500 pl-4">
-            <h3 class="text-sm font-semibold text-gray-900 mb-3">尿検査</h3>
-            <div class="space-y-3">
-              <div v-for="(item, index) in urineTestItems" :key="index" class="bg-gray-50 rounded p-3">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div v-if="item.exam_result">
-                    <div class="text-xs text-gray-500 mb-1">検診結果</div>
-                    <div class="text-sm font-medium text-gray-900">{{ item.exam_result }}</div>
-                  </div>
-                  <div v-if="item.diagnosis">
-                    <div class="text-xs text-gray-500 mb-1">診断結果</div>
-                    <div class="text-sm font-medium text-gray-900">{{ item.diagnosis }}</div>
-                  </div>
-                  <div v-if="item.treatment">
-                    <div class="text-xs text-gray-500 mb-1">処置</div>
-                    <div class="text-sm font-medium text-gray-900">{{ item.treatment }}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 心電図 -->
-          <div v-if="ecgItems.length > 0" class="border-l-4 border-red-500 pl-4">
-            <h3 class="text-sm font-semibold text-gray-900 mb-3">心電図</h3>
-            <div class="space-y-3">
-              <div v-for="(item, index) in ecgItems" :key="index" class="bg-gray-50 rounded p-3">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div v-if="item.exam_result">
-                    <div class="text-xs text-gray-500 mb-1">検診結果</div>
-                    <div class="text-sm font-medium text-gray-900">{{ item.exam_result }}</div>
-                  </div>
-                  <div v-if="item.diagnosis">
-                    <div class="text-xs text-gray-500 mb-1">診断結果</div>
-                    <div class="text-sm font-medium text-gray-900">{{ item.diagnosis }}</div>
-                  </div>
-                  <div v-if="item.treatment">
-                    <div class="text-xs text-gray-500 mb-1">処置</div>
-                    <div class="text-sm font-medium text-gray-900">{{ item.treatment }}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          
+          <!-- 検診結果がない場合 -->
+          <div v-if="allExamResults.length === 0" class="text-center py-8 text-gray-500">
+            検診結果はまだ記録されていません
           </div>
         </div>
       </BaseCard>
@@ -954,20 +890,149 @@ export default {
       }
     });
     
-    // 検査結果があるかどうか
-    const hasExamResults = computed(() => {
-      return !!(
-        record.value?.ophthalmology_exam_result ||
-        record.value?.ophthalmology_diagnosis ||
-        record.value?.ophthalmology_treatment ||
-        record.value?.ophthalmology_result ||
-        otolaryngologyItems.value.length > 0 ||
-        internalMedicineItems.value.length > 0 ||
-        hearingTestItems.value.length > 0 ||
-        tuberculosisTestItems.value.length > 0 ||
-        urineTestItems.value.length > 0 ||
-        ecgItems.value.length > 0
+    // 全ての健康記録から検診結果を集約（新しい順）
+    const allExamResults = computed(() => {
+      const results = [];
+      
+      // studentRecordsを新しい順にソート
+      const sortedRecords = [...studentRecords.value].sort((a, b) => 
+        new Date(b.measured_date) - new Date(a.measured_date)
       );
+      
+      sortedRecords.forEach(rec => {
+        const recordDate = formatDate(rec.measured_date);
+        
+        // 内科検診
+        if (rec.internal_medicine_result) {
+          try {
+            const items = JSON.parse(rec.internal_medicine_result);
+            items.forEach(item => {
+              if (item.exam_result || item.diagnosis) {
+                results.push({
+                  type: '内科検診',
+                  date: recordDate,
+                  recordId: rec.id,
+                  color: 'purple',
+                  data: item
+                });
+              }
+            });
+          } catch (e) {}
+        }
+        
+        // 耳鼻科検診
+        if (rec.otolaryngology_result) {
+          try {
+            const items = JSON.parse(rec.otolaryngology_result);
+            items.forEach(item => {
+              if (item.category || item.exam_result || item.diagnosis) {
+                results.push({
+                  type: '耳鼻科検診',
+                  date: recordDate,
+                  recordId: rec.id,
+                  color: 'green',
+                  data: item
+                });
+              }
+            });
+          } catch (e) {}
+        }
+        
+        // 眼科検診
+        if (rec.ophthalmology_exam_result || rec.ophthalmology_diagnosis || rec.ophthalmology_treatment || rec.ophthalmology_result) {
+          results.push({
+            type: '眼科検診',
+            date: recordDate,
+            recordId: rec.id,
+            color: 'blue',
+            data: {
+              exam_result: rec.ophthalmology_exam_result,
+              diagnosis: rec.ophthalmology_diagnosis,
+              treatment: rec.ophthalmology_treatment,
+              result: rec.ophthalmology_result
+            }
+          });
+        }
+        
+        // 聴力検査
+        if (rec.hearing_test_result) {
+          try {
+            const items = JSON.parse(rec.hearing_test_result);
+            items.forEach(item => {
+              if (item.exam_result || item.diagnosis) {
+                results.push({
+                  type: '聴力検査',
+                  date: recordDate,
+                  recordId: rec.id,
+                  color: 'indigo',
+                  data: item
+                });
+              }
+            });
+          } catch (e) {}
+        }
+        
+        // 結核検査
+        if (rec.tuberculosis_test_result) {
+          try {
+            const items = JSON.parse(rec.tuberculosis_test_result);
+            items.forEach(item => {
+              if (item.exam_result || item.diagnosis) {
+                results.push({
+                  type: '結核検査',
+                  date: recordDate,
+                  recordId: rec.id,
+                  color: 'yellow',
+                  data: item
+                });
+              }
+            });
+          } catch (e) {}
+        }
+        
+        // 尿検査
+        if (rec.urine_test_result) {
+          try {
+            const items = JSON.parse(rec.urine_test_result);
+            items.forEach(item => {
+              if (item.exam_result || item.diagnosis) {
+                results.push({
+                  type: '尿検査',
+                  date: recordDate,
+                  recordId: rec.id,
+                  color: 'pink',
+                  data: item
+                });
+              }
+            });
+          } catch (e) {}
+        }
+        
+        // 心電図
+        if (rec.ecg_result) {
+          try {
+            const items = JSON.parse(rec.ecg_result);
+            items.forEach(item => {
+              if (item.exam_result || item.diagnosis) {
+                results.push({
+                  type: '心電図',
+                  date: recordDate,
+                  recordId: rec.id,
+                  color: 'red',
+                  data: item
+                });
+              }
+            });
+          } catch (e) {}
+        }
+      });
+      
+      return results;
+    });
+    
+    // 検査結果があるかどうか（全ての記録を含む）
+    const hasExamResults = computed(() => {
+      return allExamResults.value.length > 0;
     });
     
     const relatedRecords = computed(() => {
@@ -1056,6 +1121,19 @@ export default {
       if (bmiValue < 25) return '適正範囲内です。現状を維持しましょう。';
       if (bmiValue < 30) return '少し体重が多めです。運動や食事に注意しましょう。';
       return '医師に相談することをお勧めします。';
+    };
+    
+    const getBorderColorClass = (color) => {
+      const colorMap = {
+        'purple': 'border-purple-500',
+        'green': 'border-green-500',
+        'blue': 'border-blue-500',
+        'indigo': 'border-indigo-500',
+        'yellow': 'border-yellow-500',
+        'pink': 'border-pink-500',
+        'red': 'border-red-500'
+      };
+      return colorMap[color] || 'border-gray-500';
     };
     
     const exportRecord = () => {
@@ -1167,6 +1245,7 @@ export default {
       tuberculosisTestItems,
       urineTestItems,
       ecgItems,
+      allExamResults,
       hasExamResults,
       relatedRecords,
       formatDate,
@@ -1177,6 +1256,7 @@ export default {
       getBMIColor,
       getBMIBorderColor,
       getBMIDescription,
+      getBorderColorClass,
       exportRecord
     };
   }
