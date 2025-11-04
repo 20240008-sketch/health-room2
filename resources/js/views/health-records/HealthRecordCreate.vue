@@ -280,89 +280,89 @@
               <!-- Measurement Items Selection -->
               <div>
                 <label class="text-base font-medium text-gray-900 mb-3 block">測定項目を選択</label>
-                <div class="space-y-3">
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   <!-- Basic Measurements -->
-                  <label class="flex items-center p-3 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+                  <label class="flex items-center p-2 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
                     <input
                       type="checkbox"
                       v-model="measurementItems.height"
                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <span class="ml-3 text-sm font-medium text-gray-700">身長 (cm)</span>
+                    <span class="ml-2 text-sm font-medium text-gray-700">身長 (cm)</span>
                   </label>
-                  <label class="flex items-center p-3 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+                  <label class="flex items-center p-2 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
                     <input
                       type="checkbox"
                       v-model="measurementItems.weight"
                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <span class="ml-3 text-sm font-medium text-gray-700">体重 (kg)</span>
+                    <span class="ml-2 text-sm font-medium text-gray-700">体重 (kg)</span>
                   </label>
-                  <label class="flex items-center p-3 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+                  <label class="flex items-center p-2 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
                     <input
                       type="checkbox"
                       v-model="measurementItems.vision"
                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <span class="ml-3 text-sm font-medium text-gray-700">視力</span>
+                    <span class="ml-2 text-sm font-medium text-gray-700">視力</span>
                   </label>
                   
                   <!-- Medical Examinations -->
-                  <label class="flex items-center p-3 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+                  <label class="flex items-center p-2 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
                     <input
                       type="checkbox"
                       v-model="measurementItems.ophthalmology"
                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <span class="ml-3 text-sm font-medium text-gray-700">眼科検診</span>
+                    <span class="ml-2 text-sm font-medium text-gray-700">眼科検診</span>
                   </label>
-                  <label class="flex items-center p-3 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+                  <label class="flex items-center p-2 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
                     <input
                       type="checkbox"
                       v-model="measurementItems.otolaryngology"
                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <span class="ml-3 text-sm font-medium text-gray-700">耳鼻科検診</span>
+                    <span class="ml-2 text-sm font-medium text-gray-700">耳鼻科検診</span>
                   </label>
-                  <label class="flex items-center p-3 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+                  <label class="flex items-center p-2 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
                     <input
                       type="checkbox"
                       v-model="measurementItems.internal_medicine"
                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <span class="ml-3 text-sm font-medium text-gray-700">内科検診</span>
+                    <span class="ml-2 text-sm font-medium text-gray-700">内科検診</span>
                   </label>
-                  <label class="flex items-center p-3 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+                  <label class="flex items-center p-2 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
                     <input
                       type="checkbox"
                       v-model="measurementItems.hearing_test"
                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <span class="ml-3 text-sm font-medium text-gray-700">聴力検査</span>
+                    <span class="ml-2 text-sm font-medium text-gray-700">聴力検査</span>
                   </label>
-                  <label class="flex items-center p-3 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+                  <label class="flex items-center p-2 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
                     <input
                       type="checkbox"
                       v-model="measurementItems.tuberculosis_test"
                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <span class="ml-3 text-sm font-medium text-gray-700">結核検査</span>
+                    <span class="ml-2 text-sm font-medium text-gray-700">結核検査</span>
                   </label>
-                  <label class="flex items-center p-3 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+                  <label class="flex items-center p-2 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
                     <input
                       type="checkbox"
                       v-model="measurementItems.urine_test"
                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <span class="ml-3 text-sm font-medium text-gray-700">尿検査</span>
+                    <span class="ml-2 text-sm font-medium text-gray-700">尿検査</span>
                   </label>
-                  <label class="flex items-center p-3 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+                  <label class="flex items-center p-2 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
                     <input
                       type="checkbox"
                       v-model="measurementItems.ecg"
                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <span class="ml-3 text-sm font-medium text-gray-700">心電図</span>
+                    <span class="ml-2 text-sm font-medium text-gray-700">心電図</span>
                   </label>
                 </div>
               </div>
@@ -794,7 +794,7 @@
                       :key="index"
                       class="border border-gray-300 rounded-lg p-4 mb-3 bg-white"
                     >
-                      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         <!-- 検診結果 -->
                         <div>
                           <label class="block text-xs font-medium text-gray-700 mb-1">検診結果</label>
@@ -838,6 +838,27 @@
                             <option value="喘息">喘息</option>
                             <option value="低身長">低身長</option>
                             <option value="機能性雑音">機能性雑音</option>
+                          </select>
+                        </div>
+
+                        <!-- 処置 -->
+                        <div>
+                          <label class="block text-xs font-medium text-gray-700 mb-1">処置</label>
+                          <select
+                            v-model="item.treatment"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="経過観察">経過観察</option>
+                            <option value="治療不要">治療不要</option>
+                            <option value="治療中">治療中</option>
+                            <option value="治療完了">治療完了</option>
+                            <option value="管理不要">管理不要</option>
+                            <option value="要管理Ａ">要管理Ａ</option>
+                            <option value="要管理Ｂ">要管理Ｂ</option>
+                            <option value="要管理Ｃ">要管理Ｃ</option>
+                            <option value="要管理Ｄ">要管理Ｄ</option>
+                            <option value="要管理Ｅ">要管理Ｅ</option>
                           </select>
                         </div>
                       </div>
@@ -1730,6 +1751,27 @@
                             <option value="喘息">喘息</option>
                             <option value="低身長">低身長</option>
                             <option value="機能性雑音">機能性雑音</option>
+                          </select>
+                        </div>
+
+                        <!-- 処置 -->
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 mb-1">処置</label>
+                          <select
+                            v-model="item.treatment"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          >
+                            <option value="">選択してください</option>
+                            <option value="経過観察">経過観察</option>
+                            <option value="治療不要">治療不要</option>
+                            <option value="治療中">治療中</option>
+                            <option value="治療完了">治療完了</option>
+                            <option value="管理不要">管理不要</option>
+                            <option value="要管理Ａ">要管理Ａ</option>
+                            <option value="要管理Ｂ">要管理Ｂ</option>
+                            <option value="要管理Ｃ">要管理Ｃ</option>
+                            <option value="要管理Ｄ">要管理Ｄ</option>
+                            <option value="要管理Ｅ">要管理Ｅ</option>
                           </select>
                         </div>
                       </div>
@@ -2778,7 +2820,8 @@ export default {
       internal_medicine_items: [
         {
           exam_result: '',
-          diagnosis: ''
+          diagnosis: '',
+          treatment: ''
         }
       ],
       hearing_test_result: '',
@@ -3055,7 +3098,8 @@ export default {
     const addInternalMedicineItem = () => {
       form.internal_medicine_items.push({
         exam_result: '',
-        diagnosis: ''
+        diagnosis: '',
+        treatment: ''
       });
     };
     
@@ -3184,7 +3228,8 @@ export default {
       }
       bulkMeasurements[studentId].internal_medicine_items.push({
         exam_result: '',
-        diagnosis: ''
+        diagnosis: '',
+        treatment: ''
       });
     };
     
@@ -3326,7 +3371,8 @@ export default {
       if (!bulkMeasurements[studentId].internal_medicine_items) {
         bulkMeasurements[studentId].internal_medicine_items = [{
           exam_result: '',
-          diagnosis: ''
+          diagnosis: '',
+          treatment: ''
         }];
       }
       return '';
