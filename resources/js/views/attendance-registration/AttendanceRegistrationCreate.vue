@@ -1508,8 +1508,8 @@ export default {
           surgical_treatment: visit.surgical_treatment || null,
           // その他の詳細情報
           subject: visit.subject || null,
-          club_activity: visit.club_activity || null,
-          event_type: visit.event_type || null,
+          club: visit.club_activity || null,
+          event: visit.event_type || null,
           absence_reason: visit.absence_reason || null
         }));
         
