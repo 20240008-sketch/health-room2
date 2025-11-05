@@ -21,7 +21,7 @@
         <div class="mt-4 flex space-x-3 md:mt-0 md:ml-4">
           <BaseButton
             variant="secondary"
-            @click="exportToPDF"
+            @click="openPDFExportModal"
           >
             <DocumentArrowDownIcon class="h-4 w-4 mr-2" />
             PDF出力
@@ -755,6 +755,153 @@
         </div>
       </template>
     </BaseModal>
+
+    <!-- PDF Export Modal -->
+    <BaseModal
+      :show="showPDFExportModal"
+      @close="closePDFExportModal"
+      title="PDF出力オプション"
+      size="md"
+    >
+      <div class="space-y-4">
+        <div>
+          <h3 class="text-sm font-medium text-gray-700 mb-3">基本測定項目</h3>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="pdfExportColumns.height"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span class="text-sm">身長</span>
+            </label>
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="pdfExportColumns.weight"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span class="text-sm">体重</span>
+            </label>
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="pdfExportColumns.vision"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span class="text-sm">視力</span>
+            </label>
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="pdfExportColumns.bmi"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span class="text-sm">BMI</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="border-t pt-4">
+          <h3 class="text-sm font-medium text-gray-700 mb-3">検査項目</h3>
+          <div class="space-y-2">
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="pdfExportColumns.ophthalmology"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span class="text-sm">眼科検診</span>
+            </label>
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="pdfExportColumns.otolaryngology"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span class="text-sm">耳鼻科検診</span>
+            </label>
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="pdfExportColumns.internal_medicine"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span class="text-sm">内科検診</span>
+            </label>
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="pdfExportColumns.hearing_test"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span class="text-sm">聴力検査</span>
+            </label>
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="pdfExportColumns.tuberculosis_test"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span class="text-sm">結核検査</span>
+            </label>
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="pdfExportColumns.urine_test"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span class="text-sm">尿検査</span>
+            </label>
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="pdfExportColumns.ecg"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span class="text-sm">心電図</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="flex space-x-2 pt-2">
+          <BaseButton
+            variant="secondary"
+            size="sm"
+            @click="selectAllPDFColumns"
+          >
+            すべて選択
+          </BaseButton>
+          <BaseButton
+            variant="secondary"
+            size="sm"
+            @click="deselectAllPDFColumns"
+          >
+            すべて解除
+          </BaseButton>
+        </div>
+      </div>
+
+      <template #footer>
+        <div class="flex justify-end space-x-3">
+          <BaseButton
+            variant="secondary"
+            @click="closePDFExportModal"
+            :disabled="isExportingPDF"
+          >
+            キャンセル
+          </BaseButton>
+          <BaseButton
+            variant="primary"
+            @click="confirmPDFExport"
+            :disabled="isExportingPDF"
+          >
+            <BaseSpinner v-if="isExportingPDF" size="sm" class="mr-2" />
+            PDF出力
+          </BaseButton>
+        </div>
+      </template>
+    </BaseModal>
   </AppLayout>
 </template>
 
@@ -907,6 +1054,23 @@ export default {
     const showDeleteModal = ref(false);
     const recordToDelete = ref(null);
     const isDeleting = ref(false);
+    
+    // PDF Export modal state
+    const showPDFExportModal = ref(false);
+    const isExportingPDF = ref(false);
+    const pdfExportColumns = reactive({
+      height: true,
+      weight: true,
+      vision: true,
+      bmi: true,
+      ophthalmology: false,
+      otolaryngology: false,
+      internal_medicine: false,
+      hearing_test: false,
+      tuberculosis_test: false,
+      urine_test: false,
+      ecg: false
+    });
     
     const filters = reactive({
       academic_year: '',
@@ -1497,6 +1661,102 @@ export default {
       }
     };
     
+    // PDF Export Modal functions
+    const openPDFExportModal = () => {
+      showPDFExportModal.value = true;
+    };
+    
+    const closePDFExportModal = () => {
+      showPDFExportModal.value = false;
+      isExportingPDF.value = false;
+    };
+    
+    const selectAllPDFColumns = () => {
+      Object.keys(pdfExportColumns).forEach(key => {
+        pdfExportColumns[key] = true;
+      });
+    };
+    
+    const deselectAllPDFColumns = () => {
+      Object.keys(pdfExportColumns).forEach(key => {
+        pdfExportColumns[key] = false;
+      });
+    };
+    
+    const confirmPDFExport = async () => {
+      try {
+        isExportingPDF.value = true;
+        
+        // Get selected columns
+        const selectedColumns = Object.keys(pdfExportColumns).filter(
+          key => pdfExportColumns[key]
+        );
+        
+        if (selectedColumns.length === 0) {
+          notificationStore.addNotification({
+            type: 'warning',
+            title: '選択エラー',
+            message: '少なくとも1つの項目を選択してください'
+          });
+          isExportingPDF.value = false;
+          return;
+        }
+        
+        notificationStore.addNotification({
+          type: 'info',
+          title: 'PDF出力中',
+          message: '健康記録のPDFを生成しています...'
+        });
+
+        // Build query parameters
+        const params = new URLSearchParams();
+        if (filters.academic_year) params.append('academic_year', filters.academic_year);
+        if (filters.class_id) params.append('class_id', filters.class_id);
+        if (filters.year) params.append('year', filters.year);
+        if (filters.month) params.append('month', filters.month);
+        if (filters.day) params.append('day', filters.day);
+        if (searchQuery.value) params.append('search', searchQuery.value);
+        
+        // Add selected columns
+        selectedColumns.forEach(col => {
+          params.append('columns[]', col);
+        });
+
+        const response = await fetch(`/api/v1/health-records/export-pdf?${params.toString()}`, {
+          method: 'GET',
+        });
+
+        if (!response.ok) {
+          throw new Error('PDF生成に失敗しました');
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `健康記録一覧_${new Date().toISOString().split('T')[0]}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        notificationStore.addNotification({
+          type: 'success',
+          title: 'PDF出力完了',
+          message: '健康記録のPDFをダウンロードしました'
+        });
+        
+        closePDFExportModal();
+      } catch (error) {
+        notificationStore.addNotification({
+          type: 'danger',
+          title: 'PDF出力エラー',
+          message: error.message || 'PDFの生成に失敗しました'
+        });
+        isExportingPDF.value = false;
+      }
+    };
+    
     const exportHealthRecords = () => {
       // Implement CSV export functionality
       const csvContent = [
@@ -1635,7 +1895,16 @@ export default {
       isDeleting,
       confirmDelete,
       closeDeleteModal,
-      deleteRecord
+      deleteRecord,
+      // PDF Export Modal
+      showPDFExportModal,
+      isExportingPDF,
+      pdfExportColumns,
+      openPDFExportModal,
+      closePDFExportModal,
+      selectAllPDFColumns,
+      deselectAllPDFColumns,
+      confirmPDFExport
     };
   }
 };

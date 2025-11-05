@@ -846,6 +846,9 @@ class HealthRecordController extends Controller
     public function exportPdf(Request $request)
     {
         try {
+            // Get selected columns (default to basic measurements)
+            $selectedColumns = $request->input('columns', ['height', 'weight', 'vision', 'bmi']);
+            
             // Get filtered records
             $query = HealthRecord::with(['student.schoolClass']);
 
@@ -895,6 +898,78 @@ class HealthRecordController extends Controller
                 if ($v >= 0.3) return 'C';
                 return 'D';
             };
+            
+            // 検査結果の概要を取得
+            $getExamSummary = function($record, $examType) {
+                try {
+                    switch ($examType) {
+                        case 'ophthalmology':
+                            if ($record->ophthalmology_exam_result) {
+                                return mb_substr($record->ophthalmology_exam_result, 0, 20);
+                            }
+                            return '-';
+                        
+                        case 'otolaryngology':
+                            if ($record->otolaryngology_result) {
+                                $items = json_decode($record->otolaryngology_result, true);
+                                if ($items && count($items) > 0 && isset($items[0]['exam_result'])) {
+                                    return mb_substr($items[0]['exam_result'], 0, 20);
+                                }
+                            }
+                            return '-';
+                        
+                        case 'internal_medicine':
+                            if ($record->internal_medicine_result) {
+                                $items = json_decode($record->internal_medicine_result, true);
+                                if ($items && count($items) > 0 && isset($items[0]['exam_result'])) {
+                                    return mb_substr($items[0]['exam_result'], 0, 20);
+                                }
+                            }
+                            return '-';
+                        
+                        case 'hearing_test':
+                            if ($record->hearing_test_result) {
+                                $items = json_decode($record->hearing_test_result, true);
+                                if ($items && count($items) > 0 && isset($items[0]['exam_result'])) {
+                                    return mb_substr($items[0]['exam_result'], 0, 20);
+                                }
+                            }
+                            return '-';
+                        
+                        case 'tuberculosis_test':
+                            if ($record->tuberculosis_test_result) {
+                                $items = json_decode($record->tuberculosis_test_result, true);
+                                if ($items && count($items) > 0 && isset($items[0]['exam_result'])) {
+                                    return mb_substr($items[0]['exam_result'], 0, 20);
+                                }
+                            }
+                            return '-';
+                        
+                        case 'urine_test':
+                            if ($record->urine_test_result) {
+                                $items = json_decode($record->urine_test_result, true);
+                                if ($items && count($items) > 0 && isset($items[0]['exam_result'])) {
+                                    return mb_substr($items[0]['exam_result'], 0, 20);
+                                }
+                            }
+                            return '-';
+                        
+                        case 'ecg':
+                            if ($record->ecg_result) {
+                                $items = json_decode($record->ecg_result, true);
+                                if ($items && count($items) > 0 && isset($items[0]['exam_result'])) {
+                                    return mb_substr($items[0]['exam_result'], 0, 20);
+                                }
+                            }
+                            return '-';
+                        
+                        default:
+                            return '-';
+                    }
+                } catch (\Exception $e) {
+                    return '-';
+                }
+            };
 
             // PDFを生成
             $pdf = new TCPDF('L', 'mm', 'A4', true, 'UTF-8', false); // 横向き
@@ -940,18 +1015,46 @@ class HealthRecordController extends Controller
                 $pdf->Ln(2);
             }
             
-            // テーブルヘッダー
-            $pdf->SetFont('kozminproregular', 'B', 8);
-            $pdf->SetFillColor(230, 230, 230);
-            $pdf->Cell(20, 7, '測定日', 1, 0, 'C', true);
-            $pdf->Cell(35, 7, 'クラス', 1, 0, 'C', true);
-            $pdf->Cell(25, 7, '出席番号', 1, 0, 'C', true);
-            $pdf->Cell(40, 7, '氏名', 1, 0, 'C', true);
-            $pdf->Cell(20, 7, '身長(cm)', 1, 0, 'C', true);
-            $pdf->Cell(20, 7, '体重(kg)', 1, 0, 'C', true);
-            $pdf->Cell(30, 7, '視力(左/右)', 1, 0, 'C', true);
-            $pdf->Cell(15, 7, 'BMI', 1, 0, 'C', true);
-            $pdf->Cell(70, 7, '備考', 1, 1, 'C', true);
+            // カラム定義（幅とラベル）
+            $columnConfig = [
+                'measured_date' => ['width' => 20, 'label' => '測定日'],
+                'class' => ['width' => 30, 'label' => 'クラス'],
+                'student_number' => ['width' => 20, 'label' => '出席番号'],
+                'name' => ['width' => 35, 'label' => '氏名'],
+                'height' => ['width' => 18, 'label' => '身長(cm)'],
+                'weight' => ['width' => 18, 'label' => '体重(kg)'],
+                'vision' => ['width' => 22, 'label' => '視力(左/右)'],
+                'bmi' => ['width' => 15, 'label' => 'BMI'],
+                'ophthalmology' => ['width' => 25, 'label' => '眼科検診'],
+                'otolaryngology' => ['width' => 25, 'label' => '耳鼻科検診'],
+                'internal_medicine' => ['width' => 25, 'label' => '内科検診'],
+                'hearing_test' => ['width' => 25, 'label' => '聴力検査'],
+                'tuberculosis_test' => ['width' => 25, 'label' => '結核検査'],
+                'urine_test' => ['width' => 25, 'label' => '尿検査'],
+                'ecg' => ['width' => 25, 'label' => '心電図'],
+            ];
+            
+            // 表示する列を構築（基本列 + 選択された列）
+            $displayColumns = ['measured_date', 'class', 'student_number', 'name'];
+            foreach ($selectedColumns as $col) {
+                if (isset($columnConfig[$col])) {
+                    $displayColumns[] = $col;
+                }
+            }
+            
+            // テーブルヘッダーを描画
+            $drawTableHeader = function() use ($pdf, $columnConfig, $displayColumns) {
+                $pdf->SetFont('kozminproregular', 'B', 8);
+                $pdf->SetFillColor(230, 230, 230);
+                foreach ($displayColumns as $col) {
+                    $config = $columnConfig[$col];
+                    $pdf->Cell($config['width'], 7, $config['label'], 1, 0, 'C', true);
+                }
+                $pdf->Ln();
+            };
+            
+            // ヘッダー描画
+            $drawTableHeader();
             
             // テーブルデータ
             $pdf->SetFont('kozminproregular', '', 7);
@@ -959,27 +1062,30 @@ class HealthRecordController extends Controller
                 // ページの残りスペースをチェック
                 if ($pdf->GetY() > 180) {
                     $pdf->AddPage();
-                    // ヘッダーを再表示
-                    $pdf->SetFont('kozminproregular', 'B', 8);
-                    $pdf->SetFillColor(230, 230, 230);
-                    $pdf->Cell(20, 7, '測定日', 1, 0, 'C', true);
-                    $pdf->Cell(35, 7, 'クラス', 1, 0, 'C', true);
-                    $pdf->Cell(25, 7, '出席番号', 1, 0, 'C', true);
-                    $pdf->Cell(40, 7, '氏名', 1, 0, 'C', true);
-                    $pdf->Cell(20, 7, '身長(cm)', 1, 0, 'C', true);
-                    $pdf->Cell(20, 7, '体重(kg)', 1, 0, 'C', true);
-                    $pdf->Cell(30, 7, '視力(左/右)', 1, 0, 'C', true);
-                    $pdf->Cell(15, 7, 'BMI', 1, 0, 'C', true);
-                    $pdf->Cell(70, 7, '備考', 1, 1, 'C', true);
+                    $drawTableHeader();
                     $pdf->SetFont('kozminproregular', '', 7);
                 }
                 
-                $measuredDate = $record->created_at ? $record->created_at->format('Y/m/d') : '-';
-                $className = $record->student->schoolClass->class_name ?? '-';
-                $studentNumber = $record->student->student_number ?? '-';
-                $studentName = $record->student->name ?? '-';
-                $height = $record->height ?? '-';
-                $weight = $record->weight ?? '-';
+                // 各列のデータを準備
+                $rowData = [];
+                
+                // 測定日
+                $rowData['measured_date'] = $record->created_at ? $record->created_at->format('Y/m/d') : '-';
+                
+                // クラス
+                $rowData['class'] = $record->student->schoolClass->class_name ?? '-';
+                
+                // 出席番号
+                $rowData['student_number'] = $record->student->student_number ?? '-';
+                
+                // 氏名
+                $rowData['name'] = $record->student->name ?? '-';
+                
+                // 身長
+                $rowData['height'] = $record->height ?? '-';
+                
+                // 体重
+                $rowData['weight'] = $record->weight ?? '-';
                 
                 // 視力（裸眼または矯正）をABCDグレードで表示
                 $visionLeft = '-';
@@ -996,20 +1102,27 @@ class HealthRecordController extends Controller
                     $visionRight = '矯' . $getVisionGrade($record->vision_right_corrected);
                 }
                 
-                $vision = $visionLeft . '/' . $visionRight;
+                $rowData['vision'] = $visionLeft . '/' . $visionRight;
                 
-                $bmi = $record->bmi ?? '-';
-                $notes = $record->notes ? mb_substr($record->notes, 0, 30) : '';
+                // BMI
+                $rowData['bmi'] = $record->bmi ?? '-';
                 
-                $pdf->Cell(20, 6, $measuredDate, 1, 0, 'C');
-                $pdf->Cell(35, 6, $className, 1, 0, 'L');
-                $pdf->Cell(25, 6, $studentNumber, 1, 0, 'C');
-                $pdf->Cell(40, 6, $studentName, 1, 0, 'L');
-                $pdf->Cell(20, 6, $height, 1, 0, 'C');
-                $pdf->Cell(20, 6, $weight, 1, 0, 'C');
-                $pdf->Cell(30, 6, $vision, 1, 0, 'C');
-                $pdf->Cell(15, 6, $bmi, 1, 0, 'C');
-                $pdf->Cell(70, 6, $notes, 1, 1, 'L');
+                // 検査結果
+                $rowData['ophthalmology'] = $getExamSummary($record, 'ophthalmology');
+                $rowData['otolaryngology'] = $getExamSummary($record, 'otolaryngology');
+                $rowData['internal_medicine'] = $getExamSummary($record, 'internal_medicine');
+                $rowData['hearing_test'] = $getExamSummary($record, 'hearing_test');
+                $rowData['tuberculosis_test'] = $getExamSummary($record, 'tuberculosis_test');
+                $rowData['urine_test'] = $getExamSummary($record, 'urine_test');
+                $rowData['ecg'] = $getExamSummary($record, 'ecg');
+                
+                // 行を描画
+                foreach ($displayColumns as $col) {
+                    $config = $columnConfig[$col];
+                    $align = in_array($col, ['measured_date', 'student_number', 'height', 'weight', 'vision', 'bmi']) ? 'C' : 'L';
+                    $pdf->Cell($config['width'], 6, $rowData[$col] ?? '-', 1, 0, $align);
+                }
+                $pdf->Ln();
             }
             
             // 統計情報
@@ -1019,7 +1132,7 @@ class HealthRecordController extends Controller
             $pdf->SetFont('kozminproregular', '', 8);
             $pdf->Cell(0, 5, '総記録数: ' . $records->count() . '件', 0, 1, 'L');
             
-            if ($records->count() > 0) {
+            if ($records->count() > 0 && in_array('height', $selectedColumns) && in_array('weight', $selectedColumns) && in_array('bmi', $selectedColumns)) {
                 $avgHeight = round($records->avg('height'), 1);
                 $avgWeight = round($records->avg('weight'), 1);
                 $avgBmi = round($records->avg('bmi'), 1);
