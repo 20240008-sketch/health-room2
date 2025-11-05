@@ -237,14 +237,109 @@
       <!-- 検査結果 -->
       <BaseCard v-if="hasExamResults">
         <template #header>
-          <h2 class="text-base font-medium text-gray-900">検査結果（全{{ allExamResults.length }}件）</h2>
-          <p class="mt-0.5 text-xs text-gray-500">この生徒のすべての検診結果を新しい順に表示しています</p>
+          <div class="flex items-start justify-between">
+            <div>
+              <h2 class="text-base font-medium text-gray-900">検査結果（全{{ filteredExamResults.length }}件）</h2>
+              <p class="mt-0.5 text-xs text-gray-500">この生徒のすべての検診結果を新しい順に表示しています</p>
+            </div>
+            <div class="relative">
+              <BaseButton
+                variant="secondary"
+                size="sm"
+                @click="showExamTypeFilter = !showExamTypeFilter"
+              >
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                </svg>
+                表示する項目を選択
+                <span v-if="hasActiveExamFilter" class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  {{ activeExamFilterCount }}
+                </span>
+              </BaseButton>
+              
+              <!-- Filter Dropdown -->
+              <div
+                v-if="showExamTypeFilter"
+                class="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-10"
+              >
+                <div class="p-4">
+                  <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-medium text-gray-900">検査種別</h3>
+                    <button
+                      @click="clearExamTypeFilter"
+                      class="text-xs text-blue-600 hover:text-blue-500"
+                    >
+                      クリア
+                    </button>
+                  </div>
+                  <div class="space-y-2">
+                    <label class="flex items-center cursor-pointer hover:bg-gray-50 p-1 rounded">
+                      <input
+                        type="checkbox"
+                        v-model="examTypeFilter.ophthalmology"
+                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span class="ml-2 text-sm text-gray-700">眼科検診</span>
+                    </label>
+                    <label class="flex items-center cursor-pointer hover:bg-gray-50 p-1 rounded">
+                      <input
+                        type="checkbox"
+                        v-model="examTypeFilter.otolaryngology"
+                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span class="ml-2 text-sm text-gray-700">耳鼻科検診</span>
+                    </label>
+                    <label class="flex items-center cursor-pointer hover:bg-gray-50 p-1 rounded">
+                      <input
+                        type="checkbox"
+                        v-model="examTypeFilter.internal_medicine"
+                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span class="ml-2 text-sm text-gray-700">内科検診</span>
+                    </label>
+                    <label class="flex items-center cursor-pointer hover:bg-gray-50 p-1 rounded">
+                      <input
+                        type="checkbox"
+                        v-model="examTypeFilter.hearing_test"
+                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span class="ml-2 text-sm text-gray-700">聴力検査</span>
+                    </label>
+                    <label class="flex items-center cursor-pointer hover:bg-gray-50 p-1 rounded">
+                      <input
+                        type="checkbox"
+                        v-model="examTypeFilter.tuberculosis_test"
+                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span class="ml-2 text-sm text-gray-700">結核検査</span>
+                    </label>
+                    <label class="flex items-center cursor-pointer hover:bg-gray-50 p-1 rounded">
+                      <input
+                        type="checkbox"
+                        v-model="examTypeFilter.urine_test"
+                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span class="ml-2 text-sm text-gray-700">尿検査</span>
+                    </label>
+                    <label class="flex items-center cursor-pointer hover:bg-gray-50 p-1 rounded">
+                      <input
+                        type="checkbox"
+                        v-model="examTypeFilter.ecg"
+                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span class="ml-2 text-sm text-gray-700">心電図</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </template>
         
         <div class="space-y-2">
           <!-- 全ての検診結果を表示 -->
           <div 
-            v-for="(exam, index) in allExamResults" 
+            v-for="(exam, index) in filteredExamResults" 
             :key="`exam-${exam.recordId}-${index}`"
             class="pl-3 bg-gray-50 rounded p-2 border-l-4"
             :class="getBorderColorClass(exam.color)"
@@ -401,6 +496,168 @@
                   ></div>
                   <div class="text-xs text-gray-500 transform rotate-45 origin-left">
                     {{ formatShortDate(record.measured_date) }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </BaseCard>
+
+      <!-- Growth History -->
+      <BaseCard v-if="growthHistory.length > 1">
+        <template #header>
+          <h2 class="text-lg font-medium text-gray-900">身長・体重の推移</h2>
+        </template>
+        
+        <div class="space-y-6">
+          <!-- Summary Stats -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Height Growth -->
+            <div class="bg-blue-50 rounded-lg p-4">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-sm font-medium text-blue-900">身長の変化</h3>
+                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                </svg>
+              </div>
+              <div class="space-y-2">
+                <div class="flex items-baseline justify-between">
+                  <span class="text-2xl font-bold text-blue-900">{{ displayHeight }}cm</span>
+                  <span class="text-sm text-blue-600">現在</span>
+                </div>
+                <div class="flex items-center justify-between text-sm">
+                  <span class="text-gray-600">初回測定</span>
+                  <span class="font-medium text-gray-900">{{ growthHistory[0].height }}cm</span>
+                </div>
+                <div class="flex items-center justify-between text-sm pt-2 border-t border-blue-200">
+                  <span class="text-gray-600">総成長</span>
+                  <span class="font-bold text-green-600">
+                    +{{ (displayHeight - growthHistory[0].height).toFixed(1) }}cm
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Weight Growth -->
+            <div class="bg-green-50 rounded-lg p-4">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-sm font-medium text-green-900">体重の変化</h3>
+                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                </svg>
+              </div>
+              <div class="space-y-2">
+                <div class="flex items-baseline justify-between">
+                  <span class="text-2xl font-bold text-green-900">{{ displayWeight }}kg</span>
+                  <span class="text-sm text-green-600">現在</span>
+                </div>
+                <div class="flex items-center justify-between text-sm">
+                  <span class="text-gray-600">初回測定</span>
+                  <span class="font-medium text-gray-900">{{ growthHistory[0].weight }}kg</span>
+                </div>
+                <div class="flex items-center justify-between text-sm pt-2 border-t border-green-200">
+                  <span class="text-gray-600">総変化</span>
+                  <span class="font-bold" :class="(displayWeight - growthHistory[0].weight) >= 0 ? 'text-green-600' : 'text-red-600'">
+                    {{ (displayWeight - growthHistory[0].weight) >= 0 ? '+' : '' }}{{ (displayWeight - growthHistory[0].weight).toFixed(1) }}kg
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Timeline Chart -->
+          <div class="border-t pt-6">
+            <h3 class="text-sm font-medium text-gray-700 mb-4">測定履歴タイムライン</h3>
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">測定日</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">身長 (cm)</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">変化</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">体重 (kg)</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">変化</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">BMI</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <tr v-for="(rec, index) in growthHistory" :key="rec.id" 
+                      :class="rec.id === record.id ? 'bg-blue-50' : ''">
+                    <td class="px-4 py-3 text-sm text-gray-900">
+                      {{ formatDate(rec.measured_date) }}
+                      <span v-if="rec.id === record.id" class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                        現在
+                      </span>
+                    </td>
+                    <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                      {{ rec.height || '-' }}
+                    </td>
+                    <td class="px-4 py-3 text-sm">
+                      <span v-if="index > 0 && rec.height && growthHistory[index - 1].height" 
+                            :class="(rec.height - growthHistory[index - 1].height) > 0 ? 'text-green-600' : (rec.height - growthHistory[index - 1].height) < 0 ? 'text-red-600' : 'text-gray-500'">
+                        {{ (rec.height - growthHistory[index - 1].height) > 0 ? '+' : '' }}{{ (rec.height - growthHistory[index - 1].height).toFixed(1) }}
+                      </span>
+                      <span v-else class="text-gray-400">-</span>
+                    </td>
+                    <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                      {{ rec.weight || '-' }}
+                    </td>
+                    <td class="px-4 py-3 text-sm">
+                      <span v-if="index > 0 && rec.weight && growthHistory[index - 1].weight" 
+                            :class="(rec.weight - growthHistory[index - 1].weight) > 0 ? 'text-green-600' : (rec.weight - growthHistory[index - 1].weight) < 0 ? 'text-red-600' : 'text-gray-500'">
+                        {{ (rec.weight - growthHistory[index - 1].weight) > 0 ? '+' : '' }}{{ (rec.weight - growthHistory[index - 1].weight).toFixed(1) }}
+                      </span>
+                      <span v-else class="text-gray-400">-</span>
+                    </td>
+                    <td class="px-4 py-3 text-sm">
+                      <span v-if="rec.bmi" :class="getBMIColor(rec.bmi)">
+                        {{ rec.bmi }}
+                      </span>
+                      <span v-else class="text-gray-400">-</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Visual Growth Chart -->
+          <div class="border-t pt-6" v-if="growthHistory.length > 2">
+            <h3 class="text-sm font-medium text-gray-700 mb-4">成長グラフ（直近6回）</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Height Chart -->
+              <div>
+                <div class="text-xs text-gray-500 mb-2">身長 (cm)</div>
+                <div class="flex items-end space-x-2 h-40 border-b border-l border-gray-300 pl-2 pb-2">
+                  <div v-for="rec in growthHistory.slice(-6)" :key="'h-' + rec.id" 
+                       class="flex-1 flex flex-col items-center justify-end">
+                    <div class="w-full bg-blue-500 rounded-t transition-all hover:bg-blue-600"
+                         :style="{ height: `${((rec.height - minHeight) / (maxHeight - minHeight)) * 100}%` }"
+                         :title="`${rec.height}cm (${formatDate(rec.measured_date)})`">
+                    </div>
+                    <div class="text-xs font-medium text-blue-900 mt-1">{{ rec.height }}</div>
+                    <div class="text-xs text-gray-500">
+                      {{ formatShortDate(rec.measured_date) }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Weight Chart -->
+              <div>
+                <div class="text-xs text-gray-500 mb-2">体重 (kg)</div>
+                <div class="flex items-end space-x-2 h-40 border-b border-l border-gray-300 pl-2 pb-2">
+                  <div v-for="rec in growthHistory.slice(-6)" :key="'w-' + rec.id" 
+                       class="flex-1 flex flex-col items-center justify-end">
+                    <div class="w-full bg-green-500 rounded-t transition-all hover:bg-green-600"
+                         :style="{ height: `${((rec.weight - minWeight) / (maxWeight - minWeight)) * 100}%` }"
+                         :title="`${rec.weight}kg (${formatDate(rec.measured_date)})`">
+                    </div>
+                    <div class="text-xs font-medium text-green-900 mt-1">{{ rec.weight }}</div>
+                    <div class="text-xs text-gray-500">
+                      {{ formatShortDate(rec.measured_date) }}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -772,6 +1029,18 @@ export default {
     const studentRecords = ref([]);
     const peerComparison = ref(null);
     
+    // Exam type filter state
+    const showExamTypeFilter = ref(false);
+    const examTypeFilter = ref({
+      ophthalmology: false,
+      otolaryngology: false,
+      internal_medicine: false,
+      hearing_test: false,
+      tuberculosis_test: false,
+      urine_test: false,
+      ecg: false
+    });
+    
     // Computed
     const recordId = computed(() => parseInt(route.params.id));
     
@@ -1091,6 +1360,41 @@ export default {
       return results;
     });
     
+    // フィルタリングされた検査結果
+    const filteredExamResults = computed(() => {
+      // フィルターが何も選択されていない場合は全て表示
+      const hasAnyFilter = Object.values(examTypeFilter.value).some(v => v === true);
+      
+      if (!hasAnyFilter) {
+        return allExamResults.value;
+      }
+      
+      // 選択された項目のみ表示
+      return allExamResults.value.filter(exam => {
+        const typeMap = {
+          '眼科検診': examTypeFilter.value.ophthalmology,
+          '耳鼻科検診': examTypeFilter.value.otolaryngology,
+          '内科検診': examTypeFilter.value.internal_medicine,
+          '聴力検査': examTypeFilter.value.hearing_test,
+          '結核検査': examTypeFilter.value.tuberculosis_test,
+          '尿検査': examTypeFilter.value.urine_test,
+          '心電図': examTypeFilter.value.ecg
+        };
+        
+        return typeMap[exam.type] === true;
+      });
+    });
+    
+    // フィルターが有効かどうか
+    const hasActiveExamFilter = computed(() => {
+      return Object.values(examTypeFilter.value).some(v => v === true);
+    });
+    
+    // 有効なフィルター数
+    const activeExamFilterCount = computed(() => {
+      return Object.values(examTypeFilter.value).filter(v => v === true).length;
+    });
+    
     // 検査結果があるかどうか（全ての記録を含む）
     const hasExamResults = computed(() => {
       return allExamResults.value.length > 0;
@@ -1200,6 +1504,18 @@ export default {
         'red': 'border-red-500'
       };
       return colorMap[color] || 'border-gray-500';
+    };
+    
+    const clearExamTypeFilter = () => {
+      examTypeFilter.value = {
+        ophthalmology: false,
+        otolaryngology: false,
+        internal_medicine: false,
+        hearing_test: false,
+        tuberculosis_test: false,
+        urine_test: false,
+        ecg: false
+      };
     };
     
     const exportRecord = () => {
@@ -1319,8 +1635,13 @@ export default {
       urineTestItems,
       ecgItems,
       allExamResults,
+      filteredExamResults,
       hasExamResults,
       relatedRecords,
+      showExamTypeFilter,
+      examTypeFilter,
+      hasActiveExamFilter,
+      activeExamFilterCount,
       formatDate,
       formatShortDate,
       calculateAge,
@@ -1330,6 +1651,7 @@ export default {
       getBMIBorderColor,
       getBMIDescription,
       getBorderColorClass,
+      clearExamTypeFilter,
       exportRecord
     };
   }
