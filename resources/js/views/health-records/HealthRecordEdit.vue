@@ -302,6 +302,641 @@
                 </div>
               </div>
 
+              <!-- Exam Results -->
+              <div class="border-t border-gray-200 pt-6 space-y-6">
+                <div>
+                  <h3 class="text-sm font-medium text-gray-700">検診結果の修正</h3>
+                  <p class="mt-1 text-xs text-gray-500">測定に紐づく検診結果をここで更新できます。</p>
+                </div>
+
+                <!-- Ophthalmology -->
+                <div class="border border-gray-200 rounded-lg p-4 space-y-4">
+                  <div class="flex items-center justify-between">
+                    <h4 class="text-sm font-semibold text-gray-900">眼科検診</h4>
+                    <span class="text-xs text-gray-500">単一記録</span>
+                  </div>
+                  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <BaseInput
+                      type="select"
+                      v-model="form.ophthalmology_exam_result"
+                      label="検診結果"
+                    >
+                      <option value="">選択してください</option>
+                      <option value="異常なし">異常なし</option>
+                      <option value="視力低下">視力低下</option>
+                      <option value="要観察">要観察</option>
+                      <option value="要精検">要精検</option>
+                      <option value="未検診">未検診</option>
+                    </BaseInput>
+                    <BaseInput
+                      type="select"
+                      v-model="form.ophthalmology_diagnosis"
+                      label="診断"
+                    >
+                      <option value="">選択してください</option>
+                      <option value="異常なし">異常なし</option>
+                      <option value="近視">近視</option>
+                      <option value="遠視">遠視</option>
+                      <option value="乱視">乱視</option>
+                      <option value="弱視">弱視</option>
+                      <option value="調節緊張">調節緊張</option>
+                    </BaseInput>
+                    <BaseInput
+                      type="select"
+                      v-model="form.ophthalmology_treatment"
+                      label="処置"
+                    >
+                      <option value="">選択してください</option>
+                      <option value="経過観察">経過観察</option>
+                      <option value="治療中">治療中</option>
+                      <option value="治療完了">治療完了</option>
+                      <option value="眼鏡適合">眼鏡適合</option>
+                      <option value="眼鏡更新">眼鏡更新</option>
+                      <option value="コンタクトレンズ処方">コンタクトレンズ処方</option>
+                    </BaseInput>
+                    <BaseInput
+                      type="textarea"
+                      v-model="form.ophthalmology_result"
+                      label="備考"
+                      :rows="3"
+                      placeholder="その他の所見や特記事項を入力してください"
+                    />
+                  </div>
+                </div>
+
+                <!-- Otolaryngology -->
+                <div class="border border-gray-200 rounded-lg p-4 space-y-4">
+                  <div class="flex items-center justify-between">
+                    <h4 class="text-sm font-semibold text-gray-900">耳鼻科検診</h4>
+                    <button
+                      type="button"
+                      class="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md text-xs font-medium text-gray-700 bg-white hover:bg-gray-50"
+                      @click="addOtolaryngologyItem"
+                    >
+                      <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                      </svg>
+                      項目を追加
+                    </button>
+                  </div>
+                  <p class="text-xs text-gray-500">必要な分類ごとに検診結果を入力してください。</p>
+                  <div
+                    v-if="form.otolaryngology_items.length === 0"
+                    class="text-xs text-gray-500 bg-gray-50 border border-dashed border-gray-300 rounded p-3"
+                  >
+                    登録済みの検診結果はありません。「項目を追加」を押して記録を作成してください。
+                  </div>
+                  <div
+                    v-for="(item, index) in form.otolaryngology_items"
+                    :key="`oto-${index}`"
+                    class="border border-gray-200 rounded-lg p-4 space-y-4 bg-white"
+                  >
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">分類</label>
+                        <select
+                          v-model="item.category"
+                          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                        >
+                          <option value="">選択してください</option>
+                          <option value="異常なし">異常なし</option>
+                          <option value="未検診">未検診</option>
+                          <option value="耳">耳</option>
+                          <option value="鼻">鼻</option>
+                          <option value="喉">喉</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">検診</label>
+                        <select
+                          v-model="item.exam_result"
+                          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          :disabled="!item.category || item.category === '異常なし' || item.category === '未検診'"
+                        >
+                          <option value="">選択してください</option>
+                          <template v-if="item.category === '耳'">
+                            <option value="耳垢">耳垢</option>
+                            <option value="外耳炎">外耳炎</option>
+                            <option value="滲出性中耳炎">滲出性中耳炎</option>
+                            <option value="慢性中耳炎">慢性中耳炎</option>
+                            <option value="難聴の疑い">難聴の疑い</option>
+                            <option value="外耳道異物">外耳道異物</option>
+                            <option value="中耳炎">中耳炎</option>
+                          </template>
+                          <template v-else-if="item.category === '鼻'">
+                            <option value="アレルギー性鼻炎">アレルギー性鼻炎</option>
+                            <option value="慢性鼻炎">慢性鼻炎</option>
+                            <option value="副鼻腔炎">副鼻腔炎</option>
+                            <option value="鼻中隔わん曲症">鼻中隔わん曲症</option>
+                            <option value="扁桃肥大">扁桃肥大</option>
+                          </template>
+                          <template v-else-if="item.category === '喉'">
+                            <option value="慢性扁桃炎">慢性扁桃炎</option>
+                            <option value="アデノイド">アデノイド</option>
+                            <option value="言語異常">言語異常</option>
+                            <option value="口内炎">口内炎</option>
+                            <option value="舌小帯異常">舌小帯異常</option>
+                            <option value="舌異常">舌異常</option>
+                            <option value="さ声">さ声</option>
+                          </template>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">所見</label>
+                        <select
+                          v-model="item.findings"
+                          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                        >
+                          <option value="">選択してください</option>
+                          <option value="A">A</option>
+                          <option value="B">B</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">診断</label>
+                        <select
+                          v-model="item.diagnosis"
+                          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          :disabled="!item.category || item.category === '異常なし' || item.category === '未検診'"
+                        >
+                          <option value="">選択してください</option>
+                          <template v-if="item.category === '耳'">
+                            <option value="異常なし">異常なし</option>
+                            <option value="耳垢栓塞">耳垢栓塞</option>
+                            <option value="滲出性中耳炎">滲出性中耳炎</option>
+                            <option value="慢性中耳炎鼓膜穿孔">慢性中耳炎鼓膜穿孔</option>
+                            <option value="伝音性難聴">伝音性難聴</option>
+                            <option value="感音性難聴">感音性難聴</option>
+                          </template>
+                          <template v-else-if="item.category === '鼻'">
+                            <option value="異常なし">異常なし</option>
+                            <option value="慢性鼻炎">慢性鼻炎</option>
+                            <option value="アレルギー性鼻炎">アレルギー性鼻炎</option>
+                            <option value="副鼻腔炎">副鼻腔炎</option>
+                            <option value="鼻中隔わん曲症">鼻中隔わん曲症</option>
+                            <option value="急性鼻炎">急性鼻炎</option>
+                            <option value="鼻カタル">鼻カタル</option>
+                            <option value="鼻炎">鼻炎</option>
+                            <option value="併合性鼻副鼻腔炎">併合性鼻副鼻腔炎</option>
+                            <option value="鼻出血">鼻出血</option>
+                            <option value="肥厚性鼻炎">肥厚性鼻炎</option>
+                          </template>
+                          <template v-else-if="item.category === '喉'">
+                            <option value="異常なし">異常なし</option>
+                            <option value="扁桃肥大">扁桃肥大</option>
+                            <option value="扁桃炎">扁桃炎</option>
+                            <option value="アデノイド">アデノイド</option>
+                            <option value="音声言語異常">音声言語異常</option>
+                            <option value="口内炎">口内炎</option>
+                            <option value="舌小帯異常">舌小帯異常</option>
+                            <option value="舌異常">舌異常</option>
+                          </template>
+                        </select>
+                      </div>
+                      <div class="sm:col-span-2">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">処置</label>
+                        <select
+                          v-model="item.treatment"
+                          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                          :disabled="!item.category || item.category === '異常なし' || item.category === '未検診'"
+                        >
+                          <option value="">選択してください</option>
+                          <option value="必要なし">必要なし</option>
+                          <option value="治療中">治療中</option>
+                          <option value="経過観察">経過観察</option>
+                          <option value="治療完了">治療完了</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="flex justify-end">
+                      <button
+                        type="button"
+                        class="text-xs text-red-600 hover:text-red-800"
+                        @click="removeOtolaryngologyItem(index)"
+                      >
+                        この項目を削除
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Internal Medicine -->
+                <div class="border border-gray-200 rounded-lg p-4 space-y-4">
+                  <div class="flex items-center justify-between">
+                    <h4 class="text-sm font-semibold text-gray-900">内科検診</h4>
+                    <button
+                      type="button"
+                      class="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md text-xs font-medium text-gray-700 bg-white hover:bg-gray-50"
+                      @click="addInternalMedicineItem"
+                    >
+                      <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                      </svg>
+                      項目を追加
+                    </button>
+                  </div>
+                  <div
+                    v-if="form.internal_medicine_items.length === 0"
+                    class="text-xs text-gray-500 bg-gray-50 border border-dashed border-gray-300 rounded p-3"
+                  >
+                    登録済みの検診結果はありません。「項目を追加」を押して記録を作成してください。
+                  </div>
+                  <div
+                    v-for="(item, index) in form.internal_medicine_items"
+                    :key="`internal-${index}`"
+                    class="border border-gray-200 rounded-lg p-4 space-y-4 bg-white"
+                  >
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">検診結果</label>
+                        <select
+                          v-model="item.exam_result"
+                          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                        >
+                          <option value="">選択してください</option>
+                          <option value="異常なし">異常なし</option>
+                          <option value="未検診">未検診</option>
+                          <option value="心雑音の疑い">心雑音の疑い</option>
+                          <option value="肥満">肥満</option>
+                          <option value="やせ">やせ</option>
+                          <option value="アトピー性皮膚炎">アトピー性皮膚炎</option>
+                          <option value="貧血の疑い">貧血の疑い</option>
+                          <option value="喘息">喘息</option>
+                          <option value="低身長の疑い">低身長の疑い</option>
+                          <option value="要精検">要精検</option>
+                          <option value="不整脈">不整脈</option>
+                          <option value="徐脈">徐脈</option>
+                          <option value="その他">その他</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">診断</label>
+                        <select
+                          v-model="item.diagnosis"
+                          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                        >
+                          <option value="">選択してください</option>
+                          <option value="異常なし">異常なし</option>
+                          <option value="心雑音">心雑音</option>
+                          <option value="肥満">肥満</option>
+                          <option value="思春期やせ症">思春期やせ症</option>
+                          <option value="脊柱側わん症">脊柱側わん症</option>
+                          <option value="胸郭変形">胸郭変形</option>
+                          <option value="アトピー性皮膚炎">アトピー性皮膚炎</option>
+                          <option value="貧血">貧血</option>
+                          <option value="喘息">喘息</option>
+                          <option value="低身長">低身長</option>
+                          <option value="機能性雑音">機能性雑音</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">処置</label>
+                        <select
+                          v-model="item.treatment"
+                          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                        >
+                          <option value="">選択してください</option>
+                          <option value="経過観察">経過観察</option>
+                          <option value="治療不要">治療不要</option>
+                          <option value="治療中">治療中</option>
+                          <option value="治療完了">治療完了</option>
+                          <option value="管理不要">管理不要</option>
+                          <option value="要管理Ａ">要管理Ａ</option>
+                          <option value="要管理Ｂ">要管理Ｂ</option>
+                          <option value="要管理Ｃ">要管理Ｃ</option>
+                          <option value="要管理Ｄ">要管理Ｄ</option>
+                          <option value="要管理Ｅ">要管理Ｅ</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="flex justify-end">
+                      <button
+                        type="button"
+                        class="text-xs text-red-600 hover:text-red-800"
+                        @click="removeInternalMedicineItem(index)"
+                      >
+                        この項目を削除
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Hearing Test -->
+                <div class="border border-gray-200 rounded-lg p-4 space-y-4">
+                  <div class="flex items-center justify-between">
+                    <h4 class="text-sm font-semibold text-gray-900">聴力検査</h4>
+                    <button
+                      type="button"
+                      class="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md text-xs font-medium text-gray-700 bg-white hover:bg-gray-50"
+                      @click="addHearingTestItem"
+                    >
+                      <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                      </svg>
+                      項目を追加
+                    </button>
+                  </div>
+                  <div
+                    v-if="form.hearing_test_items.length === 0"
+                    class="text-xs text-gray-500 bg-gray-50 border border-dashed border-gray-300 rounded p-3"
+                  >
+                    登録済みの検査結果はありません。「項目を追加」を押して記録を作成してください。
+                  </div>
+                  <div
+                    v-for="(item, index) in form.hearing_test_items"
+                    :key="`hearing-${index}`"
+                    class="border border-gray-200 rounded-lg p-4 space-y-4 bg-white"
+                  >
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">検査結果</label>
+                        <select
+                          v-model="item.exam_result"
+                          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                        >
+                          <option value="">選択してください</option>
+                          <option value="異常なし">異常なし</option>
+                          <option value="要観察">要観察</option>
+                          <option value="要精検">要精検</option>
+                          <option value="未検査">未検査</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">診断</label>
+                        <select
+                          v-model="item.diagnosis"
+                          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                        >
+                          <option value="">選択してください</option>
+                          <option value="異常なし">異常なし</option>
+                          <option value="聴力低下">聴力低下</option>
+                          <option value="難聴">難聴</option>
+                          <option value="耳鼻科受診">耳鼻科受診</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">処置</label>
+                        <select
+                          v-model="item.treatment"
+                          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                        >
+                          <option value="">選択してください</option>
+                          <option value="経過観察">経過観察</option>
+                          <option value="治療中">治療中</option>
+                          <option value="治療完了">治療完了</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="flex justify-end">
+                      <button
+                        type="button"
+                        class="text-xs text-red-600 hover:text-red-800"
+                        @click="removeHearingTestItem(index)"
+                      >
+                        この項目を削除
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Tuberculosis Test -->
+                <div class="border border-gray-200 rounded-lg p-4 space-y-4">
+                  <div class="flex items-center justify-between">
+                    <h4 class="text-sm font-semibold text-gray-900">結核検査</h4>
+                    <button
+                      type="button"
+                      class="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md text-xs font-medium text-gray-700 bg-white hover:bg-gray-50"
+                      @click="addTuberculosisTestItem"
+                    >
+                      <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                      </svg>
+                      項目を追加
+                    </button>
+                  </div>
+                  <div
+                    v-if="form.tuberculosis_test_items.length === 0"
+                    class="text-xs text-gray-500 bg-gray-50 border border-dashed border-gray-300 rounded p-3"
+                  >
+                    登録済みの検査結果はありません。「項目を追加」を押して記録を作成してください。
+                  </div>
+                  <div
+                    v-for="(item, index) in form.tuberculosis_test_items"
+                    :key="`tb-${index}`"
+                    class="border border-gray-200 rounded-lg p-4 space-y-4 bg-white"
+                  >
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">検査結果</label>
+                        <select
+                          v-model="item.exam_result"
+                          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                        >
+                          <option value="">選択してください</option>
+                          <option value="陰性">陰性</option>
+                          <option value="陽性">陽性</option>
+                          <option value="要再検査">要再検査</option>
+                          <option value="未検査">未検査</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">診断</label>
+                        <select
+                          v-model="item.diagnosis"
+                          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                        >
+                          <option value="">選択してください</option>
+                          <option value="異常なし">異常なし</option>
+                          <option value="結核感染症">結核感染症</option>
+                          <option value="要精密検査">要精密検査</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">処置</label>
+                        <select
+                          v-model="item.treatment"
+                          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                        >
+                          <option value="">選択してください</option>
+                          <option value="経過観察">経過観察</option>
+                          <option value="治療中">治療中</option>
+                          <option value="治療完了">治療完了</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="flex justify-end">
+                      <button
+                        type="button"
+                        class="text-xs text-red-600 hover:text-red-800"
+                        @click="removeTuberculosisTestItem(index)"
+                      >
+                        この項目を削除
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Urine Test -->
+                <div class="border border-gray-200 rounded-lg p-4 space-y-4">
+                  <div class="flex items-center justify-between">
+                    <h4 class="text-sm font-semibold text-gray-900">尿検査</h4>
+                    <button
+                      type="button"
+                      class="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md text-xs font-medium text-gray-700 bg-white hover:bg-gray-50"
+                      @click="addUrineTestItem"
+                    >
+                      <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                      </svg>
+                      項目を追加
+                    </button>
+                  </div>
+                  <div
+                    v-if="form.urine_test_items.length === 0"
+                    class="text-xs text-gray-500 bg-gray-50 border border-dashed border-gray-300 rounded p-3"
+                  >
+                    登録済みの検査結果はありません。「項目を追加」を押して記録を作成してください。
+                  </div>
+                  <div
+                    v-for="(item, index) in form.urine_test_items"
+                    :key="`urine-${index}`"
+                    class="border border-gray-200 rounded-lg p-4 space-y-4 bg-white"
+                  >
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">検査結果</label>
+                        <select
+                          v-model="item.exam_result"
+                          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                        >
+                          <option value="">選択してください</option>
+                          <option value="異常なし">異常なし</option>
+                          <option value="糖陽性">糖陽性</option>
+                          <option value="蛋白陽性">蛋白陽性</option>
+                          <option value="潜血陽性">潜血陽性</option>
+                          <option value="ケトン体陽性">ケトン体陽性</option>
+                          <option value="ウロビリノーゲン陽性">ウロビリノーゲン陽性</option>
+                          <option value="未検査">未検査</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">診断</label>
+                        <select
+                          v-model="item.diagnosis"
+                          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                        >
+                          <option value="">選択してください</option>
+                          <option value="異常なし">異常なし</option>
+                          <option value="糖尿病疑い">糖尿病疑い</option>
+                          <option value="腎疾患疑い">腎疾患疑い</option>
+                          <option value="尿路疾患疑い">尿路疾患疑い</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">処置</label>
+                        <select
+                          v-model="item.treatment"
+                          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                        >
+                          <option value="">選択してください</option>
+                          <option value="経過観察">経過観察</option>
+                          <option value="治療中">治療中</option>
+                          <option value="治療完了">治療完了</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="flex justify-end">
+                      <button
+                        type="button"
+                        class="text-xs text-red-600 hover:text-red-800"
+                        @click="removeUrineTestItem(index)"
+                      >
+                        この項目を削除
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- ECG -->
+                <div class="border border-gray-200 rounded-lg p-4 space-y-4">
+                  <div class="flex items-center justify-between">
+                    <h4 class="text-sm font-semibold text-gray-900">心電図</h4>
+                    <button
+                      type="button"
+                      class="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md text-xs font-medium text-gray-700 bg-white hover:bg-gray-50"
+                      @click="addEcgItem"
+                    >
+                      <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                      </svg>
+                      項目を追加
+                    </button>
+                  </div>
+                  <div
+                    v-if="form.ecg_items.length === 0"
+                    class="text-xs text-gray-500 bg-gray-50 border border-dashed border-gray-300 rounded p-3"
+                  >
+                    登録済みの検査結果はありません。「項目を追加」を押して記録を作成してください。
+                  </div>
+                  <div
+                    v-for="(item, index) in form.ecg_items"
+                    :key="`ecg-${index}`"
+                    class="border border-gray-200 rounded-lg p-4 space-y-4 bg-white"
+                  >
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">検査結果</label>
+                        <select
+                          v-model="item.exam_result"
+                          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                        >
+                          <option value="">選択してください</option>
+                          <option value="正常">正常</option>
+                          <option value="要観察">要観察</option>
+                          <option value="要精密検査">要精密検査</option>
+                          <option value="未検査">未検査</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">診断</label>
+                        <select
+                          v-model="item.diagnosis"
+                          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                        >
+                          <option value="">選択してください</option>
+                          <option value="異常なし">異常なし</option>
+                          <option value="不整脈">不整脈</option>
+                          <option value="徐脈">徐脈</option>
+                          <option value="頻脈">頻脈</option>
+                          <option value="その他">その他</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">処置</label>
+                        <select
+                          v-model="item.treatment"
+                          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2"
+                        >
+                          <option value="">選択してください</option>
+                          <option value="経過観察">経過観察</option>
+                          <option value="治療中">治療中</option>
+                          <option value="治療完了">治療完了</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="flex justify-end">
+                      <button
+                        type="button"
+                        class="text-xs text-red-600 hover:text-red-800"
+                        @click="removeEcgItem(index)"
+                      >
+                        この項目を削除
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <!-- Notes -->
               <div>
                 <BaseInput
@@ -679,7 +1314,53 @@ export default {
     const record = ref(null);
     const originalRecord = ref({});
     const studentRecords = ref([]);
-    
+
+    // Helpers for exam items
+    const createOtolaryngologyItem = () => ({
+      category: '',
+      exam_result: '異常なし',
+      findings: '',
+      diagnosis: '',
+      treatment: ''
+    });
+
+    const createSimpleExamItem = () => ({
+      exam_result: '異常なし',
+      diagnosis: '',
+      treatment: ''
+    });
+
+    const parseExamItems = (rawValue, factory) => {
+      if (!factory) {
+        return [];
+      }
+
+      let items = [];
+
+      if (Array.isArray(rawValue)) {
+        items = rawValue;
+      } else if (typeof rawValue === 'string' && rawValue.trim() !== '') {
+        try {
+          const parsed = JSON.parse(rawValue);
+          if (Array.isArray(parsed)) {
+            items = parsed;
+          }
+        } catch (error) {
+          // fall through to default when parsing fails
+          console.warn('Failed to parse exam items, falling back to defaults:', error);
+        }
+      }
+
+      if (!items || items.length === 0) {
+        return [factory()];
+      }
+
+      return items.map(item => ({
+        ...factory(),
+        ...item
+      }));
+    };
+
     // Form data
     const form = reactive({
       measured_date: '',
@@ -690,6 +1371,16 @@ export default {
       vision_right: '',
       vision_left_corrected: '',
       vision_right_corrected: '',
+      ophthalmology_result: '',
+      ophthalmology_exam_result: '異常なし',
+      ophthalmology_diagnosis: '',
+      ophthalmology_treatment: '',
+      otolaryngology_items: [createOtolaryngologyItem()],
+      internal_medicine_items: [createSimpleExamItem()],
+      hearing_test_items: [createSimpleExamItem()],
+      tuberculosis_test_items: [createSimpleExamItem()],
+      urine_test_items: [createSimpleExamItem()],
+      ecg_items: [createSimpleExamItem()],
       notes: '',
       edit_reason: ''
     });

@@ -2801,14 +2801,14 @@ export default {
       vision_left_corrected: '',
       vision_right_corrected: '',
       ophthalmology_result: '',
-      ophthalmology_exam_result: '',
+      ophthalmology_exam_result: '異常なし',
       ophthalmology_diagnosis: '',
       ophthalmology_treatment: '',
       otolaryngology_result: '',
       otolaryngology_items: [
         {
           category: '',
-          exam_result: '',
+          exam_result: '異常なし',
           findings: '',
           diagnosis: '',
           treatment: ''
@@ -2819,7 +2819,7 @@ export default {
       internal_medicine_diagnosis: '',
       internal_medicine_items: [
         {
-          exam_result: '',
+          exam_result: '異常なし',
           diagnosis: '',
           treatment: ''
         }
@@ -2827,7 +2827,7 @@ export default {
       hearing_test_result: '',
       hearing_test_items: [
         {
-          exam_result: '',
+          exam_result: '異常なし',
           diagnosis: '',
           treatment: ''
         }
@@ -2835,7 +2835,7 @@ export default {
       tuberculosis_test_result: '',
       tuberculosis_test_items: [
         {
-          exam_result: '',
+          exam_result: '異常なし',
           diagnosis: '',
           treatment: ''
         }
@@ -2843,7 +2843,7 @@ export default {
       urine_test_result: '',
       urine_test_items: [
         {
-          exam_result: '',
+          exam_result: '異常なし',
           diagnosis: '',
           treatment: ''
         }
@@ -2853,7 +2853,7 @@ export default {
       ecg_diagnosis: '',
       ecg_items: [
         {
-          exam_result: '',
+          exam_result: '異常なし',
           diagnosis: '',
           treatment: ''
         }
@@ -3080,7 +3080,7 @@ export default {
     const addOtolaryngologyItem = () => {
       form.otolaryngology_items.push({
         category: '',
-        exam_result: '',
+        exam_result: '異常なし',
         findings: '',
         diagnosis: '',
         treatment: ''
@@ -3097,7 +3097,7 @@ export default {
     // 内科検診項目を追加
     const addInternalMedicineItem = () => {
       form.internal_medicine_items.push({
-        exam_result: '',
+        exam_result: '異常なし',
         diagnosis: '',
         treatment: ''
       });
@@ -3113,7 +3113,7 @@ export default {
     // 心電図項目を追加
     const addEcgItem = () => {
       form.ecg_items.push({
-        exam_result: '',
+        exam_result: '異常なし',
         diagnosis: '',
         treatment: ''
       });
@@ -3129,7 +3129,7 @@ export default {
     // 聴力検査項目を追加
     const addHearingTestItem = () => {
       form.hearing_test_items.push({
-        exam_result: '',
+        exam_result: '異常なし',
         diagnosis: '',
         treatment: ''
       });
@@ -3145,7 +3145,7 @@ export default {
     // 結核検査項目を追加
     const addTuberculosisTestItem = () => {
       form.tuberculosis_test_items.push({
-        exam_result: '',
+        exam_result: '異常なし',
         diagnosis: '',
         treatment: ''
       });
@@ -3161,7 +3161,7 @@ export default {
     // 尿検査項目を追加
     const addUrineTestItem = () => {
       form.urine_test_items.push({
-        exam_result: '',
+        exam_result: '異常なし',
         diagnosis: '',
         treatment: ''
       });

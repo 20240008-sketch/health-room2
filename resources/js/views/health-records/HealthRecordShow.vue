@@ -354,12 +354,12 @@
                 >
                   #{{ exam.recordId }}
                 </router-link>
-                <router-link 
-                  :to="`/health-records/${exam.recordId}/edit`"
+                <button
+                  @click="openExamEditModal(exam)"
                   class="text-xs text-green-600 hover:text-green-500 font-medium"
                 >
                   編集
-                </router-link>
+                </button>
               </div>
             </div>
             
@@ -896,6 +896,525 @@
         </BaseCard>
       </div>
     </template>
+    
+    <!-- 検診データ編集モーダル -->
+    <Teleport to="body">
+      <div
+        v-if="showExamEditModal"
+        class="fixed inset-0 z-50 overflow-y-auto"
+        @click.self="closeExamEditModal"
+      >
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+          <!-- Backdrop -->
+          <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" @click="closeExamEditModal"></div>
+          
+          <!-- Modal -->
+          <div class="relative inline-block w-full max-w-2xl overflow-hidden text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
+              <div class="flex items-center justify-between">
+                <h3 class="text-lg font-medium text-white">
+                  {{ editingExam?.type }} - 編集
+                </h3>
+                <button
+                  @click="closeExamEditModal"
+                  class="text-white hover:text-gray-200 transition-colors"
+                >
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
+              <p class="mt-1 text-sm text-blue-100">{{ editingExam?.date }}</p>
+            </div>
+            
+            <!-- Body -->
+            <div class="px-6 py-4 max-h-[60vh] overflow-y-auto">
+              <!-- 耳鼻科検診 -->
+              <div v-if="editingExam?.type === '耳鼻科検診'" class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">分類</label>
+                  <select
+                    v-model="editFormData.category"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">選択してください</option>
+                    <option value="異常なし">異常なし</option>
+                    <option value="未検診">未検診</option>
+                    <option value="耳">耳</option>
+                    <option value="鼻">鼻</option>
+                    <option value="喉">喉</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">検診結果</label>
+                  <select
+                    v-model="editFormData.exam_result"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    :disabled="!editFormData.category || editFormData.category === '異常なし' || editFormData.category === '未検診'"
+                  >
+                    <option value="">選択してください</option>
+                    <template v-if="editFormData.category === '耳'">
+                      <option value="耳垢">耳垢</option>
+                      <option value="外耳炎">外耳炎</option>
+                      <option value="滲出性中耳炎">滲出性中耳炎</option>
+                      <option value="慢性中耳炎">慢性中耳炎</option>
+                      <option value="難聴の疑い">難聴の疑い</option>
+                      <option value="外耳道異物">外耳道異物</option>
+                      <option value="中耳炎">中耳炎</option>
+                    </template>
+                    <template v-else-if="editFormData.category === '鼻'">
+                      <option value="アレルギー性鼻炎">アレルギー性鼻炎</option>
+                      <option value="慢性鼻炎">慢性鼻炎</option>
+                      <option value="副鼻腔炎">副鼻腔炎</option>
+                      <option value="鼻中隔わん曲症">鼻中隔わん曲症</option>
+                      <option value="扁桃肥大">扁桃肥大</option>
+                    </template>
+                    <template v-else-if="editFormData.category === '喉'">
+                      <option value="慢性扁桃炎">慢性扁桃炎</option>
+                      <option value="アデノイド">アデノイド</option>
+                      <option value="言語異常">言語異常</option>
+                      <option value="口内炎">口内炎</option>
+                      <option value="舌小帯異常">舌小帯異常</option>
+                      <option value="舌異常">舌異常</option>
+                      <option value="さ声">さ声</option>
+                    </template>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">所見</label>
+                  <select
+                    v-model="editFormData.findings"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">選択してください</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">診断結果</label>
+                  <select
+                    v-model="editFormData.diagnosis"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    :disabled="!editFormData.category || editFormData.category === '異常なし' || editFormData.category === '未検診'"
+                  >
+                    <option value="">選択してください</option>
+                    <template v-if="editFormData.category === '耳'">
+                      <option value="異常なし">異常なし</option>
+                      <option value="耳垢栓塞">耳垢栓塞</option>
+                      <option value="滲出性中耳炎">滲出性中耳炎</option>
+                      <option value="慢性中耳炎鼓膜穿孔">慢性中耳炎鼓膜穿孔</option>
+                      <option value="伝音性難聴">伝音性難聴</option>
+                      <option value="感音性難聴">感音性難聴</option>
+                    </template>
+                    <template v-else-if="editFormData.category === '鼻'">
+                      <option value="異常なし">異常なし</option>
+                      <option value="慢性鼻炎">慢性鼻炎</option>
+                      <option value="アレルギー性鼻炎">アレルギー性鼻炎</option>
+                      <option value="副鼻腔炎">副鼻腔炎</option>
+                      <option value="鼻中隔わん曲症">鼻中隔わん曲症</option>
+                      <option value="急性鼻炎">急性鼻炎</option>
+                      <option value="鼻カタル">鼻カタル</option>
+                      <option value="鼻炎">鼻炎</option>
+                      <option value="併合性鼻副鼻腔炎">併合性鼻副鼻腔炎</option>
+                      <option value="鼻出血">鼻出血</option>
+                      <option value="肥厚性鼻炎">肥厚性鼻炎</option>
+                    </template>
+                    <template v-else-if="editFormData.category === '喉'">
+                      <option value="異常なし">異常なし</option>
+                      <option value="扁桃肥大">扁桃肥大</option>
+                      <option value="扁桃炎">扁桃炎</option>
+                      <option value="アデノイド">アデノイド</option>
+                      <option value="音声言語異常">音声言語異常</option>
+                      <option value="口内炎">口内炎</option>
+                      <option value="舌小帯異常">舌小帯異常</option>
+                      <option value="舌異常">舌異常</option>
+                    </template>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">処置</label>
+                  <select
+                    v-model="editFormData.treatment"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    :disabled="!editFormData.category || editFormData.category === '異常なし' || editFormData.category === '未検診'"
+                  >
+                    <option value="">選択してください</option>
+                    <option value="必要なし">必要なし</option>
+                    <option value="治療中">治療中</option>
+                    <option value="経過観察">経過観察</option>
+                    <option value="治療完了">治療完了</option>
+                  </select>
+                </div>
+              </div>
+              
+              <!-- 内科検診 -->
+              <div v-if="editingExam?.type === '内科検診'" class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">検診結果</label>
+                  <select
+                    v-model="editFormData.exam_result"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">選択してください</option>
+                    <option value="異常なし">異常なし</option>
+                    <option value="未検診">未検診</option>
+                    <option value="心雑音の疑い">心雑音の疑い</option>
+                    <option value="肥満">肥満</option>
+                    <option value="やせ">やせ</option>
+                    <option value="アトピー性皮膚炎">アトピー性皮膚炎</option>
+                    <option value="貧血の疑い">貧血の疑い</option>
+                    <option value="喘息">喘息</option>
+                    <option value="低身長の疑い">低身長の疑い</option>
+                    <option value="要精検">要精検</option>
+                    <option value="不整脈">不整脈</option>
+                    <option value="徐脈">徐脈</option>
+                    <option value="その他">その他</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">診断結果</label>
+                  <select
+                    v-model="editFormData.diagnosis"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">選択してください</option>
+                    <option value="異常なし">異常なし</option>
+                    <option value="心雑音">心雑音</option>
+                    <option value="肥満">肥満</option>
+                    <option value="思春期やせ症">思春期やせ症</option>
+                    <option value="脊柱側わん症">脊柱側わん症</option>
+                    <option value="胸郭変形">胸郭変形</option>
+                    <option value="アトピー性皮膚炎">アトピー性皮膚炎</option>
+                    <option value="貧血">貧血</option>
+                    <option value="喘息">喘息</option>
+                    <option value="低身長">低身長</option>
+                    <option value="機能性雑音">機能性雑音</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">処置</label>
+                  <select
+                    v-model="editFormData.treatment"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">選択してください</option>
+                    <option value="必要なし">必要なし</option>
+                    <option value="治療中">治療中</option>
+                    <option value="経過観察">経過観察</option>
+                    <option value="治療完了">治療完了</option>
+                  </select>
+                </div>
+              </div>
+              
+              <!-- 眼科検診 -->
+              <div v-if="editingExam?.type === '眼科検診'" class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">検診結果</label>
+                  <select
+                    v-model="editFormData.exam_result"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">選択してください</option>
+                    <option value="異常なし">異常なし</option>
+                    <option value="未検診">未検診</option>
+                    <option value="アレルギー性結膜炎">アレルギー性結膜炎</option>
+                    <option value="結膜炎">結膜炎</option>
+                    <option value="外斜位の疑い">外斜位の疑い</option>
+                    <option value="内斜位の疑い">内斜位の疑い</option>
+                    <option value="眼瞼炎">眼瞼炎</option>
+                    <option value="眼瞼膜炎">眼瞼膜炎</option>
+                    <option value="睫毛内反">睫毛内反</option>
+                    <option value="麦粒腫">麦粒腫</option>
+                    <option value="霰粒腫">霰粒腫</option>
+                    <option value="その他">その他</option>
+                    <option value="眼瞼脂肪腫">眼瞼脂肪腫</option>
+                    <option value="コンタクト検診">コンタクト検診</option>
+                    <option value="眼瞼皮膚炎">眼瞼皮膚炎</option>
+                    <option value="マイボーム腺梗塞">マイボーム腺梗塞</option>
+                    <option value="眼窩脂肪腫">眼窩脂肪腫</option>
+                    <option value="眼瞼内反症">眼瞼内反症</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">眼科診断</label>
+                  <select
+                    v-model="editFormData.diagnosis"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">選択してください</option>
+                    <option value="異常なし">異常なし</option>
+                    <option value="アレルギー性結膜炎">アレルギー性結膜炎</option>
+                    <option value="結膜炎">結膜炎</option>
+                    <option value="外斜位">外斜位</option>
+                    <option value="内斜位">内斜位</option>
+                    <option value="眼瞼炎">眼瞼炎</option>
+                    <option value="眼瞼膜炎">眼瞼膜炎</option>
+                    <option value="睫毛内反">睫毛内反</option>
+                    <option value="麦粒瞳">麦粒瞳</option>
+                    <option value="霰粒瞳">霰粒瞳</option>
+                    <option value="その他">その他</option>
+                    <option value="コンタクト検診">コンタクト検診</option>
+                    <option value="眼瞼脂肪腫">眼瞼脂肪腫</option>
+                    <option value="マイボーム腺梗塞">マイボーム腺梗塞</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">処置</label>
+                  <select
+                    v-model="editFormData.treatment"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">選択してください</option>
+                    <option value="経過観察">経過観察</option>
+                    <option value="点眼治療">点眼治療</option>
+                    <option value="眼鏡処方">眼鏡処方</option>
+                    <option value="眼鏡適合">眼鏡適合</option>
+                    <option value="眼鏡更新">眼鏡更新</option>
+                    <option value="コンタクトレンズ処方">コンタクトレンズ処方</option>
+                    <option value="その他">その他</option>
+                    <option value="治療中">治療中</option>
+                    <option value="治療済み">治療済み</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">備考</label>
+                  <textarea
+                    v-model="editFormData.result"
+                    rows="2"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="その他の所見や特記事項を入力してください"
+                  ></textarea>
+                </div>
+              </div>
+              
+              <!-- 聴力検査・結核検査・尿検査・心電図 -->
+              <div v-if="['聴力検査', '結核検査', '尿検査', '心電図'].includes(editingExam?.type)" class="space-y-4">
+                <!-- 聴力検査 -->
+                <template v-if="editingExam?.type === '聴力検査'">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">検診結果</label>
+                    <select
+                      v-model="editFormData.exam_result"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">選択してください</option>
+                      <option value="異常なし">異常なし</option>
+                      <option value="未検査">未検査</option>
+                      <option value="難聴の疑い・両">難聴の疑い・両</option>
+                      <option value="難聴の疑い・右">難聴の疑い・右</option>
+                      <option value="難聴の疑い・左">難聴の疑い・左</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">診断結果</label>
+                    <select
+                      v-model="editFormData.diagnosis"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">選択してください</option>
+                      <option value="異常なし">異常なし</option>
+                      <option value="感音難聴">感音難聴</option>
+                      <option value="伝音難聴">伝音難聴</option>
+                      <option value="難聴">難聴</option>
+                    </select>
+                  </div>
+                </template>
+
+                <!-- 結核検査 -->
+                <template v-if="editingExam?.type === '結核検査'">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">検診結果</label>
+                    <select
+                      v-model="editFormData.exam_result"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">選択してください</option>
+                      <option value="異常なし">異常なし</option>
+                      <option value="未検査">未検査</option>
+                      <option value="要検討者">要検討者</option>
+                      <option value="精密検査">精密検査</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">診断結果</label>
+                    <select
+                      v-model="editFormData.diagnosis"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">選択してください</option>
+                      <option value="異常なし">異常なし</option>
+                      <option value="経過観察">経過観察</option>
+                      <option value="精密検査">精密検査</option>
+                    </select>
+                  </div>
+                </template>
+
+                <!-- 尿検査 -->
+                <template v-if="editingExam?.type === '尿検査'">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">検診結果</label>
+                    <select
+                      v-model="editFormData.exam_result"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">選択してください</option>
+                      <option value="異常なし">異常なし</option>
+                      <option value="未検査">未検査</option>
+                      <option value="蛋白±">蛋白±</option>
+                      <option value="蛋白＋">蛋白＋</option>
+                      <option value="蛋白＋＋">蛋白＋＋</option>
+                      <option value="糖±">糖±</option>
+                      <option value="糖＋">糖＋</option>
+                      <option value="糖＋＋">糖＋＋</option>
+                      <option value="潜血±">潜血±</option>
+                      <option value="潜血＋">潜血＋</option>
+                      <option value="潜血＋＋">潜血＋＋</option>
+                      <option value="再検異常なし">再検異常なし</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">診断結果</label>
+                    <select
+                      v-model="editFormData.diagnosis"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">選択してください</option>
+                      <option value="異常なし">異常なし</option>
+                      <option value="蛋白尿">蛋白尿</option>
+                      <option value="糖尿">糖尿</option>
+                      <option value="血尿">血尿</option>
+                      <option value="起立性蛋白尿">起立性蛋白尿</option>
+                      <option value="慢性腎炎">慢性腎炎</option>
+                      <option value="ネフローゼ症候群">ネフローゼ症候群</option>
+                      <option value="急性腎炎">急性腎炎</option>
+                      <option value="IgA腎症">IgA腎症</option>
+                      <option value="糖尿病">糖尿病</option>
+                      <option value="尿路感染症">尿路感染症</option>
+                      <option value="膀胱炎">膀胱炎</option>
+                      <option value="腎盂腎炎">腎盂腎炎</option>
+                      <option value="尿路結石">尿路結石</option>
+                      <option value="腎機能障害">腎機能障害</option>
+                      <option value="その他">その他</option>
+                    </select>
+                  </div>
+                </template>
+
+                <!-- 心電図 -->
+                <template v-if="editingExam?.type === '心電図'">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">検診結果</label>
+                    <select
+                      v-model="editFormData.exam_result"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">選択してください</option>
+                      <option value="異常なし">異常なし</option>
+                      <option value="未検診">未検診</option>
+                      <option value="心室性期外収縮">心室性期外収縮</option>
+                      <option value="不完全右脚ブロック">不完全右脚ブロック</option>
+                      <option value="不整脈">不整脈</option>
+                      <option value="左軸偏位">左軸偏位</option>
+                      <option value="ＳＴ−Ｔ異常">ＳＴ−Ｔ異常</option>
+                      <option value="ＷＰＷ症候群">ＷＰＷ症候群</option>
+                      <option value="先天性心疾患">先天性心疾患</option>
+                      <option value="川崎病既往">川崎病既往</option>
+                      <option value="心雑音">心雑音</option>
+                      <option value="問診より">問診より</option>
+                      <option value="ＱＴ延長症候群">ＱＴ延長症候群</option>
+                      <option value="完全房室ブロック">完全房室ブロック</option>
+                      <option value="第2度房室ブロック">第2度房室ブロック</option>
+                      <option value="洞性除脈">洞性除脈</option>
+                      <option value="上室性期外収縮">上室性期外収縮</option>
+                      <option value="洞性頻脈">洞性頻脈</option>
+                      <option value="第1度房室ブロック">第1度房室ブロック</option>
+                      <option value="ST低下">ST低下</option>
+                      <option value="経過観察">経過観察</option>
+                      <option value="班時計回転">班時計回転</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">診断結果</label>
+                    <select
+                      v-model="editFormData.diagnosis"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">選択してください</option>
+                      <option value="異常なし">異常なし</option>
+                      <option value="心室性期外収縮">心室性期外収縮</option>
+                      <option value="不完全右脚ブロック">不完全右脚ブロック</option>
+                      <option value="不整脈">不整脈</option>
+                      <option value="左軸偏位">左軸偏位</option>
+                      <option value="ＳＴ−Ｔ異常">ＳＴ−Ｔ異常</option>
+                      <option value="ＷＰＷ症候群">ＷＰＷ症候群</option>
+                      <option value="先天性心疾患">先天性心疾患</option>
+                      <option value="川崎病既往">川崎病既往</option>
+                      <option value="心雑音">心雑音</option>
+                      <option value="問診より">問診より</option>
+                      <option value="ＱＴ延長症候群">ＱＴ延長症候群</option>
+                      <option value="完全房室ブロック">完全房室ブロック</option>
+                      <option value="第2度房室ブロック">第2度房室ブロック</option>
+                      <option value="洞性除脈">洞性除脈</option>
+                      <option value="上室性期外収縮">上室性期外収縮</option>
+                      <option value="洞性頻脈">洞性頻脈</option>
+                      <option value="第1度房室ブロック">第1度房室ブロック</option>
+                    </select>
+                  </div>
+                </template>
+
+                <!-- 共通の処置フィールド -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">処置</label>
+                  <select
+                    v-model="editFormData.treatment"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">選択してください</option>
+                    <option value="経過観察">経過観察</option>
+                    <option value="治療不要">治療不要</option>
+                    <option value="治療中">治療中</option>
+                    <option value="治療完了">治療完了</option>
+                    <option value="管理不要">管理不要</option>
+                    <option value="要管理Ａ">要管理Ａ</option>
+                    <option value="要管理Ｂ">要管理Ｂ</option>
+                    <option value="要管理Ｃ">要管理Ｃ</option>
+                    <option value="要管理Ｄ">要管理Ｄ</option>
+                    <option value="要管理Ｅ">要管理Ｅ</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Footer -->
+            <div class="bg-gray-50 px-6 py-4 flex justify-between items-center">
+              <BaseButton
+                variant="danger"
+                @click="deleteExamItem"
+                :disabled="isLoading"
+              >
+                消去
+              </BaseButton>
+              <div class="flex space-x-3">
+                <BaseButton
+                  variant="secondary"
+                  @click="closeExamEditModal"
+                >
+                  キャンセル
+                </BaseButton>
+                <BaseButton
+                  variant="primary"
+                  @click="saveExamEdit"
+                  :disabled="isLoading"
+                >
+                  {{ isLoading ? '保存中...' : '保存' }}
+                </BaseButton>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </AppLayout>
 </template>
 
@@ -1040,6 +1559,11 @@ export default {
       urine_test: false,
       ecg: false
     });
+    
+    // Exam edit modal state
+    const showExamEditModal = ref(false);
+    const editingExam = ref(null);
+    const editFormData = ref({});
     
     // Computed
     const recordId = computed(() => parseInt(route.params.id));
@@ -1518,6 +2042,291 @@ export default {
       };
     };
     
+    const openExamEditModal = (exam) => {
+      editingExam.value = exam;
+      editFormData.value = { ...exam.data };
+      showExamEditModal.value = true;
+    };
+    
+    const closeExamEditModal = () => {
+      showExamEditModal.value = false;
+      editingExam.value = null;
+      editFormData.value = {};
+    };
+    
+    const saveExamEdit = async () => {
+      if (!editingExam.value) return;
+      
+      try {
+        isLoading.value = true;
+        
+        // 現在のレコードを取得
+        const currentRecord = studentRecords.value.find(r => r.id === editingExam.value.recordId);
+        if (!currentRecord) {
+          throw new Error('レコードが見つかりません');
+        }
+        
+        // 既存のレコードデータを全て含める（バリデーション通過のため）
+        const baseUpdateData = {
+          year: currentRecord.year,
+          student_id: currentRecord.student_id,
+          measured_date: currentRecord.measured_date,
+          height: currentRecord.height,
+          weight: currentRecord.weight,
+          vision_left: currentRecord.vision_left,
+          vision_right: currentRecord.vision_right,
+          vision_left_corrected: currentRecord.vision_left_corrected,
+          vision_right_corrected: currentRecord.vision_right_corrected,
+          ophthalmology_exam_result: currentRecord.ophthalmology_exam_result,
+          ophthalmology_diagnosis: currentRecord.ophthalmology_diagnosis,
+          ophthalmology_treatment: currentRecord.ophthalmology_treatment,
+          ophthalmology_result: currentRecord.ophthalmology_result,
+          otolaryngology_result: currentRecord.otolaryngology_result,
+          internal_medicine_result: currentRecord.internal_medicine_result,
+          hearing_test_result: currentRecord.hearing_test_result,
+          tuberculosis_test_result: currentRecord.tuberculosis_test_result,
+          urine_test_result: currentRecord.urine_test_result,
+          ecg_result: currentRecord.ecg_result,
+        };
+        
+        // 検診タイプに応じて適切なフィールドを更新
+        let fieldName = '';
+        let currentData = [];
+        
+        switch (editingExam.value.type) {
+          case '内科検診':
+            fieldName = 'internal_medicine_result';
+            currentData = currentRecord.internal_medicine_result 
+              ? JSON.parse(currentRecord.internal_medicine_result) 
+              : [];
+            break;
+          case '耳鼻科検診':
+            fieldName = 'otolaryngology_result';
+            currentData = currentRecord.otolaryngology_result 
+              ? JSON.parse(currentRecord.otolaryngology_result) 
+              : [];
+            break;
+          case '聴力検査':
+            fieldName = 'hearing_test_result';
+            currentData = currentRecord.hearing_test_result 
+              ? JSON.parse(currentRecord.hearing_test_result) 
+              : [];
+            break;
+          case '結核検査':
+            fieldName = 'tuberculosis_test_result';
+            currentData = currentRecord.tuberculosis_test_result 
+              ? JSON.parse(currentRecord.tuberculosis_test_result) 
+              : [];
+            break;
+          case '尿検査':
+            fieldName = 'urine_test_result';
+            currentData = currentRecord.urine_test_result 
+              ? JSON.parse(currentRecord.urine_test_result) 
+              : [];
+            break;
+          case '心電図':
+            fieldName = 'ecg_result';
+            currentData = currentRecord.ecg_result 
+              ? JSON.parse(currentRecord.ecg_result) 
+              : [];
+            break;
+          case '眼科検診':
+            // 眼科検診は配列ではなく個別フィールド
+            baseUpdateData.ophthalmology_exam_result = editFormData.value.exam_result || null;
+            baseUpdateData.ophthalmology_diagnosis = editFormData.value.diagnosis || null;
+            baseUpdateData.ophthalmology_treatment = editFormData.value.treatment || null;
+            baseUpdateData.ophthalmology_result = editFormData.value.result || null;
+            
+            await healthRecordStore.updateHealthRecord(editingExam.value.recordId, baseUpdateData);
+            closeExamEditModal();
+            await fetchRecord();
+            
+            notificationStore.addNotification({
+              type: 'success',
+              title: '更新完了',
+              message: '検診データを更新しました'
+            });
+            return;
+        }
+        
+        // 配列形式の検診データの場合、該当アイテムを更新
+        if (fieldName) {
+          // 編集対象のアイテムを見つけて更新
+          const index = currentData.findIndex(item => 
+            JSON.stringify(item) === JSON.stringify(editingExam.value.data)
+          );
+          
+          if (index !== -1) {
+            currentData[index] = editFormData.value;
+          } else {
+            // 見つからない場合は追加
+            currentData.push(editFormData.value);
+          }
+          
+          // 更新対象のフィールドに新しいデータをセット
+          baseUpdateData[fieldName] = JSON.stringify(currentData);
+          
+          await healthRecordStore.updateHealthRecord(editingExam.value.recordId, baseUpdateData);
+          closeExamEditModal();
+          await fetchRecord();
+          
+          notificationStore.addNotification({
+            type: 'success',
+            title: '更新完了',
+            message: '検診データを更新しました'
+          });
+        }
+        
+      } catch (error) {
+        console.error('Failed to update exam data:', error);
+        console.error('Error response:', error.response?.data);
+        notificationStore.addNotification({
+          type: 'danger',
+          title: '更新エラー',
+          message: error.response?.data?.message || '検診データの更新に失敗しました'
+        });
+      } finally {
+        isLoading.value = false;
+      }
+    };
+    
+    const deleteExamItem = async () => {
+      if (!editingExam.value) return;
+      
+      if (!confirm('この検診データを削除してもよろしいですか？')) {
+        return;
+      }
+      
+      try {
+        isLoading.value = true;
+        
+        // 現在のレコードを取得
+        const currentRecord = studentRecords.value.find(r => r.id === editingExam.value.recordId);
+        if (!currentRecord) {
+          throw new Error('レコードが見つかりません');
+        }
+        
+        // 既存のレコードデータを全て含める（バリデーション通過のため）
+        const baseUpdateData = {
+          year: currentRecord.year,
+          student_id: currentRecord.student_id,
+          measured_date: currentRecord.measured_date,
+          height: currentRecord.height,
+          weight: currentRecord.weight,
+          vision_left: currentRecord.vision_left,
+          vision_right: currentRecord.vision_right,
+          vision_left_corrected: currentRecord.vision_left_corrected,
+          vision_right_corrected: currentRecord.vision_right_corrected,
+          ophthalmology_exam_result: currentRecord.ophthalmology_exam_result,
+          ophthalmology_diagnosis: currentRecord.ophthalmology_diagnosis,
+          ophthalmology_treatment: currentRecord.ophthalmology_treatment,
+          ophthalmology_result: currentRecord.ophthalmology_result,
+          otolaryngology_result: currentRecord.otolaryngology_result,
+          internal_medicine_result: currentRecord.internal_medicine_result,
+          hearing_test_result: currentRecord.hearing_test_result,
+          tuberculosis_test_result: currentRecord.tuberculosis_test_result,
+          urine_test_result: currentRecord.urine_test_result,
+          ecg_result: currentRecord.ecg_result,
+        };
+        
+        // 検診タイプに応じて適切なフィールドを更新
+        let fieldName = '';
+        let currentData = [];
+        
+        switch (editingExam.value.type) {
+          case '内科検診':
+            fieldName = 'internal_medicine_result';
+            currentData = currentRecord.internal_medicine_result 
+              ? JSON.parse(currentRecord.internal_medicine_result) 
+              : [];
+            break;
+          case '耳鼻科検診':
+            fieldName = 'otolaryngology_result';
+            currentData = currentRecord.otolaryngology_result 
+              ? JSON.parse(currentRecord.otolaryngology_result) 
+              : [];
+            break;
+          case '聴力検査':
+            fieldName = 'hearing_test_result';
+            currentData = currentRecord.hearing_test_result 
+              ? JSON.parse(currentRecord.hearing_test_result) 
+              : [];
+            break;
+          case '結核検査':
+            fieldName = 'tuberculosis_test_result';
+            currentData = currentRecord.tuberculosis_test_result 
+              ? JSON.parse(currentRecord.tuberculosis_test_result) 
+              : [];
+            break;
+          case '尿検査':
+            fieldName = 'urine_test_result';
+            currentData = currentRecord.urine_test_result 
+              ? JSON.parse(currentRecord.urine_test_result) 
+              : [];
+            break;
+          case '心電図':
+            fieldName = 'ecg_result';
+            currentData = currentRecord.ecg_result 
+              ? JSON.parse(currentRecord.ecg_result) 
+              : [];
+            break;
+          case '眼科検診':
+            // 眼科検診は配列ではなく個別フィールド
+            baseUpdateData.ophthalmology_exam_result = null;
+            baseUpdateData.ophthalmology_diagnosis = null;
+            baseUpdateData.ophthalmology_treatment = null;
+            baseUpdateData.ophthalmology_result = null;
+            
+            await healthRecordStore.updateHealthRecord(editingExam.value.recordId, baseUpdateData);
+            closeExamEditModal();
+            await fetchRecord();
+            
+            notificationStore.addNotification({
+              type: 'success',
+              title: '削除完了',
+              message: '検診データを削除しました'
+            });
+            return;
+        }
+        
+        // 配列形式の検診データの場合、該当アイテムを削除
+        if (fieldName) {
+          // 編集対象のアイテムを見つけて削除
+          const index = currentData.findIndex(item => 
+            JSON.stringify(item) === JSON.stringify(editingExam.value.data)
+          );
+          
+          if (index !== -1) {
+            currentData.splice(index, 1);
+          }
+          
+          // 更新対象のフィールドに新しいデータをセット
+          baseUpdateData[fieldName] = currentData.length > 0 ? JSON.stringify(currentData) : null;
+          
+          await healthRecordStore.updateHealthRecord(editingExam.value.recordId, baseUpdateData);
+          closeExamEditModal();
+          await fetchRecord();
+          
+          notificationStore.addNotification({
+            type: 'success',
+            title: '削除完了',
+            message: '検診データを削除しました'
+          });
+        }
+        
+      } catch (error) {
+        console.error('Failed to delete exam data:', error);
+        console.error('Error response:', error.response?.data);
+        notificationStore.addNotification({
+          type: 'danger',
+          title: '削除エラー',
+          message: error.response?.data?.message || '検診データの削除に失敗しました'
+        });
+      } finally {
+        isLoading.value = false;
+      }
+    };
+    
     const exportRecord = () => {
       if (!record.value) return;
       
@@ -1642,6 +2451,9 @@ export default {
       examTypeFilter,
       hasActiveExamFilter,
       activeExamFilterCount,
+      showExamEditModal,
+      editingExam,
+      editFormData,
       formatDate,
       formatShortDate,
       calculateAge,
@@ -1652,6 +2464,10 @@ export default {
       getBMIDescription,
       getBorderColorClass,
       clearExamTypeFilter,
+      openExamEditModal,
+      closeExamEditModal,
+      saveExamEdit,
+      deleteExamItem,
       exportRecord
     };
   }
