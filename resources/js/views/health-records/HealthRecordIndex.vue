@@ -21,6 +21,13 @@
         <div class="mt-4 flex space-x-3 md:mt-0 md:ml-4">
           <BaseButton
             variant="secondary"
+            @click="goBackOrClearSearch"
+          >
+            <ArrowLeftIcon class="h-4 w-4 mr-2" />
+            戻る
+          </BaseButton>
+          <BaseButton
+            variant="secondary"
             @click="openPDFExportModal"
           >
             <DocumentArrowDownIcon class="h-4 w-4 mr-2" />
@@ -451,7 +458,7 @@
           :columns="tableColumns"
           :data="paginatedRecords"
           :loading="isLoading"
-          @row-click="(row) => $router.push(`/health-records/${row.id}`)"
+          @row-click="(row) => goToDetailPage(row.id)"
         >
           <template #cell(student_name)="{ item }">
             <div class="space-y-1">
@@ -560,7 +567,7 @@
               <BaseButton
                 size="sm"
                 variant="primary"
-                @click.stop="$router.push(`/health-records/${item.id}`)"
+                @click.stop="goToDetailPage(item.id)"
               >
                 詳細
               </BaseButton>
@@ -596,7 +603,7 @@
           v-for="record in paginatedRecords"
           :key="record.id"
           class="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-          @click="$router.push(`/health-records/${record.id}`)"
+          @click="goToDetailPage(record.id)"
         >
           <div class="p-6">
             <!-- Actions -->
@@ -611,7 +618,7 @@
               <BaseButton
                 size="sm"
                 variant="primary"
-                @click.stop="$router.push(`/health-records/${record.id}`)"
+                @click.stop="goToDetailPage(record.id)"
               >
                 詳細
               </BaseButton>
@@ -907,6 +914,7 @@
 
 <script>
 import { ref, computed, onMounted, onActivated, reactive } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { useHealthRecordStore } from '@/stores/healthRecord.js';
 import { useClassStore } from '@/stores/class.js';
 import { useNotificationStore } from '@/stores/notification.js';
@@ -996,6 +1004,14 @@ const ArrowUpIcon = {
   `
 };
 
+const ArrowLeftIcon = {
+  template: `
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+    </svg>
+  `
+};
+
 const ArrowDownIcon = {
   template: `
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1024,6 +1040,7 @@ export default {
     BaseBadge,
     BasePagination,
     BaseModal,
+    ArrowLeftIcon,
     PlusIcon,
     MagnifyingGlassIcon,
     HeartIcon,
@@ -1038,6 +1055,8 @@ export default {
   },
   
   setup() {
+    const router = useRouter();
+    const route = useRoute();
     const healthRecordStore = useHealthRecordStore();
     const classStore = useClassStore();
     const notificationStore = useNotificationStore();
@@ -1356,6 +1375,61 @@ export default {
       filters.day = '';
       sortBy.value = 'measured_date';
       currentPage.value = 1;
+    };
+    
+    // Go back or clear search
+    const goBackOrClearSearch = () => {
+      // 検索条件がある場合はクリアして全件表示
+      if (searchQuery.value || 
+          filters.academic_year || 
+          filters.class_id || 
+          filters.year || 
+          filters.month || 
+          filters.day) {
+        resetFilters();
+        // URLのクエリパラメータもクリア
+        router.push({ path: '/health-records' });
+      } else {
+        // 検索条件がない場合はダッシュボードに戻る
+        router.push('/');
+      }
+    };
+    
+    // Navigate to detail page with search params
+    const goToDetailPage = (recordId) => {
+      const queryParams = {};
+      
+      // 検索条件を保存
+      if (searchQuery.value) {
+        queryParams.search = searchQuery.value;
+      }
+      if (filters.academic_year) {
+        queryParams.academic_year = filters.academic_year;
+      }
+      if (filters.class_id) {
+        queryParams.class_id = filters.class_id;
+      }
+      if (filters.year) {
+        queryParams.year = filters.year;
+      }
+      if (filters.month) {
+        queryParams.month = filters.month;
+      }
+      if (filters.day) {
+        queryParams.day = filters.day;
+      }
+      if (sortBy.value !== 'measured_date') {
+        queryParams.sortBy = sortBy.value;
+      }
+      if (currentPage.value !== 1) {
+        queryParams.page = currentPage.value;
+      }
+      
+      // 詳細ページへ遷移
+      router.push({
+        path: `/health-records/${recordId}`,
+        query: queryParams
+      });
     };
     
     const formatDate = (dateString) => {
@@ -1837,6 +1911,32 @@ export default {
           healthRecordStore.fetchHealthRecords(),
           classStore.fetchClasses()
         ]);
+        
+        // URLのクエリパラメータから検索条件を復元
+        if (route.query.search) {
+          searchQuery.value = route.query.search;
+        }
+        if (route.query.academic_year) {
+          filters.academic_year = route.query.academic_year;
+        }
+        if (route.query.class_id) {
+          filters.class_id = route.query.class_id;
+        }
+        if (route.query.year) {
+          filters.year = route.query.year;
+        }
+        if (route.query.month) {
+          filters.month = route.query.month;
+        }
+        if (route.query.day) {
+          filters.day = route.query.day;
+        }
+        if (route.query.sortBy) {
+          sortBy.value = route.query.sortBy;
+        }
+        if (route.query.page) {
+          currentPage.value = parseInt(route.query.page);
+        }
       } catch (error) {
         notificationStore.addNotification({
           type: 'danger',
@@ -1880,6 +1980,8 @@ export default {
       applyFilters,
       applySorting,
       resetFilters,
+      goBackOrClearSearch,
+      goToDetailPage,
       formatDate,
       getBMICategory,
       getBMIVariant,

@@ -21,6 +21,13 @@
         <div class="mt-4 flex space-x-3 md:mt-0 md:ml-4">
           <BaseButton
             variant="secondary"
+            @click="$router.push('/')"
+          >
+            <ArrowLeftIcon class="h-4 w-4 mr-2" />
+            戻る
+          </BaseButton>
+          <BaseButton
+            variant="secondary"
             @click="exportToPDF"
           >
             <DocumentArrowDownIcon class="h-4 w-4 mr-2" />
@@ -395,6 +402,14 @@ import {
 } from '@/components/index.js';
 
 // Icons
+const ArrowLeftIcon = {
+  template: `
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+    </svg>
+  `
+};
+
 const PlusIcon = {
   template: `
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -469,13 +484,15 @@ export default {
     BaseButton,
     BaseSpinner,
     BaseTable,
+    ArrowLeftIcon,
     PlusIcon,
     MagnifyingGlassIcon,
     AcademicCapIcon,
     UsersIcon,
     CalculatorIcon,
     ViewColumnsIcon,
-    Bars3Icon
+    Bars3Icon,
+    DocumentArrowDownIcon
   },
   
   setup() {

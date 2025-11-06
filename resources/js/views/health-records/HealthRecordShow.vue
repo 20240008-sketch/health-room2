@@ -48,6 +48,14 @@
         <div class="mt-5 flex lg:mt-0 lg:ml-4">
           <BaseButton
             variant="secondary"
+            @click="goBack"
+          >
+            <ArrowLeftIcon class="h-4 w-4 mr-2" />
+            戻る
+          </BaseButton>
+          <BaseButton
+            variant="secondary"
+            class="ml-3"
             @click="$router.push(`/health-records/${record?.id}/edit`)"
             v-if="record"
           >
@@ -1466,6 +1474,14 @@ const AcademicCapIcon = {
   `
 };
 
+const ArrowLeftIcon = {
+  template: `
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+    </svg>
+  `
+};
+
 const PencilIcon = {
   template: `
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1527,6 +1543,7 @@ export default {
     UserIcon,
     CalendarIcon,
     AcademicCapIcon,
+    ArrowLeftIcon,
     PencilIcon,
     ArrowDownTrayIcon,
     ArrowUpIcon,
@@ -1937,6 +1954,22 @@ export default {
     });
     
     // Methods
+    const goBack = () => {
+      // URLのクエリパラメータから検索条件を取得
+      const query = route.query;
+      
+      // 検索条件があれば、それを保持して一覧ページに戻る
+      if (Object.keys(query).length > 0) {
+        router.push({
+          path: '/health-records',
+          query: query
+        });
+      } else {
+        // クエリパラメータがなければ、履歴を戻る
+        router.back();
+      }
+    };
+    
     const formatDate = (dateString) => {
       if (!dateString) return '';
       const date = new Date(dateString);
@@ -2454,6 +2487,7 @@ export default {
       showExamEditModal,
       editingExam,
       editFormData,
+      goBack,
       formatDate,
       formatShortDate,
       calculateAge,

@@ -26,6 +26,15 @@
             学生の身長・体重を測定して記録します
           </p>
         </div>
+        <div class="mt-5 flex lg:mt-0 lg:ml-4">
+          <BaseButton
+            variant="secondary"
+            @click="$router.back()"
+          >
+            <ArrowLeftIcon class="h-4 w-4 mr-2" />
+            戻る
+          </BaseButton>
+        </div>
       </div>
     </template>
 
@@ -2719,6 +2728,14 @@ const ArrowDownIcon = {
   `
 };
 
+const ArrowLeftIcon = {
+  template: `
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+    </svg>
+  `
+};
+
 const ExclamationTriangleIcon = {
   template: `
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2751,6 +2768,7 @@ export default {
     BaseInput,
     BaseButton,
     BaseBadge,
+    ArrowLeftIcon,
     ChevronRightIcon,
     MagnifyingGlassIcon,
     ArrowUpIcon,
