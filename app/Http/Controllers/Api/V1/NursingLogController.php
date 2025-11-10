@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Support\PdfFontHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use TCPDF;
@@ -13,11 +14,12 @@ class NursingLogController extends Controller
     {
         try {
             $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
+            $fontName = PdfFontHelper::applyFont($pdf, 12);
             $pdf->setPrintHeader(false);
             $pdf->setPrintFooter(false);
             $pdf->SetMargins(10, 10, 10);
             $pdf->AddPage();
-            $pdf->SetFont('helvetica', '', 12);
+            $pdf->SetFont($fontName, '', 12);
             $pdf->Cell(0, 10, 'Test PDF', 0, 1);
             
             $pdfContent = $pdf->Output('', 'S');
@@ -59,6 +61,7 @@ class NursingLogController extends Controller
             Log::info('Validation passed, generating PDF');
             // TCPDFインスタンスを作成
             $pdf = new TCPDF('L', 'mm', 'A4', true, 'UTF-8', false);
+            $fontName = PdfFontHelper::applyFont($pdf, 10);
             
             // ドキュメント情報を設定
             $pdf->SetCreator('Health Management System');
@@ -75,8 +78,7 @@ class NursingLogController extends Controller
             $pdf->SetAutoPageBreak(true, 10);
             
             // 日本語フォントを設定
-            // TCPDFのデフォルトCJKフォントを使用
-            $pdf->SetFont('cid0jp', '', 10);
+            $pdf->SetFont($fontName, '', 10);
             
             // ページを追加
             $pdf->AddPage();
@@ -131,8 +133,9 @@ class NursingLogController extends Controller
         $absence = $data['absence'] ?? [];
         $visits = $data['visits'] ?? [];
         
-        // シンプルなHTMLテーブル構造
-        $html = '<h1 style="text-align:center;">養護日誌</h1>';
+    // シンプルなHTMLテーブル構造
+    $html = '<style>body { font-family: "seieiIPexMincho", serif; font-size: 10pt; }</style>';
+    $html .= '<h1 style="text-align:center;">養護日誌</h1>';
         
         // 基本情報
         $html .= '<table border="1" cellpadding="4" style="width:100%;margin-bottom:10px;">';

@@ -4,13 +4,34 @@
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>健康記録統計レポート</title>
+    @php
+        $seieiFontPath = null;
+        foreach ([
+            'seieiIPexMincho.ttf',
+            'seieiIPAexMincho.ttf',
+        ] as $candidate) {
+            $path = public_path($candidate);
+            if (file_exists($path)) {
+                $seieiFontPath = $path;
+                break;
+            }
+        }
+    @endphp
     <style>
+        @if($seieiFontPath)
+        @font-face {
+            font-family: 'seieiIPexMincho';
+            src: url('{{ $seieiFontPath }}') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        @endif
         @page {
             margin: 20mm 15mm;
         }
         
         body {
-            font-family: ipaexg, ipag, "DejaVu Sans", sans-serif;
+            font-family: 'seieiIPexMincho', serif;
             font-size: 10pt;
             line-height: 1.6;
             color: #333;

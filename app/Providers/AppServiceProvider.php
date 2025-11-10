@@ -13,7 +13,8 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind('TCPDF', function() {
             $pdf = new \TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-            $pdf->SetFont('kozgopromedium', '', 10);
+            \App\Support\PdfFontHelper::applyFont($pdf, 10, 10, 8);
+
             return $pdf;
         });
     }

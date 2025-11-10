@@ -1,4 +1,7 @@
 <style>
+    body {
+        font-family: 'seieiIPexMincho', serif;
+    }
     h1 {
         font-size: 18pt;
         color: #1e40af;

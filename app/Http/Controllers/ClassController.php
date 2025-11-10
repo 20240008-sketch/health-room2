@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\SchoolClass;
+use App\Support\PdfFontHelper;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -189,6 +190,7 @@ class ClassController extends Controller
 
             // PDFを生成
             $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
+            $fontName = PdfFontHelper::applyFont($pdf, 10);
             
             // PDFの基本設定
             $pdf->SetCreator('Health Room System');
@@ -205,23 +207,23 @@ class ClassController extends Controller
             $pdf->SetAutoPageBreak(true, 15);
             
             // フォント設定（日本語対応）
-            $pdf->SetFont('kozminproregular', '', 10);
+            $pdf->SetFont($fontName, '', 10);
             
             // ページ追加
             $pdf->AddPage();
             
             // タイトル
-            $pdf->SetFont('kozminproregular', 'B', 16);
+            $pdf->SetFont($fontName, '', 16);
             $pdf->Cell(0, 10, 'クラス一覧', 0, 1, 'C');
             $pdf->Ln(5);
             
             // 出力日時
-            $pdf->SetFont('kozminproregular', '', 9);
+            $pdf->SetFont($fontName, '', 9);
             $pdf->Cell(0, 5, '出力日時: ' . date('Y年m月d日 H:i'), 0, 1, 'R');
             $pdf->Ln(5);
             
             // テーブルヘッダー
-            $pdf->SetFont('kozminproregular', 'B', 10);
+            $pdf->SetFont($fontName, '', 10);
             $pdf->SetFillColor(230, 230, 230);
             $pdf->Cell(30, 8, '年度', 1, 0, 'C', true);
             $pdf->Cell(25, 8, '学年', 1, 0, 'C', true);
@@ -230,7 +232,7 @@ class ClassController extends Controller
             $pdf->Cell(20, 8, '生徒数', 1, 1, 'C', true);
             
             // テーブルデータ
-            $pdf->SetFont('kozminproregular', '', 9);
+            $pdf->SetFont($fontName, '', 9);
             foreach ($classes as $class) {
                 $pdf->Cell(30, 7, $class->year . '年度', 1, 0, 'C');
                 $pdf->Cell(25, 7, $class->grade . '年', 1, 0, 'C');
@@ -241,9 +243,9 @@ class ClassController extends Controller
             
             // 統計情報
             $pdf->Ln(10);
-            $pdf->SetFont('kozminproregular', 'B', 10);
+            $pdf->SetFont($fontName, '', 10);
             $pdf->Cell(0, 7, '統計情報', 0, 1, 'L');
-            $pdf->SetFont('kozminproregular', '', 9);
+            $pdf->SetFont($fontName, '', 9);
             $pdf->Cell(0, 6, '総クラス数: ' . $classes->count() . 'クラス', 0, 1, 'L');
             $pdf->Cell(0, 6, '総生徒数: ' . $classes->sum('students_count') . '名', 0, 1, 'L');
             

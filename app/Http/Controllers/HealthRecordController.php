@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\HealthRecord;
 use App\Models\Student;
 use App\Http\Requests\HealthRecordRequest;
+use App\Support\PdfFontHelper;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -774,6 +775,7 @@ class HealthRecordController extends Controller
 
             // Generate PDF using TCPDF
             $pdf = app('TCPDF');
+            $fontName = PdfFontHelper::applyFont($pdf, 10, 10, 8);
             
             // Set document information
             $pdf->SetCreator('Health Management System');
@@ -785,8 +787,8 @@ class HealthRecordController extends Controller
             $pdf->SetHeaderData('', 0, '健康記録統計レポート', $academicYear . '年度');
             
             // Set header and footer fonts
-            $pdf->setHeaderFont(['kozgopromedium', '', 10]);
-            $pdf->setFooterFont(['kozgopromedium', '', 8]);
+            $pdf->setHeaderFont([$fontName, '', 10]);
+            $pdf->setFooterFont([$fontName, '', 8]);
             
             // Set default monospaced font
             $pdf->SetDefaultMonospacedFont('courier');
@@ -803,7 +805,7 @@ class HealthRecordController extends Controller
             $pdf->setImageScale(1.25);
             
             // Set font
-            $pdf->SetFont('kozgopromedium', '', 10);
+            $pdf->SetFont($fontName, '', 10);
             
             // Add a page
             $pdf->AddPage();
@@ -973,6 +975,7 @@ class HealthRecordController extends Controller
 
             // PDFを生成
             $pdf = new TCPDF('L', 'mm', 'A4', true, 'UTF-8', false); // 横向き
+            $fontName = PdfFontHelper::applyFont($pdf, 9);
             
             // PDFの基本設定
             $pdf->SetCreator('Health Room System');
@@ -989,24 +992,24 @@ class HealthRecordController extends Controller
             $pdf->SetAutoPageBreak(true, 10);
             
             // フォント設定（日本語対応）
-            $pdf->SetFont('kozminproregular', '', 9);
+            $pdf->SetFont($fontName, '', 9);
             
             // ページ追加
             $pdf->AddPage();
             
             // タイトル
-            $pdf->SetFont('kozminproregular', 'B', 14);
+            $pdf->SetFont($fontName, '', 14);
             $pdf->Cell(0, 8, '健康記録一覧', 0, 1, 'C');
             $pdf->Ln(3);
             
             // 出力日時
-            $pdf->SetFont('kozminproregular', '', 8);
+            $pdf->SetFont($fontName, '', 8);
             $pdf->Cell(0, 5, '出力日時: ' . date('Y年m月d日 H:i'), 0, 1, 'R');
             $pdf->Ln(2);
             
             // フィルター情報
             if ($request->has('academic_year') || $request->has('class_id')) {
-                $pdf->SetFont('kozminproregular', '', 8);
+                $pdf->SetFont($fontName, '', 8);
                 $filterText = '絞り込み: ';
                 $filters = [];
                 if ($request->has('academic_year')) $filters[] = $request->academic_year . '年度';
@@ -1043,8 +1046,8 @@ class HealthRecordController extends Controller
             }
             
             // テーブルヘッダーを描画
-            $drawTableHeader = function() use ($pdf, $columnConfig, $displayColumns) {
-                $pdf->SetFont('kozminproregular', 'B', 8);
+            $drawTableHeader = function() use ($pdf, $columnConfig, $displayColumns, $fontName) {
+                $pdf->SetFont($fontName, '', 8);
                 $pdf->SetFillColor(230, 230, 230);
                 foreach ($displayColumns as $col) {
                     $config = $columnConfig[$col];
@@ -1057,13 +1060,13 @@ class HealthRecordController extends Controller
             $drawTableHeader();
             
             // テーブルデータ
-            $pdf->SetFont('kozminproregular', '', 7);
+            $pdf->SetFont($fontName, '', 7);
             foreach ($records as $record) {
                 // ページの残りスペースをチェック
                 if ($pdf->GetY() > 180) {
                     $pdf->AddPage();
                     $drawTableHeader();
-                    $pdf->SetFont('kozminproregular', '', 7);
+                    $pdf->SetFont($fontName, '', 7);
                 }
                 
                 // 各列のデータを準備
@@ -1127,9 +1130,9 @@ class HealthRecordController extends Controller
             
             // 統計情報
             $pdf->Ln(5);
-            $pdf->SetFont('kozminproregular', 'B', 9);
+            $pdf->SetFont($fontName, '', 9);
             $pdf->Cell(0, 6, '統計情報', 0, 1, 'L');
-            $pdf->SetFont('kozminproregular', '', 8);
+            $pdf->SetFont($fontName, '', 8);
             $pdf->Cell(0, 5, '総記録数: ' . $records->count() . '件', 0, 1, 'L');
             
             if ($records->count() > 0 && in_array('height', $selectedColumns) && in_array('weight', $selectedColumns) && in_array('bmi', $selectedColumns)) {

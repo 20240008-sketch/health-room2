@@ -12,7 +12,7 @@
     <style>
         body {
             background-color: #f3f4f6;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'EUDC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
         .fallback-content {
             display: flex;

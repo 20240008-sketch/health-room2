@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Support\PdfFontHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use TCPDF;
@@ -31,6 +32,7 @@ class HealthRecordPrintController extends Controller
             
             // TCPDFインスタンスを作成
             $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
+            $fontName = PdfFontHelper::applyFont($pdf, 10);
             
             // ドキュメント情報を設定
             $pdf->SetCreator('Health Management System');
@@ -50,7 +52,7 @@ class HealthRecordPrintController extends Controller
             $pdf->AddPage();
             
             // 日本語フォントを設定（ページ追加後に設定）
-            $pdf->SetFont('kozminproregular', '', 10);
+            $pdf->SetFont($fontName, '', 10);
             
             // HTMLコンテンツを作成
             if ($data['exam_type'] === 'vision_test') {
@@ -118,7 +120,7 @@ class HealthRecordPrintController extends Controller
         
         $html = '
         <style>
-            body { font-size: 10pt; }
+            body { font-size: 10pt; font-family: "seieiIPexMincho", serif; }
             h2 { font-size: 14pt; text-align: center; border-bottom: 2px solid #000; padding-bottom: 5px; margin: 10px 0; }
             h3 { font-size: 11pt; margin-top: 15px; margin-bottom: 8px; }
             table { border-collapse: collapse; width: 90%; margin: 10px 0; }
@@ -235,7 +237,7 @@ class HealthRecordPrintController extends Controller
         
         $html = '
         <style>
-            body { font-size: 9pt; font-family: "Noto Sans JP", sans-serif; }
+            body { font-size: 9pt; font-family: "seieiIPexMincho", serif; }
             h2 { font-size: 12pt; text-align: center; border-bottom: 2px solid #000; padding-bottom: 5px; margin: 8px 0; }
             h3 { font-size: 10pt; margin: 8px 0 3px 0; }
             table { border-collapse: collapse; width: 100%; margin: 3px 0; font-size: 8pt; }
