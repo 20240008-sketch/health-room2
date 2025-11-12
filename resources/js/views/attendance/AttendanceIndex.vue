@@ -103,11 +103,11 @@
                   <input type="text" v-model="diary.humidity" class="border border-gray-300 px-2 py-1 w-16 text-center" />
                   <span>％</span>
                 </div>
-                <div class="flex items-center space-x-4 text-xs">
-                  <span>校長印</span>
-                  <span>副校長印</span>
-                  <span>教頭印</span>
-                  <span>記入者印</span>
+                <div class="flex items-center space-x-5 text-xs">
+                  <span>校長<span class="text-lg font-semibold ml-0.5">印</span></span>
+                  <span>副校長<span class="text-lg font-semibold ml-0.5">印</span></span>
+                  <span>教頭<span class="text-lg font-semibold ml-0.5">印</span></span>
+                  <span>記入者<span class="text-lg font-semibold ml-0.5">印</span></span>
                 </div>
               </div>
             </div>
