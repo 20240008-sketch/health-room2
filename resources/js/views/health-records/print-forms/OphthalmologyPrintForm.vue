@@ -28,55 +28,81 @@
     <table class="diagnosis-table">
       <thead>
         <tr>
-          <th class="col-number"></th>
+          <th class="col-number">番号</th>
           <th class="col-disease">病　　　名</th>
           <th class="col-description">説　　　　　明</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td class="col-number">１</td>
+          <td class="number-cell clickable" @click="toggleFinding(1)">
+            <span class="number-circle" :class="{ 'selected': formData.findings[1] }">１</span>
+          </td>
           <td class="col-disease">アレルギー性結膜炎</td>
           <td class="col-description">かゆみなどの不快感が続くことが多いので、医師にご相談ください。</td>
         </tr>
         <tr>
-          <td class="col-number">２</td>
+          <td class="number-cell clickable" @click="toggleFinding(2)">
+            <span class="number-circle" :class="{ 'selected': formData.findings[2] }">２</span>
+          </td>
           <td class="col-disease">結膜炎</td>
           <td class="col-description">目が赤く充血しています。人にうつることもありますので、早く受診されますようお勧めします。</td>
         </tr>
         <tr>
-          <td class="col-number">３</td>
+          <td class="number-cell clickable" @click="toggleFinding(3)">
+            <span class="number-circle" :class="{ 'selected': formData.findings[3] }">３</span>
+          </td>
           <td class="col-disease">麦粒腫</td>
           <td class="col-description">まぶたが炎症をおこしています。腫れや痛みが進むこともあります。</td>
         </tr>
         <tr>
-          <td class="col-number">４</td>
+          <td class="number-cell clickable" @click="toggleFinding(4)">
+            <span class="number-circle" :class="{ 'selected': formData.findings[4] }">４</span>
+          </td>
           <td class="col-disease">眼瞼縁炎</td>
           <td class="col-description">目の縁が炎症をおこしています。症状が進むと、まつげが抜けたり、結膜炎をおこしやすくなります。</td>
         </tr>
         <tr>
-          <td class="col-number">５</td>
+          <td class="number-cell clickable" @click="toggleFinding(5)">
+            <span class="number-circle" :class="{ 'selected': formData.findings[5] }">５</span>
+          </td>
           <td class="col-disease">霰粒腫</td>
           <td class="col-description">まぶたの中に硬いしこりができています。大きくなるとまぶたが開きにくくなることもあります。</td>
         </tr>
         <tr>
-          <td class="col-number">６</td>
+          <td class="number-cell clickable" @click="toggleFinding(6)">
+            <span class="number-circle" :class="{ 'selected': formData.findings[6] }">６</span>
+          </td>
           <td class="col-disease">内反症</td>
           <td class="col-description">まぶたが内側に入り込んでいます。まつげが角膜をこすると、ゴロゴロして涙がでたり、視力が下がることもあります。</td>
         </tr>
         <tr>
-          <td class="col-number">７</td>
+          <td class="number-cell clickable" @click="toggleFinding(7)">
+            <span class="number-circle" :class="{ 'selected': formData.findings[7] }">７</span>
+          </td>
           <td class="col-disease">斜視</td>
           <td class="col-description">そのままにしておくと弱視になる場合があります。できるだけ早く受診されますようにお勧めします。</td>
         </tr>
         <tr>
-          <td class="col-number">８</td>
+          <td class="number-cell clickable" @click="toggleFinding(8)">
+            <span class="number-circle" :class="{ 'selected': formData.findings[8] }">８</span>
+          </td>
           <td class="col-disease">斜位</td>
           <td class="col-description">眼精疲労を起こしやすく、矯正が必要となる場合もあります。</td>
         </tr>
         <tr>
-          <td class="col-number">９</td>
-          <td class="col-disease">その他（　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　）</td>
+          <td class="number-cell clickable" @click="toggleFinding(9)">
+            <span class="number-circle" :class="{ 'selected': formData.findings[9] }">９</span>
+          </td>
+          <td class="col-disease">
+            その他（<input 
+              type="text" 
+              v-model="formData.otherFindings" 
+              class="other-input"
+              placeholder="その他の所見を入力"
+              @click.stop
+            >）
+          </td>
           <td class="col-description"></td>
         </tr>
       </tbody>
@@ -131,6 +157,24 @@ export default {
       default: null
     }
   },
+  data() {
+    return {
+      formData: {
+        findings: {
+          1: false,  // アレルギー性結膜炎
+          2: false,  // 結膜炎
+          3: false,  // 麦粒腫
+          4: false,  // 眼瞼縁炎
+          5: false,  // 霰粒腫
+          6: false,  // 内反症
+          7: false,  // 斜視
+          8: false,  // 斜位
+          9: false   // その他
+        },
+        otherFindings: ''
+      }
+    };
+  },
   methods: {
     getGrade() {
       if (!this.student.class_id) return '';
@@ -182,6 +226,40 @@ export default {
       const year = now.getFullYear();
       // 令和は2019年5月1日から
       return year - 2018;
+    },
+    toggleFinding(number) {
+      this.formData.findings[number] = !this.formData.findings[number];
+    },
+    getFormData() {
+      // 選択された所見を配列に変換
+      const selectedFindings = [];
+      const findingNames = {
+        1: 'アレルギー性結膜炎',
+        2: '結膜炎',
+        3: '麦粒腫',
+        4: '眼瞼縁炎',
+        5: '霰粒腫',
+        6: '内反症',
+        7: '斜視',
+        8: '斜位',
+        9: 'その他'
+      };
+      
+      for (const [key, value] of Object.entries(this.formData.findings)) {
+        if (value) {
+          if (key === '9' && this.formData.otherFindings) {
+            selectedFindings.push(`${findingNames[key]}（${this.formData.otherFindings}）`);
+          } else {
+            selectedFindings.push(findingNames[key]);
+          }
+        }
+      }
+      
+      return {
+        findings: selectedFindings,
+        findingsText: selectedFindings.join('、'),
+        otherFindings: this.formData.otherFindings
+      };
     }
   }
 };
@@ -269,12 +347,54 @@ export default {
 }
 
 .col-number {
-  width: 40px;
+  width: 60px;
   text-align: center;
 }
 
+.number-cell {
+  text-align: center;
+  padding: 12px 8px;
+}
+
+.number-cell.clickable {
+  cursor: pointer;
+}
+
+.number-cell.clickable:hover {
+  background-color: #f0f0f0;
+}
+
+.number-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 2px solid #333;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.number-circle.selected {
+  background-color: #333;
+  color: white;
+  border-color: #333;
+}
+
 .col-disease {
-  width: 150px;
+  width: 200px;
+}
+
+.col-disease .other-input {
+  width: 300px;
+  border: none;
+  border-bottom: 1px solid #000;
+  padding: 2px 5px;
+  font-family: inherit;
+  font-size: inherit;
 }
 
 .col-description {

@@ -10,6 +10,61 @@ use TCPDF;
 
 class HealthRecordPrintController extends Controller
 {
+    /**
+     * school_classesテーブルから学年・コース・組番号を取得
+     */
+    private function getClassInfo($schoolClass)
+    {
+        if (empty($schoolClass)) {
+            return [
+                'grade' => '',
+                'course_name' => '',
+                'class_number' => '',
+                'dept_name' => '普通'
+            ];
+        }
+        
+        $grade = $schoolClass['grade'] ?? '';
+        $className = $schoolClass['class_name'] ?? '';
+        $kumi = $schoolClass['kumi'] ?? '';
+        
+        // class_nameからコース名と組番号を抽出
+        // 例: "2特進" -> "特進", "3総合1" -> "総合", 組番号:1
+        $courseName = '';
+        $classNumber = $kumi;
+        
+        // class_nameから学年番号を除いたコース名を抽出
+        if (preg_match('/^[0-9](.+?)([0-9]+)?$/', $className, $matches)) {
+            $courseName = $matches[1]; // コース名
+            // class_nameに組番号が含まれている場合は上書き
+            if (isset($matches[2]) && $matches[2] !== '') {
+                $classNumber = $matches[2];
+            }
+        }
+        
+        // kumiが0の場合は組番号なしとして空文字
+        if ($classNumber === 0 || $classNumber === '0') {
+            $classNumber = '';
+        }
+        
+        // 科を判定
+        $deptName = '普通';
+        if (strpos($courseName, '情報') !== false || strpos($courseName, '情会') !== false) {
+            $deptName = '情報会計';
+        } elseif (strpos($courseName, '福祉') !== false) {
+            $deptName = '福祉';
+        } elseif (strpos($courseName, '調理') !== false) {
+            $deptName = '調理';
+        }
+        
+        return [
+            'grade' => $grade,
+            'course_name' => $courseName,
+            'class_number' => $classNumber,
+            'dept_name' => $deptName
+        ];
+    }
+    
     public function generatePdf(Request $request)
     {
         try {
@@ -329,19 +384,12 @@ class HealthRecordPrintController extends Controller
         $day = $now->format('j');
         
         // 学年情報を取得
-        $classId = $student['school_class']['class_id'] ?? '';
-        $gradeId = strlen($classId) >= 3 ? substr($classId, 1, 1) : '';
-        $courseCode = strlen($classId) >= 4 ? substr($classId, 2, 1) : '';
-        $classNumber = strlen($classId) >= 5 ? substr($classId, 4, 1) : '';
-        
-        $courseMap = [
-            '1' => '特別進学',
-            '2' => '進学',
-            '3' => '総合',
-            '4' => '情報会計',
-            '5' => '福祉'
-        ];
-        $courseName = $courseMap[$courseCode] ?? '';
+        $schoolClass = $student['school_class'] ?? [];
+        $classInfo = $this->getClassInfo($schoolClass);
+        $gradeId = $classInfo['grade'];
+        $courseName = $classInfo['course_name'];
+        $classNumber = $classInfo['class_number'];
+        $deptName = $classInfo['dept_name'];
         
         $studentNumber = $student['student_number'] ?? '';
         
@@ -515,19 +563,12 @@ class HealthRecordPrintController extends Controller
         $day = $now->format('j');
         
         // 学年情報を取得
-        $classId = $student['school_class']['class_id'] ?? '';
-        $gradeId = strlen($classId) >= 3 ? substr($classId, 1, 1) : '';
-        $courseCode = strlen($classId) >= 4 ? substr($classId, 2, 1) : '';
-        $classNumber = strlen($classId) >= 5 ? substr($classId, 4, 1) : '';
-        
-        $courseMap = [
-            '1' => '特別進学',
-            '2' => '進学',
-            '3' => '総合',
-            '4' => '情報会計',
-            '5' => '福祉'
-        ];
-        $courseName = $courseMap[$courseCode] ?? '';
+        $schoolClass = $student['school_class'] ?? [];
+        $classInfo = $this->getClassInfo($schoolClass);
+        $gradeId = $classInfo['grade'];
+        $courseName = $classInfo['course_name'];
+        $classNumber = $classInfo['class_number'];
+        $deptName = $classInfo['dept_name'];
         
         $studentNumber = $student['student_number'] ?? '';
         
@@ -636,19 +677,12 @@ class HealthRecordPrintController extends Controller
         $day = $now->format('j');
         
         // 学年情報を取得
-        $classId = $student['school_class']['class_id'] ?? '';
-        $gradeId = strlen($classId) >= 3 ? substr($classId, 1, 1) : '';
-        $courseCode = strlen($classId) >= 4 ? substr($classId, 2, 1) : '';
-        $classNumber = strlen($classId) >= 5 ? substr($classId, 4, 1) : '';
-        
-        $courseMap = [
-            '1' => '特別進学',
-            '2' => '進学',
-            '3' => '総合',
-            '4' => '情報会計',
-            '5' => '福祉'
-        ];
-        $courseName = $courseMap[$courseCode] ?? '';
+        $schoolClass = $student['school_class'] ?? [];
+        $classInfo = $this->getClassInfo($schoolClass);
+        $gradeId = $classInfo['grade'];
+        $courseName = $classInfo['course_name'];
+        $classNumber = $classInfo['class_number'];
+        $deptName = $classInfo['dept_name'];
         
         $studentNumber = $student['student_number'] ?? '';
         
@@ -659,33 +693,33 @@ class HealthRecordPrintController extends Controller
         
         $html = '
         <style>
-            body { font-family: "seieiIPexMincho", serif; font-size: 10pt; line-height: 1.6; }
-            .date { text-align: right; margin-bottom: 10px; }
-            .header { margin-bottom: 15px; }
-            .school-info { text-align: right; }
-            h1 { text-align: center; font-size: 12pt; font-weight: bold; margin: 15px 0; }
-            .student-info { margin: 10px 0; }
-            .notice-text { margin: 15px 0; line-height: 1.8; }
-            table { border-collapse: collapse; width: 100%; margin: 15px 0; }
-            th, td { border: 1px solid #000; padding: 8px; }
-            th { background-color: #f5f5f5; font-weight: bold; }
-            .separator { border-top: 2px dashed #000; margin: 25px 0; }
-            .report-title { text-align: center; font-size: 12pt; font-weight: bold; margin: 15px 0; }
+            body { font-family: "seieiIPexMincho", serif; font-size: 10pt; line-height: 1.8; }
+            .date-line { text-align: right; margin-bottom: 5px; }
+            .student-line { margin-bottom: 3px; }
+            .indent { margin-left: 40px; }
+            .school-info { text-align: right; margin: 15px 0; }
+            h1 { text-align: center; font-size: 12pt; font-weight: bold; margin: 20px 0; }
+            .notice { margin: 20px 0; line-height: 2; text-indent: 1em; }
+            .separator { margin: 40px 0; }
+            .report-title { text-align: center; font-size: 12pt; font-weight: bold; margin: 30px 0; }
+            .report-date { text-align: right; margin-bottom: 15px; }
+            .report-student { margin-bottom: 10px; }
+            .report-item { margin: 15px 0; }
+            .signature { text-align: right; margin-top: 40px; }
         </style>
         
-        <div class="date">令和' . $warekiYear . '年' . $month . '月' . $day . '日</div>
+        <div class="date-line">令和' . $warekiYear . '年' . $month . '月' . $day . '日</div>
         
-        <div class="student-info">
-            ' . htmlspecialchars($gradeId) . '年　普通　科　' . htmlspecialchars($classNumber) . '組　' . htmlspecialchars($studentNumber) . '番<br>
-            （' . ($courseName === '特別進学' ? '<u>特別進学</u>' : '特別進学') . '・' . 
+        <div class="student-line">' . htmlspecialchars($gradeId) . '年　' . htmlspecialchars($deptName) . '　科　' . htmlspecialchars($classNumber) . '組　' . htmlspecialchars($studentNumber) . '番　' . htmlspecialchars($student['name']) . '</div>
+        <div class="indent">（' . 
+            ($courseName === '特別進学' ? '<u>特別進学</u>' : '特別進学') . '・' . 
             ($courseName === '進学' ? '<u>進学</u>' : '進学') . '・' . 
-            ($courseName === '総合' ? '<u>総合</u>' : '総合') . '）<br>
-            情報会計科<br>
-            福祉　科
-        </div>
+            ($courseName === '総合' ? '<u>総合</u>' : '総合') . '）</div>
+        <div class="indent">情報会計科</div>
+        <div class="indent">福祉　科</div>
         
-        <div>生徒　' . htmlspecialchars($student['name']) . '</div>
-        <div style="margin: 10px 0;">保　護　者　様</div>
+        <div style="margin: 10px 0;">　生徒　' . htmlspecialchars($student['name']) . '</div>
+        <div style="margin-bottom: 15px;">　　保　　護　　者　　様</div>
         
         <div class="school-info">
             誠英高等学校<br>
@@ -694,8 +728,10 @@ class HealthRecordPrintController extends Controller
         
         <h1>聴力検査について（お知らせ）</h1>
         
-        <div class="notice-text">
-            検査の結果、（' . ($isRightEar ? '<u>右</u>' : '右') . '　・　' . ($isLeftEar ? '<u>左</u>' : '左') . '）の耳がやや聞こえにくいように思いますので、一度専門医の診断を受けることをお勧めします。<br>
+        <div class="notice">
+            検査の結果、（　' . ($isRightEar ? '<u>右</u>' : '右') . '　・　' . ($isLeftEar ? '<u>左</u>' : '左') . '　）の耳がやや聞こえにくいように思いますので、一度専門医の診断を受けることをお勧めします。
+        </div>
+        <div class="notice">
             なお、結果については担当医に下記報告書を依頼し、学校に提出してください。
         </div>
         
@@ -703,29 +739,28 @@ class HealthRecordPrintController extends Controller
         
         <div class="report-title">報　　　告　　　書</div>
         
-        <div style="text-align: right; margin-bottom: 15px;">令和　　年　　月　　日</div>
+        <div class="report-date">令和　　年　　月　　日</div>
         
-        <div style="margin-bottom: 15px;">
-            ' . htmlspecialchars($gradeId) . '年　普通科（' . htmlspecialchars($courseName) . 'コース）　' . htmlspecialchars($classNumber) . '組<br>
-            情報会計科・福祉科　　組<br>
+        <div class="report-student" style="margin-left: 100px;">
+            ' . htmlspecialchars($gradeId) . '年　普通科（' . htmlspecialchars($courseName) . 'コース）　' . htmlspecialchars($classNumber) . '組
+        </div>
+        <div class="report-student" style="margin-left: 100px;">
+            情報会計科・福祉科　　組
+        </div>
+        <div class="report-student" style="margin-left: 100px;">
             氏名　' . htmlspecialchars($student['name']) . '
         </div>
         
-        <table>
-            <tr>
-                <td>１．異常を認めず</td>
-            </tr>
-            <tr>
-                <td>２．異常あり（　　　　　　　　　　　　　　　）</td>
-            </tr>
-            <tr>
-                <td style="height: 80px; vertical-align: top;">３．指導または留意事項</td>
-            </tr>
-        </table>
+        <div class="report-item">１．異常を認めず</div>
+        <div style="height: 20px;"></div>
+        <div class="report-item">２．異常あり（　　　　　　　　　　　　　　　）</div>
+        <div style="height: 20px;"></div>
+        <div class="report-item">３．指導または留意事項</div>
+        <div style="height: 80px; border-bottom: 1px solid #ccc; margin: 10px 0 30px 0;"></div>
         
-        <div style="text-align: right; margin-top: 30px;">
+        <div class="signature">
             <div>医療機関名　　　　　　　　　　　　　　　　　</div>
-            <div style="margin-top: 10px;">医    師   名　　　　　　　　　　　　　印</div>
+            <div style="margin-top: 15px;">医    師   名　　　　　　　　　　　　　印</div>
         </div>';
         
         return $html;
@@ -744,19 +779,12 @@ class HealthRecordPrintController extends Controller
         $day = $now->format('j');
         
         // 学年情報を取得
-        $classId = $student['school_class']['class_id'] ?? '';
-        $gradeId = strlen($classId) >= 3 ? substr($classId, 1, 1) : '';
-        $courseCode = strlen($classId) >= 4 ? substr($classId, 2, 1) : '';
-        $classNumber = strlen($classId) >= 5 ? substr($classId, 4, 1) : '';
-        
-        $courseMap = [
-            '1' => '特別進学',
-            '2' => '進学',
-            '3' => '総合',
-            '4' => '情報会計',
-            '5' => '福祉'
-        ];
-        $courseName = $courseMap[$courseCode] ?? '';
+        $schoolClass = $student['school_class'] ?? [];
+        $classInfo = $this->getClassInfo($schoolClass);
+        $gradeId = $classInfo['grade'];
+        $courseName = $classInfo['course_name'];
+        $classNumber = $classInfo['class_number'];
+        $deptName = $classInfo['dept_name'];
         
         $studentNumber = $student['student_number'] ?? '';
         
