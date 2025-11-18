@@ -60,7 +60,7 @@ class NursingLogController extends Controller
 
             Log::info('Validation passed, generating PDF');
             // TCPDFインスタンスを作成
-            $pdf = new TCPDF('L', 'mm', 'A4', true, 'UTF-8', false);
+            $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
             $fontName = PdfFontHelper::applyFont($pdf, 10);
             
             // ドキュメント情報を設定
@@ -150,6 +150,22 @@ class NursingLogController extends Controller
         $html .= '<td>' . htmlspecialchars($data['temperature'] ?? '') . ' 度</td>';
         $html .= '<td style="background-color:#f0f0f0;"><b>湿度</b></td>';
         $html .= '<td>' . htmlspecialchars($data['humidity'] ?? '') . ' ％</td>';
+        $html .= '</tr>';
+        $html .= '</table>';
+        
+        // 印鑑枠テーブル
+        $html .= '<table border="1" cellpadding="8" style="width:100%;margin-bottom:10px;border-collapse:collapse;">';
+        $html .= '<tr style="background-color:#f0f0f0;">';
+        $html .= '<th style="width:25%;text-align:center;padding:5px;"><b>校長印</b></th>';
+        $html .= '<th style="width:25%;text-align:center;padding:5px;"><b>副校長印</b></th>';
+        $html .= '<th style="width:25%;text-align:center;padding:5px;"><b>教頭印</b></th>';
+        $html .= '<th style="width:25%;text-align:center;padding:5px;"><b>記入者印</b></th>';
+        $html .= '</tr>';
+        $html .= '<tr>';
+        $html .= '<td style="height:60px;text-align:center;"></td>';
+        $html .= '<td style="height:60px;text-align:center;"></td>';
+        $html .= '<td style="height:60px;text-align:center;"></td>';
+        $html .= '<td style="height:60px;text-align:center;"></td>';
         $html .= '</tr>';
         $html .= '</table>';
         

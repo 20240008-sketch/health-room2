@@ -4,7 +4,7 @@
 
 @font-face {
   font-family: 'EUDC';
-  src: url('/EUDC.woff') format('woff');
+  src: url('../fonts/EUDC.woff') format('woff');
   font-weight: normal;
   font-style: normal;
   font-display: swap;

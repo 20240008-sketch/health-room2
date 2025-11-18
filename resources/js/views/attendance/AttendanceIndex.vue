@@ -97,18 +97,32 @@
               </div>
               
               <!-- Humidity and Stamps -->
-              <div class="col-span-12 grid grid-cols-2 gap-4 mt-2">
-                <div class="flex items-center space-x-2">
+              <div class="col-span-12 mt-2">
+                <div class="flex items-center space-x-2 mb-2">
                   <span class="font-medium">湿度</span>
                   <input type="text" v-model="diary.humidity" class="border border-gray-300 px-2 py-1 w-16 text-center" />
                   <span>％</span>
                 </div>
-                <div class="flex items-center space-x-5 text-xs">
-                  <span>校長<span class="text-lg font-semibold ml-0.5">印</span></span>
-                  <span>副校長<span class="text-lg font-semibold ml-0.5">印</span></span>
-                  <span>教頭<span class="text-lg font-semibold ml-0.5">印</span></span>
-                  <span>記入者<span class="text-lg font-semibold ml-0.5">印</span></span>
-                </div>
+                
+                <!-- 印鑑枠テーブル -->
+                <table class="w-full border-2 border-gray-800 text-xs">
+                  <thead>
+                    <tr class="border-b-2 border-gray-800">
+                      <th class="border-r-2 border-gray-800 px-2 py-1 bg-gray-100 w-1/4">校長印</th>
+                      <th class="border-r-2 border-gray-800 px-2 py-1 bg-gray-100 w-1/4">副校長印</th>
+                      <th class="border-r-2 border-gray-800 px-2 py-1 bg-gray-100 w-1/4">教頭印</th>
+                      <th class="px-2 py-1 bg-gray-100 w-1/4">記入者印</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="border-r-2 border-gray-800 p-2 h-20 align-middle text-center"></td>
+                      <td class="border-r-2 border-gray-800 p-2 h-20 align-middle text-center"></td>
+                      <td class="border-r-2 border-gray-800 p-2 h-20 align-middle text-center"></td>
+                      <td class="p-2 h-20 align-middle text-center"></td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
