@@ -135,39 +135,40 @@ class NursingLogController extends Controller
         
     // シンプルなHTMLテーブル構造
     $html = '<style>body { font-family: "seieiIPexMincho", serif; font-size: 10pt; }</style>';
-    $html .= '<h1 style="text-align:center;">養護日誌</h1>';
+    
+    // タイトル
+    $html .= '<h1 style="text-align:center;margin-bottom:10px;">養護日誌</h1>';
+    
+    // テーブル：1行目はヘッダー、2行目はデータと印鑑枠
+    $html .= '<table border="1" cellpadding="4" style="width:100%;margin-bottom:10px;border-collapse:collapse;">';
+    
+    // 1行目：ヘッダー行
+    $html .= '<tr>';
+    $html .= '<td style="border:1px solid #000;text-align:center;vertical-align:middle;width:20%;"></td>'; // 日付欄（幅20%）
+    $html .= '<td style="border:1px solid #000;text-align:center;vertical-align:middle;width:8%;"><b>天候</b></td>';
+    $html .= '<td style="border:1px solid #000;text-align:center;vertical-align:middle;width:8%;"><b>温度</b></td>';
+    $html .= '<td style="border:1px solid #000;text-align:center;vertical-align:middle;width:8%;"><b>湿度</b></td>';
+    $html .= '<td style="border:1px solid #000;text-align:center;vertical-align:middle;width:14%;"><b>校長印</b></td>';
+    $html .= '<td style="border:1px solid #000;text-align:center;vertical-align:middle;width:14%;"><b>副校長印</b></td>';
+    $html .= '<td style="border:1px solid #000;text-align:center;vertical-align:middle;width:14%;"><b>教頭印</b></td>';
+    $html .= '<td style="border:1px solid #000;text-align:center;vertical-align:middle;width:14%;"><b>記入者印</b></td>';
+    $html .= '</tr>';
+    
+    // 2行目：データ行
+    $html .= '<tr>';
+    $html .= '<td style="border:1px solid #000;text-align:left;vertical-align:middle;width:20%;padding-left:10px;">令和' . htmlspecialchars($year) . '年' . htmlspecialchars($month) . '月' . htmlspecialchars($day) . '日　' . $dayOfWeek . '曜日</td>';
+    $html .= '<td style="border:1px solid #000;text-align:left;vertical-align:middle;width:8%;padding-left:10px;">' . htmlspecialchars($data['weather'] ?? '') . '</td>';
+    $html .= '<td style="border:1px solid #000;text-align:left;vertical-align:middle;width:8%;padding-left:10px;">' . htmlspecialchars($data['temperature'] ?? '') . '</td>';
+    $html .= '<td style="border:1px solid #000;text-align:left;vertical-align:middle;width:8%;padding-left:10px;">' . htmlspecialchars($data['humidity'] ?? '') . '</td>';
+    $html .= '<td style="border:1px solid #000;height:50px;width:14%;"></td>'; // 校長印
+    $html .= '<td style="border:1px solid #000;height:50px;width:14%;"></td>'; // 副校長印
+    $html .= '<td style="border:1px solid #000;height:50px;width:14%;"></td>'; // 教頭印
+    $html .= '<td style="border:1px solid #000;height:50px;width:14%;"></td>'; // 記入者印
+    $html .= '</tr>';
+    
+    $html .= '</table>';
         
-        // 基本情報
-        $html .= '<table border="1" cellpadding="4" style="width:100%;margin-bottom:10px;">';
-        $html .= '<tr>';
-        $html .= '<td style="background-color:#f0f0f0;width:15%;"><b>日付</b></td>';
-        $html .= '<td style="width:35%;">令和' . htmlspecialchars($year) . '年' . htmlspecialchars($month) . '月' . htmlspecialchars($day) . '日（' . $dayOfWeek . '）</td>';
-        $html .= '<td style="background-color:#f0f0f0;width:15%;"><b>天候</b></td>';
-        $html .= '<td style="width:35%;">' . htmlspecialchars($data['weather'] ?? '') . '</td>';
-        $html .= '</tr>';
-        $html .= '<tr>';
-        $html .= '<td style="background-color:#f0f0f0;"><b>温度</b></td>';
-        $html .= '<td>' . htmlspecialchars($data['temperature'] ?? '') . ' 度</td>';
-        $html .= '<td style="background-color:#f0f0f0;"><b>湿度</b></td>';
-        $html .= '<td>' . htmlspecialchars($data['humidity'] ?? '') . ' ％</td>';
-        $html .= '</tr>';
-        $html .= '</table>';
-        
-        // 印鑑枠テーブル
-        $html .= '<table border="1" cellpadding="8" style="width:100%;margin-bottom:10px;border-collapse:collapse;">';
-        $html .= '<tr style="background-color:#f0f0f0;">';
-        $html .= '<th style="width:25%;text-align:center;padding:5px;"><b>校長印</b></th>';
-        $html .= '<th style="width:25%;text-align:center;padding:5px;"><b>副校長印</b></th>';
-        $html .= '<th style="width:25%;text-align:center;padding:5px;"><b>教頭印</b></th>';
-        $html .= '<th style="width:25%;text-align:center;padding:5px;"><b>記入者印</b></th>';
-        $html .= '</tr>';
-        $html .= '<tr>';
-        $html .= '<td style="height:60px;text-align:center;"></td>';
-        $html .= '<td style="height:60px;text-align:center;"></td>';
-        $html .= '<td style="height:60px;text-align:center;"></td>';
-        $html .= '<td style="height:60px;text-align:center;"></td>';
-        $html .= '</tr>';
-        $html .= '</table>';
+        // 以前の印鑑枠テーブルは削除（上に移動したため）
         
         // 欠席調査
         $html .= '<h3 style="background-color:#f0f0f0;padding:5px;margin:10px 0 5px 0;">欠席調査</h3>';

@@ -66,63 +66,63 @@
         <div class="nursing-diary">
           <!-- Header Section -->
           <div class="diary-header border-2 border-gray-800 p-4 mb-4">
-            <div class="text-center mb-4">
-              <h2 class="text-2xl font-bold">養護日誌</h2>
+            <!-- Title and Stamps Row -->
+            <div class="flex items-start justify-between mb-4">
+              <div class="flex-1 text-center">
+                <h2 class="text-2xl font-bold">養護日誌</h2>
+              </div>
+              
+              <!-- 印鑑枠テーブル -->
+              <table class="border-2 border-gray-800 text-xs ml-4">
+                <thead>
+                  <tr class="border-b-2 border-gray-800" style="height: 12px;">
+                    <th class="border-r-2 border-gray-800 px-2" style="height: 12px; width: 60px; padding-top: 0; padding-bottom: 0;">校長印</th>
+                    <th class="border-r-2 border-gray-800 px-2" style="height: 12px; width: 60px; padding-top: 0; padding-bottom: 0;">副校長印</th>
+                    <th class="border-r-2 border-gray-800 px-2" style="height: 12px; width: 60px; padding-top: 0; padding-bottom: 0;">教頭印</th>
+                    <th class="px-2" style="height: 12px; width: 60px; padding-top: 0; padding-bottom: 0;">記入者印</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="border-r-2 border-gray-800 p-2 align-middle text-center" style="height: 50px; width: 60px;"></td>
+                    <td class="border-r-2 border-gray-800 p-2 align-middle text-center" style="height: 50px; width: 60px;"></td>
+                    <td class="border-r-2 border-gray-800 p-2 align-middle text-center" style="height: 50px; width: 60px;"></td>
+                    <td class="p-2 align-middle text-center" style="height: 50px; width: 60px;"></td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
             
             <div class="grid grid-cols-12 gap-2 text-sm">
-              <!-- Date Info -->
-              <div class="col-span-6 flex items-center space-x-2">
-                <span class="font-medium">令和</span>
-                <input type="text" v-model="diary.year" class="border border-gray-300 px-2 py-1 w-16 text-center" />
-                <span>年</span>
-                <input type="text" v-model="diary.month" class="border border-gray-300 px-2 py-1 w-12 text-center" />
-                <span>月</span>
-                <input type="text" v-model="diary.day" class="border border-gray-300 px-2 py-1 w-12 text-center" />
-                <span>日</span>
-                <span class="font-medium">({{ getDayOfWeek(diary.date) }})</span>
-              </div>
-              
-              <!-- Weather and Temperature -->
-              <div class="col-span-6 grid grid-cols-2 gap-2">
+              <!-- Date, Weather, Temperature, Humidity in one row -->
+              <div class="col-span-12 flex items-center space-x-4">
+                <div class="flex items-center space-x-2">
+                  <span class="font-medium">令和</span>
+                  <input type="text" v-model="diary.year" class="border border-gray-300 px-2 py-1 w-16 text-center" />
+                  <span>年</span>
+                  <input type="text" v-model="diary.month" class="border border-gray-300 px-2 py-1 w-12 text-center" />
+                  <span>月</span>
+                  <input type="text" v-model="diary.day" class="border border-gray-300 px-2 py-1 w-12 text-center" />
+                  <span>日</span>
+                  <span class="font-medium">({{ getDayOfWeek(diary.date) }})</span>
+                </div>
+                
                 <div class="flex items-center space-x-2">
                   <span class="font-medium">天候</span>
-                  <input type="text" v-model="diary.weather" class="border border-gray-300 px-2 py-1 flex-1" placeholder="晴" />
+                  <input type="text" v-model="diary.weather" class="border border-gray-300 px-2 py-1 w-20" placeholder="晴" />
                 </div>
+                
                 <div class="flex items-center space-x-2">
                   <span class="font-medium">温度</span>
                   <input type="text" v-model="diary.temperature" class="border border-gray-300 px-2 py-1 w-16 text-center" />
                   <span>度</span>
                 </div>
-              </div>
-              
-              <!-- Humidity and Stamps -->
-              <div class="col-span-12 mt-2">
-                <div class="flex items-center space-x-2 mb-2">
+                
+                <div class="flex items-center space-x-2">
                   <span class="font-medium">湿度</span>
                   <input type="text" v-model="diary.humidity" class="border border-gray-300 px-2 py-1 w-16 text-center" />
                   <span>％</span>
                 </div>
-                
-                <!-- 印鑑枠テーブル -->
-                <table class="w-full border-2 border-gray-800 text-xs">
-                  <thead>
-                    <tr class="border-b-2 border-gray-800">
-                      <th class="border-r-2 border-gray-800 px-2 py-1 bg-gray-100 w-1/4">校長印</th>
-                      <th class="border-r-2 border-gray-800 px-2 py-1 bg-gray-100 w-1/4">副校長印</th>
-                      <th class="border-r-2 border-gray-800 px-2 py-1 bg-gray-100 w-1/4">教頭印</th>
-                      <th class="px-2 py-1 bg-gray-100 w-1/4">記入者印</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td class="border-r-2 border-gray-800 p-2 h-20 align-middle text-center"></td>
-                      <td class="border-r-2 border-gray-800 p-2 h-20 align-middle text-center"></td>
-                      <td class="border-r-2 border-gray-800 p-2 h-20 align-middle text-center"></td>
-                      <td class="p-2 h-20 align-middle text-center"></td>
-                    </tr>
-                  </tbody>
-                </table>
               </div>
             </div>
           </div>

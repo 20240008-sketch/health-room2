@@ -199,6 +199,9 @@ import { useNotificationStore } from '@/stores/notification';
 import { useClassStore } from '@/stores/class';
 import OtolaryngologyPrintForm from './print-forms/OtolaryngologyPrintForm.vue';
 import VisionTestPrintForm from '@/components/print-forms/VisionTestPrintForm.vue';
+import OphthalmologyPrintForm from './print-forms/OphthalmologyPrintForm.vue';
+import InternalMedicinePrintForm from './print-forms/InternalMedicinePrintForm.vue';
+import HearingTestPrintForm from './print-forms/HearingTestPrintForm.vue';
 
 // Icons
 const ChevronRightIcon = {
@@ -224,7 +227,10 @@ export default {
     MagnifyingGlassIcon,
     DocumentArrowDownIcon,
     OtolaryngologyPrintForm,
-    VisionTestPrintForm
+    VisionTestPrintForm,
+    OphthalmologyPrintForm,
+    InternalMedicinePrintForm,
+    HearingTestPrintForm
   },
   setup() {
     const router = useRouter();
@@ -262,6 +268,12 @@ export default {
           return VisionTestPrintForm;
         case 'otolaryngology':
           return OtolaryngologyPrintForm;
+        case 'ophthalmology':
+          return OphthalmologyPrintForm;
+        case 'internal_medicine':
+          return InternalMedicinePrintForm;
+        case 'hearing_test':
+          return HearingTestPrintForm;
         default:
           return null;
       }
