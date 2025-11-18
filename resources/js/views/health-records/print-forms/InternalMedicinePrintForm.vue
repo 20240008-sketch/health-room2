@@ -3,7 +3,7 @@
     <div class="form-header">
       <div class="recipient-line">
         <span class="recipient">保護者様</span>
-        <span class="date-field">令和　　年（　　　　年）　月　　日</span>
+        <span class="date-field">令和{{ getWarekiYear() }}年（{{ getCurrentYear() }}年）{{ getCurrentMonth() }}月{{ getCurrentDay() }}日</span>
       </div>
       <div class="school-info">
         <div class="school-name">誠英高等学校</div>
@@ -125,6 +125,24 @@ export default {
         return classId.charAt(4);
       }
       return '';
+    },
+    getCurrentYear() {
+      const now = new Date();
+      return now.getFullYear();
+    },
+    getCurrentMonth() {
+      const now = new Date();
+      return now.getMonth() + 1;
+    },
+    getCurrentDay() {
+      const now = new Date();
+      return now.getDate();
+    },
+    getWarekiYear() {
+      const now = new Date();
+      const year = now.getFullYear();
+      // 令和は2019年5月1日から
+      return year - 2018;
     }
   }
 };

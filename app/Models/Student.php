@@ -91,4 +91,15 @@ class Student extends Model
     {
         return $this->hasMany(HealthRecord::class)->where('academic_year', $academicYear);
     }
+
+    /**
+     * Get the student's age.
+     */
+    public function getAgeAttribute(): ?int
+    {
+        if (!$this->birth_date) {
+            return null;
+        }
+        return $this->birth_date->age;
+    }
 }

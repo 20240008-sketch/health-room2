@@ -31,7 +31,8 @@ class HealthRecord extends Model
         'hearing_test_result',
         'tuberculosis_test_result',
         'urine_test_result',
-        'ecg_result'
+        'ecg_result',
+        'dental_result'
     ];
 
     protected $casts = [

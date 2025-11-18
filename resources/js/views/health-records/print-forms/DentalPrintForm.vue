@@ -1,5 +1,5 @@
 <template>
-  <div class="print-form ophthalmology-form">
+  <div class="print-form dental-form">
     <div class="form-header">
       <div class="recipient-line">
         <span class="recipient">保護者様</span>
@@ -9,7 +9,7 @@
         <div class="school-name">誠英高等学校</div>
         <div class="principal">校長　大田　真一</div>
       </div>
-      <h1 class="form-title">眼科検診結果のお知らせ</h1>
+      <h1 class="form-title">歯科検診結果のお知らせ</h1>
     </div>
 
     <div class="student-info">
@@ -21,63 +21,28 @@
     </div>
 
     <div class="notice-text">
-      今年度の眼科検診の結果は下記◯印のとおりです。専門医で受診されますようお勧めします。<br>
+      今年度の歯科検診の結果、歯科医の診察が必要と思われます。<br>
       なお、受診後は下欄の連絡表に記入してもらい、切り取らずに学校に提出してください。
     </div>
 
     <table class="diagnosis-table">
       <thead>
         <tr>
-          <th class="col-number"></th>
-          <th class="col-disease">病　　　名</th>
-          <th class="col-description">説　　　　　明</th>
+          <th>検　診　結　果</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td class="col-number">１</td>
-          <td class="col-disease">アレルギー性結膜炎</td>
-          <td class="col-description">かゆみなどの不快感が続くことが多いので、医師にご相談ください。</td>
-        </tr>
-        <tr>
-          <td class="col-number">２</td>
-          <td class="col-disease">結膜炎</td>
-          <td class="col-description">目が赤く充血しています。人にうつることもありますので、早く受診されますようお勧めします。</td>
-        </tr>
-        <tr>
-          <td class="col-number">３</td>
-          <td class="col-disease">麦粒腫</td>
-          <td class="col-description">まぶたが炎症をおこしています。腫れや痛みが進むこともあります。</td>
-        </tr>
-        <tr>
-          <td class="col-number">４</td>
-          <td class="col-disease">眼瞼縁炎</td>
-          <td class="col-description">目の縁が炎症をおこしています。症状が進むと、まつげが抜けたり、結膜炎をおこしやすくなります。</td>
-        </tr>
-        <tr>
-          <td class="col-number">５</td>
-          <td class="col-disease">霰粒腫</td>
-          <td class="col-description">まぶたの中に硬いしこりができています。大きくなるとまぶたが開きにくくなることもあります。</td>
-        </tr>
-        <tr>
-          <td class="col-number">６</td>
-          <td class="col-disease">内反症</td>
-          <td class="col-description">まぶたが内側に入り込んでいます。まつげが角膜をこすると、ゴロゴロして涙がでたり、視力が下がることもあります。</td>
-        </tr>
-        <tr>
-          <td class="col-number">７</td>
-          <td class="col-disease">斜視</td>
-          <td class="col-description">そのままにしておくと弱視になる場合があります。できるだけ早く受診されますようにお勧めします。</td>
-        </tr>
-        <tr>
-          <td class="col-number">８</td>
-          <td class="col-disease">斜位</td>
-          <td class="col-description">眼精疲労を起こしやすく、矯正が必要となる場合もあります。</td>
-        </tr>
-        <tr>
-          <td class="col-number">９</td>
-          <td class="col-disease">その他（　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　）</td>
-          <td class="col-description"></td>
+          <td class="diagnosis-content">
+            <div class="diagnosis-items">
+              <div class="diagnosis-item">□　むし歯</div>
+              <div class="diagnosis-item">□　歯肉の炎症</div>
+              <div class="diagnosis-item">□　歯垢の付着</div>
+              <div class="diagnosis-item">□　歯列・咬合</div>
+              <div class="diagnosis-item">□　顎関節</div>
+              <div class="diagnosis-item">□　その他（　　　　　　　　　　　　　　　　　　　　　　　　　　）</div>
+            </div>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -85,7 +50,7 @@
     <div class="separator"></div>
 
     <div class="report-section">
-      <h2 class="report-title">眼　科　受　診　連　絡　票</h2>
+      <h2 class="report-title">歯　科　受　診　連　絡　票</h2>
 
       <table class="report-table">
         <tr>
@@ -100,9 +65,9 @@
           </td>
         </tr>
         <tr>
-          <th>運動について</th>
+          <th>備考</th>
           <td>
-            １水泳可　　　　　２水泳不可　　　３　その他
+            <div class="note-space"></div>
           </td>
         </tr>
       </table>
@@ -120,7 +85,7 @@
 
 <script>
 export default {
-  name: 'OphthalmologyPrintForm',
+  name: 'DentalPrintForm',
   props: {
     student: {
       type: Object,
@@ -134,7 +99,6 @@ export default {
   methods: {
     getGrade() {
       if (!this.student.class_id) return '';
-      // クラスIDから学年を抽出（例: 25111 → 1年）
       const classId = String(this.student.class_id);
       if (classId.length >= 3) {
         return classId.charAt(1);
@@ -259,7 +223,7 @@ export default {
 .diagnosis-table th,
 .diagnosis-table td {
   border: 1px solid #000;
-  padding: 10px;
+  padding: 15px;
 }
 
 .diagnosis-table th {
@@ -268,17 +232,20 @@ export default {
   text-align: center;
 }
 
-.col-number {
-  width: 40px;
-  text-align: center;
+.diagnosis-content {
+  vertical-align: top;
+  min-height: 200px;
 }
 
-.col-disease {
-  width: 150px;
+.diagnosis-items {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
-.col-description {
-  text-align: left;
+.diagnosis-item {
+  font-size: 15px;
+  line-height: 1.8;
 }
 
 .separator {
@@ -314,6 +281,10 @@ export default {
   font-weight: bold;
   width: 150px;
   text-align: left;
+}
+
+.note-space {
+  height: 60px;
 }
 
 .signature-section {

@@ -202,6 +202,7 @@ import VisionTestPrintForm from '@/components/print-forms/VisionTestPrintForm.vu
 import OphthalmologyPrintForm from './print-forms/OphthalmologyPrintForm.vue';
 import InternalMedicinePrintForm from './print-forms/InternalMedicinePrintForm.vue';
 import HearingTestPrintForm from './print-forms/HearingTestPrintForm.vue';
+import DentalPrintForm from './print-forms/DentalPrintForm.vue';
 
 // Icons
 const ChevronRightIcon = {
@@ -230,7 +231,8 @@ export default {
     VisionTestPrintForm,
     OphthalmologyPrintForm,
     InternalMedicinePrintForm,
-    HearingTestPrintForm
+    HearingTestPrintForm,
+    DentalPrintForm
   },
   setup() {
     const router = useRouter();
@@ -255,6 +257,7 @@ export default {
       { value: 'vision_test', label: '視力検査' },
       { value: 'ophthalmology', label: '眼科検診' },
       { value: 'otolaryngology', label: '耳鼻科検診' },
+      { value: 'dental', label: '歯科検診' },
       { value: 'internal_medicine', label: '内科検診' },
       { value: 'hearing_test', label: '聴力検査' },
       { value: 'tuberculosis_test', label: '結核検査' },
@@ -270,6 +273,8 @@ export default {
           return OtolaryngologyPrintForm;
         case 'ophthalmology':
           return OphthalmologyPrintForm;
+        case 'dental':
+          return DentalPrintForm;
         case 'internal_medicine':
           return InternalMedicinePrintForm;
         case 'hearing_test':
